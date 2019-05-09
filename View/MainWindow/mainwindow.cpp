@@ -191,7 +191,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(nullptr,"FChat","FChat (client). Version: 1.0 (12.04.2019)");
+    QMessageBox::about(nullptr,"FChat","FChat (client). Version: 1.05 (09.05.2019)");
 }
 
 void MainWindow::on_actionConnect_triggered()
