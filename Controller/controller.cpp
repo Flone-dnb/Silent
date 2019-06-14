@@ -8,6 +8,14 @@ Controller::Controller(MainWindow* pMainWindow)
     pNetworkService = new NetworkService(pMainWindow);
 }
 
+
+
+
+std::string Controller::getClientVersion()
+{
+    return pNetworkService->getClientVersion();
+}
+
 void Controller::connectTo(std::string adress, std::string port, std::string userName)
 {
     pNetworkService->start(adress,port,userName);
@@ -27,6 +35,9 @@ void Controller::stop()
 {
     pNetworkService->stop();
 }
+
+
+
 
 Controller::~Controller()
 {

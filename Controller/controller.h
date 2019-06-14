@@ -13,6 +13,8 @@ public:
 
     Controller(MainWindow* pMainWindow);
 
+    std::string getClientVersion();
+
     void connectTo(std::string adress, std::string port, std::string userName);
 
     void sendMessage(std::wstring message);

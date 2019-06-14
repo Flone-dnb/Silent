@@ -9,10 +9,21 @@
 
 NetworkService::NetworkService(MainWindow* pMainWindow)
 {
+    clientVersion = "1.15";
+
     this->pMainWindow = pMainWindow;
 
     bWinSockLaunched = false;
     bListen          = false;
+}
+
+
+
+
+
+std::string NetworkService::getClientVersion()
+{
+    return clientVersion;
 }
 
 void NetworkService::start(std::string adress, std::string port, std::string userName)
@@ -50,10 +61,10 @@ void NetworkService::start(std::string adress, std::string port, std::string use
         }
         else
         {
-            std::thread connectThread(&NetworkService::connectTo,this,adress,port,userName,ref(mtx));
+            std::thread connectThread(&NetworkService::connectTo, this, adress, port, userName, ref(mtx));
             connectThread.detach();
 
-            std::thread listenThread (&NetworkService::listenForServer,this,ref(mtx));
+            std::thread listenThread (&NetworkService::listenForServer, this, ref(mtx));
             listenThread.detach();
         }
     }
@@ -76,7 +87,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
     sockaddrToConnect.sin_port = htons(static_cast<USHORT>(stoi(port)));
 
 
-    pMainWindow->printOutput(std::string("Connecting... (time out after 20 sec.)"),true);
+    pMainWindow->printOutput(std::string("Connecting... (time out after 20 sec.)"), true);
 
 
     returnCode = connect(userSocket, reinterpret_cast<sockaddr*>(&sockaddrToConnect), sizeof(sockaddrToConnect));
@@ -112,24 +123,72 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
         }
         else
         {
-            // Send user name
-            send(userSocket,userName.c_str(),static_cast<int>(userName.size()),0);
+            // Send version & user name
+            char versionAndNameBuffer[41];
+            memset(versionAndNameBuffer, 0, 41);
 
-            char* pReadBuffer = new char[1400];
-            memset(pReadBuffer,0,1400);
+            char versionStringSize = static_cast<char>(clientVersion.size());
+            versionAndNameBuffer[0] = versionStringSize;
 
-            int iReceivedSize = recv(userSocket,pReadBuffer,1,0);
-            if (pReadBuffer[0] == 0)
+            std::memcpy(versionAndNameBuffer + 1, clientVersion.c_str(), static_cast<unsigned long long>(versionStringSize));
+            std::memcpy(versionAndNameBuffer + 1 + versionStringSize, userName.c_str(), userName.size());
+
+            send(userSocket, versionAndNameBuffer, static_cast<int>(1 + versionStringSize + userName.size()), 0);
+
+
+
+            char readBuffer[1400];
+            memset(readBuffer, 0, 1400);
+
+            int iReceivedSize = recv(userSocket, readBuffer, 1, 0);
+            if (readBuffer[0] == 0)
             {
                 // This user name is already in use... Disconnect
 
-                if (recv(userSocket,pReadBuffer,1500,0) == 0)
+                if (recv(userSocket, readBuffer, 1, 0) == 0)
                 {
                     shutdown(userSocket,SD_SEND);
                 }
 
-                pMainWindow->printOutput(std::string("\nA user with this name is already present on the server. Select another name."),true);
-                pMainWindow->enableInteractiveElements(true,false);
+                pMainWindow->printOutput(std::string("\nA user with this name is already present on the server. Select another name."), true);
+                pMainWindow->enableInteractiveElements(true, false);
+                closesocket(userSocket);
+                WSACleanup();
+                bWinSockLaunched = false;
+            }
+            else if (readBuffer[0] == 2)
+            {
+                // Server is full
+
+                if (recv(userSocket, readBuffer, 1, 0) == 0)
+                {
+                    shutdown(userSocket,SD_SEND);
+                }
+
+                pMainWindow->printOutput(std::string("\nServer is full."), true);
+                pMainWindow->enableInteractiveElements(true, false);
+                closesocket(userSocket);
+                WSACleanup();
+                bWinSockLaunched = false;
+            }
+            else if (readBuffer[0] == 3)
+            {
+                char serverVersionSize = 0;
+                recv(userSocket, &serverVersionSize, 1, 0);
+
+                char versionBuffer[21];
+                memset(versionBuffer, 0, 21);
+
+                recv(userSocket, versionBuffer, 20, 0);
+
+                if (recv(userSocket, readBuffer, 1, 0) == 0)
+                {
+                    shutdown(userSocket,SD_SEND);
+                }
+
+                pMainWindow->printOutput(std::string("\nYour FChat version (" + clientVersion + ") does not match with the server version (" + std::string(versionBuffer) + ").\n"
+                                                                          "Please update your FChat Client to version " + std::string(versionBuffer) + "."), true);
+                pMainWindow->enableInteractiveElements(true, false);
                 closesocket(userSocket);
                 WSACleanup();
                 bWinSockLaunched = false;
@@ -137,45 +196,45 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
             else
             {
                 // Receive packet size
-                iReceivedSize = recv(userSocket,pReadBuffer,2,0);
+                iReceivedSize = recv(userSocket, readBuffer, 2, 0);
 
                 unsigned short int iPacketSize = 0;
-                std::memcpy(&iPacketSize, pReadBuffer, 2);
+                std::memcpy(&iPacketSize, readBuffer, 2);
 
                 // Receive data
-                iReceivedSize = recv(userSocket, pReadBuffer, iPacketSize, 0);
+                iReceivedSize = recv(userSocket, readBuffer, iPacketSize, 0);
                 pMainWindow->printOutput(std::string("Received " + std::to_string(iReceivedSize + 3) + " bytes of data from the server.\n"), true);
 
                 // READ online info
                 int iReadBytes = 0;
-
                 int iOnline    = 0;
 
-                std::memcpy(&iOnline,pReadBuffer,4);
-                iReadBytes+=4;
+                std::memcpy(&iOnline, readBuffer, 4);
+                iReadBytes += 4;
 
                 pMainWindow->setOnlineUsersCount(iOnline);
 
-                for (int i = 0; i < (iOnline-1); i++)
+                for (int i = 0; i < (iOnline - 1); i++)
                 {
                     unsigned char currentItemSize = 0;
-                    std::memcpy(&currentItemSize,pReadBuffer+iReadBytes,1);
+                    std::memcpy(&currentItemSize, readBuffer + iReadBytes, 1);
                     iReadBytes++;
 
-                    char* pRowText = new char[currentItemSize];
-                    memset(pRowText,0,currentItemSize);
-                    std::memcpy(pRowText,pReadBuffer+iReadBytes,currentItemSize);
-                    iReadBytes+=currentItemSize;
+                    // 20 - max user name (in ConnectWindow textEdit element) + 1 null terminator char
+                    char rowText[21];
+                    memset(rowText, 0, 21);
 
-                    pMainWindow->addNewUserToList(std::string(pRowText));
-                    delete[] pRowText;
+                    std::memcpy(rowText, readBuffer + iReadBytes, currentItemSize);
+                    iReadBytes += currentItemSize;
+
+                    pMainWindow->addNewUserToList(std::string(rowText));
                 }
 
                 pMainWindow->addNewUserToList(userName);
 
                 // Translate socket to non-blocking mode
                 u_long arg = true;
-                if (ioctlsocket(userSocket,FIONBIO,&arg) == SOCKET_ERROR)
+                if (ioctlsocket(userSocket, FIONBIO, &arg) == SOCKET_ERROR)
                 {
                     pMainWindow->printOutput(std::string("NetworkService::connectTo()::ioctsocket() (non-blocking mode) failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),true);
 
@@ -183,16 +242,15 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     WSACleanup();
 
                     bWinSockLaunched = false;
-                    pMainWindow->enableInteractiveElements(true,false);
+                    pMainWindow->enableInteractiveElements(true, false);
                 }
 
                 this->userName = userName;
-                pMainWindow->printOutput(std::string("Connected.\n==============   Welcome to chat!  ==============\n\nWARNING:\nThe data transmitted over the network is not encrypted.\n"),true);
-                pMainWindow->enableInteractiveElements(true,true);
+                pMainWindow->printOutput(std::string("WARNING:\nThe data transmitted over the network is not encrypted.\n\nConnected.\n"),true);
+                pMainWindow->enableInteractiveElements(true, true);
 
                 bListen = true;
             }
-            delete[] pReadBuffer;
         }
     }
 
@@ -204,164 +262,159 @@ void NetworkService::listenForServer(std::mutex& mtx)
     mtx.lock();
     mtx.unlock();
 
-    char* pReadBuffer = new char[1500];
+    char readBuffer[1];
 
     while(bListen)
     {
-        // We will check if there is a message every 10 ms (look end of this function)
-        if (recv(userSocket,pReadBuffer,0,0) == 0)
+        while (recv(userSocket, readBuffer, 0, 0) == 0)
         {
             // There are some data to read
 
             // There are some data to receive
-            int receivedAmount = recv(userSocket, pReadBuffer, 1, 0);
+            int receivedAmount = recv(userSocket, readBuffer, 1, 0);
             if (receivedAmount == 0)
             {
                 // Server sent FIN
-                bListen = false;
 
-                pMainWindow->printOutput(std::string("Server is closing connection.\n"),true);
-                int returnCode = shutdown(userSocket, SD_SEND);
-                if (returnCode == SOCKET_ERROR)
-                {
-                     pMainWindow->printOutput(std::string("NetworkService::listenForServer()::shutdown() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),true);
-                     closesocket(userSocket);
-                     WSACleanup();
-                     bWinSockLaunched = false;
-                }
-                else
-                {
-                    returnCode = closesocket(userSocket);
-                    if (returnCode == SOCKET_ERROR)
-                    {
-                        pMainWindow->printOutput(std::string("NetworkService::listenForServer()::closesocket() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),true);
-                        WSACleanup();
-                        bWinSockLaunched = false;
-                    }
-                    else
-                    {
-                        if (WSACleanup() == SOCKET_ERROR)
-                        {
-                            pMainWindow->printOutput(std::string("NetworkService::listenForServer()::WSACleanup() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),true);
-                        }
-                        else
-                        {
-                            pMainWindow->setOnlineUsersCount(0);
-                            pMainWindow->enableInteractiveElements(true,false);
-
-                            bWinSockLaunched = false;
-
-                            pMainWindow->printOutput(std::string("Connection closed successfully!\n"),true);
-                            pMainWindow->deleteUserFromList("",true);
-                        }
-                    }
-                }
+                answerToFIN();
             }
             else
             {
-                if (pReadBuffer[0] == 0)
+                if (readBuffer[0] == 0)
                 {
-                    // We received info about new user
-                    // Read packet size
-                    unsigned char iPacketSize = 0;
-                    receivedAmount = recv(userSocket, pReadBuffer, 1, 0);
-                    std::memcpy(&iPacketSize, pReadBuffer, 1);
+                    // We received info about the new user
 
-                    receivedAmount = recv(userSocket, pReadBuffer, iPacketSize, 0);
-
-                    int iOnline = 0;
-                    std::memcpy(&iOnline, pReadBuffer, 4);
-
-                    unsigned char sizeOfNewUserName = 0;
-                    std::memcpy(&sizeOfNewUserName, pReadBuffer + 4, 1);
-
-                    char* pNewUserName = new char[sizeOfNewUserName + 1];
-                    memset(pNewUserName, 0, sizeOfNewUserName + 1);
-                    std::memcpy(pNewUserName, pReadBuffer + 5, sizeOfNewUserName);
-
-                    pMainWindow->setOnlineUsersCount(iOnline);
-                    pMainWindow->addNewUserToList(std::string(pNewUserName));
-
-                    delete[] pNewUserName;
+                    receiveInfoAboutNewUser();
                 }
-                else if (pReadBuffer[0] == 1)
+                else if (readBuffer[0] == 1)
                 {
                     // Someone disconnected
 
-                    // Read packet size
-                    receivedAmount = recv(userSocket, pReadBuffer, 1, 0);
-                    unsigned char iPacketSize = 0;
-                    std::memcpy(&iPacketSize, pReadBuffer, 1);
-
-                    receivedAmount = recv(userSocket, pReadBuffer, iPacketSize, 0);
-
-                    int iOnline = 0;
-
-                    std::memcpy(&iOnline, pReadBuffer, 4);
-                    pMainWindow->setOnlineUsersCount(iOnline);
-
-                    // Max user name length = 20 (in ConnectWindow textEdit element) + 1 for null-terminated char
-                    char* pUserName = new char[21];
-                    memset(pUserName, 0, 21);
-
-                    std::memcpy(pUserName, pReadBuffer + 4, iPacketSize - 4);
-
-                    pMainWindow->deleteUserFromList(std::string(pUserName));
-
-                    delete[] pUserName;
+                    deleteDisconnectedUserFromList();
                 }
-                else if (pReadBuffer[0] == 10)
+                else if (readBuffer[0] == 9)
+                {
+                    // This is keep-alive message
+                    // We've been idle for 30 seconds
+                    // We should answer in 10 seconds or will be disconnected
+
+                    char keepAliveChar = 9;
+                    send(userSocket, &keepAliveChar, 1, 0);
+                }
+                else if (readBuffer[0] == 10)
                 {
                     // It's a message
-                    // Read size
-                    unsigned short int iPacketSize = 0;
-                    receivedAmount = recv(userSocket, pReadBuffer, 2, 0);
-                    std::memcpy(&iPacketSize, pReadBuffer, 2);
 
-                    // Receive message
-                    receivedAmount = recv(userSocket, pReadBuffer, iPacketSize, 0);
-
-                    // Message structure: "Hour:Minute. UserName: Message (in wchar_t*)".
-
-                    // Read time data:
-                    int iFirstWCharPos  = 0;
-                    bool bFirstColonWas = false;
-                    for (int j = 0; j < receivedAmount; j++)
-                    {
-                        if ( (pReadBuffer[j] == ':') && (!bFirstColonWas) )
-                        {
-                            bFirstColonWas = true;
-                        }
-                        else if ( (pReadBuffer[j] == ':') && (bFirstColonWas) )
-                        {
-                            iFirstWCharPos = j + 2;
-                            break;
-                        }
-                    }
-
-                    // Copy time info to pTimeText
-                    char* pTimeText = new char[static_cast<unsigned long long>(iFirstWCharPos + 1)];
-                    memset(pTimeText, 0, static_cast<unsigned long long>(iFirstWCharPos + 1));
-                    std::memcpy(pTimeText, pReadBuffer, static_cast<unsigned long long>(iFirstWCharPos));
-
-                    // Copy message to pWChatText
-                    wchar_t* pWCharText = new wchar_t[static_cast<unsigned long long>(receivedAmount - iFirstWCharPos + 2)];
-                    memset(pWCharText, 0, static_cast<unsigned long long>(receivedAmount - iFirstWCharPos + 2));
-                    std::memcpy(pWCharText, pReadBuffer + iFirstWCharPos, static_cast<unsigned long long>(receivedAmount - iFirstWCharPos));
-
-                    // Show data on screen
-                    pMainWindow->printUserMessage(std::string(pTimeText), std::wstring(pWCharText), true);
-
-                    delete[] pTimeText;
-                    delete[] pWCharText;
+                    receiveMessage();
                 }
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
+}
+
+void NetworkService::receiveInfoAboutNewUser()
+{
+    char readBuffer[31];
+    memset(readBuffer, 0, 31);
+
+    // Read packet size
+    unsigned char iPacketSize = 0;
+    recv(userSocket, readBuffer, 1, 0);
+    std::memcpy(&iPacketSize, readBuffer, 1);
+
+    // Read other stuff
+    recv(userSocket, readBuffer, iPacketSize, 0);
+    int iOnline = 0;
+    std::memcpy(&iOnline, readBuffer, 4);
+
+//    unsigned char sizeOfNewUserName = 0;
+//    std::memcpy(&sizeOfNewUserName, readBuffer + 4, 1);
+
+//    // 20 - max user name (in ConnectWindow textEdit element) + 1 null terminator char
+//    char newUserName[21];
+//    memset(newUserName, 0, 21);
+//    std::memcpy(newUserName, readBuffer + 5, sizeOfNewUserName);
+
+    pMainWindow->setOnlineUsersCount(iOnline);
+    pMainWindow->addNewUserToList(std::string(readBuffer + 5));
+}
+
+void NetworkService::receiveMessage()
+{
+    // Read packet size
+    unsigned short int iPacketSize = 0;
+    recv(userSocket, reinterpret_cast<char*>(&iPacketSize), 2, 0);
+
+    char* pReadBuffer = new char[iPacketSize + 2];
+    memset(pReadBuffer, 0, iPacketSize + 2);
+
+    // Receive message
+    int receivedAmount = recv(userSocket, pReadBuffer, iPacketSize, 0);
+
+    // Message structure: "Hour:Minute. UserName: Message (message in wchar_t)".
+
+    // Read time data:
+    int iFirstWCharPos  = 0;
+    bool bFirstColonWas = false;
+    for (int j = 0; j < receivedAmount; j++)
+    {
+        if ( (pReadBuffer[j] == ':') && (!bFirstColonWas) )
+        {
+            bFirstColonWas = true;
+        }
+        else if ( (pReadBuffer[j] == ':') && (bFirstColonWas) )
+        {
+            iFirstWCharPos = j + 2;
+            break;
+        }
+    }
+
+    // Copy time info to 'timeText'
+    // timeText = time info + user name
+    // Max user name size = 20 + ~ max 7 chars before user name
+    char timeText[31];
+    memset(timeText, 0, 31);
+    std::memcpy(timeText, pReadBuffer, static_cast<unsigned long long>(iFirstWCharPos));
+
+    // Copy message to pWChatText
+    wchar_t* pWCharText = new wchar_t[static_cast<unsigned long long>(receivedAmount - iFirstWCharPos + 2)];
+    memset(pWCharText, 0, static_cast<unsigned long long>(receivedAmount - iFirstWCharPos + 2));
+    std::memcpy(pWCharText, pReadBuffer + iFirstWCharPos, static_cast<unsigned long long>(receivedAmount - iFirstWCharPos));
+
+    // Show data on screen
+    pMainWindow->printUserMessage("\n" + std::string(timeText), std::wstring(pWCharText), true);
+
+    delete[] pWCharText;
     delete[] pReadBuffer;
+}
+
+void NetworkService::deleteDisconnectedUserFromList()
+{
+    char readBuffer[31];
+    memset(readBuffer, 0, 31);
+
+    // Read packet size
+    recv(userSocket, readBuffer, 1, 0);
+    unsigned char iPacketSize = 0;
+    std::memcpy(&iPacketSize, readBuffer, 1);
+
+    // Read other stuff
+    recv(userSocket, readBuffer, iPacketSize, 0);
+    int iOnline = 0;
+
+    std::memcpy(&iOnline, readBuffer, 4);
+    pMainWindow->setOnlineUsersCount(iOnline);
+
+//    // Max user name length = 20 (in ConnectWindow textEdit element) + 1 for null terminator char
+//    char userName[21];
+//    memset(userName, 0, 21);
+
+//    std::memcpy(userName, readBuffer + 4, iPacketSize - 4);
+
+    pMainWindow->deleteUserFromList(std::string(readBuffer + 4));
 }
 
 void NetworkService::sendMessage(std::wstring message)
@@ -369,42 +422,20 @@ void NetworkService::sendMessage(std::wstring message)
     if (message.size() > 550) pMainWindow->showMessageBox(0, "Your message is too big!");
     else
     {
-        // Get local time to pCurrentTime
-        time_t seconds = time(NULL);
-        tm* timeinfo = localtime(&seconds);
+        char* pSendBuffer = new char[3 + (message.size() * 2) + 2];
+        memset(pSendBuffer, 0, 3 + (message.size() * 2) + 2);
 
-        // Create string to send in format: "Hour:Minute. UserName: Message".
-        std::string timeString = "";
-        if (std::to_string(timeinfo->tm_hour).size() == 1)
-        {
-            timeString += "0";
-        }
-        timeString += std::to_string(timeinfo->tm_hour);
-        timeString += ":";
-        if (std::to_string(timeinfo->tm_min).size() == 1)
-        {
-            timeString += "0";
-        }
-        timeString += std::to_string(timeinfo->tm_min);
-        timeString += ". ";
-        timeString += userName;
-        timeString += ": ";
-
-        char* pSend = new char[1400];
-        memset(pSend,0,1400);
-
-        unsigned short int iPacketSize = static_cast<unsigned short>( timeString.size() + (message.size() * 2) );
+        unsigned short int iPacketSize = static_cast<unsigned short>( message.size() * 2 );
 
         // 10 == message
         unsigned char commandType = 10;
-        std::memcpy(pSend, &commandType, 1);
-        std::memcpy(pSend + 1, &iPacketSize, 2);
-        std::memcpy(pSend + 3, timeString.c_str(), timeString.size());
+        std::memcpy(pSendBuffer, &commandType, 1);
+        std::memcpy(pSendBuffer + 1, &iPacketSize, 2);
 
-        std::memcpy(pSend + 3 + timeString.size(), message.c_str(), message.size() * 2);
+        std::memcpy(pSendBuffer + 3, message.c_str(), message.size() * 2);
 
-        int sendSize = send(userSocket,pSend,static_cast<int>(1 + 2 + timeString.size() + (message.size() * 2)), 0);
-        if ( sendSize != static_cast<int>(1 + 2 + timeString.size() + (message.size() * 2)) )
+        int sendSize = send(  userSocket, pSendBuffer, static_cast<int>( 3 + (message.size() * 2) ), 0  );
+        if ( sendSize != static_cast<int>(3 + (message.size() * 2)) )
         {
             if (sendSize == SOCKET_ERROR)
             {
@@ -415,25 +446,15 @@ void NetworkService::sendMessage(std::wstring message)
             {
                 pMainWindow->printOutput(std::string("\nWARNING:\nWe could not send the whole message, because not enough space in the outgoing socket buffer.\n"));
 
-                if (sendSize > static_cast<int>(timeString.size()))
-                {
-                    pMainWindow->printUserMessage(timeString,message.substr(0,static_cast<size_t>(sendSize - static_cast<int>(timeString.size()))));
-                }
-                else
-                {
-                    pMainWindow->printUserMessage(timeString.substr(0,static_cast<size_t>(sendSize)),L"");
-                }
-
                 pMainWindow->clearTextEdit();
             }
         }
         else
         {
-            pMainWindow->printUserMessage(timeString,message);
             pMainWindow->clearTextEdit();
         }
 
-        delete[] pSend;
+        delete[] pSendBuffer;
     }
 }
 
@@ -442,7 +463,7 @@ void NetworkService::disconnect()
     if (bListen)
     {
         bListen = false;
-        char* pReadBuffer = new char[1500];
+        char readBuffer[5];
 
         // Send FIN
         int returnCode = shutdown(userSocket, SD_SEND);
@@ -465,7 +486,7 @@ void NetworkService::disconnect()
                 bWinSockLaunched = false;
             }
 
-            if (recv(userSocket, pReadBuffer, 1500, 0) == 0)
+            if (recv(userSocket, readBuffer, 5, 0) == 0)
             {
                 returnCode = closesocket(userSocket);
                 if (returnCode == SOCKET_ERROR)
@@ -483,9 +504,9 @@ void NetworkService::disconnect()
                     }
                     else
                     {
-                        pMainWindow->deleteUserFromList("",true);
+                        pMainWindow->deleteUserFromList("", true);
                         pMainWindow->setOnlineUsersCount(0);
-                        pMainWindow->enableInteractiveElements(true,false);
+                        pMainWindow->enableInteractiveElements(true, false);
 
                         bWinSockLaunched = false;
                     }
@@ -504,14 +525,58 @@ void NetworkService::disconnect()
                 pMainWindow->enableInteractiveElements(true,false);
             }
         }
-
-        delete[] pReadBuffer;
     }
     else
     {
-        pMainWindow->showMessageBox(0,std::string("You are not connected."));
+        pMainWindow->showMessageBox(0, std::string("You are not connected.") );
     }
 }
+
+void NetworkService::answerToFIN()
+{
+    bListen = false;
+
+    pMainWindow->printOutput(std::string("Server is closing connection.\n"),true);
+    int returnCode = shutdown(userSocket, SD_SEND);
+    if (returnCode == SOCKET_ERROR)
+    {
+         pMainWindow->printOutput(std::string("NetworkService::listenForServer()::shutdown() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+         closesocket(userSocket);
+         WSACleanup();
+         bWinSockLaunched = false;
+    }
+    else
+    {
+        returnCode = closesocket(userSocket);
+        if (returnCode == SOCKET_ERROR)
+        {
+            pMainWindow->printOutput(std::string("NetworkService::listenForServer()::closesocket() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+            WSACleanup();
+            bWinSockLaunched = false;
+        }
+        else
+        {
+            if (WSACleanup() == SOCKET_ERROR)
+            {
+                pMainWindow->printOutput(std::string("NetworkService::listenForServer()::WSACleanup() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+            }
+            else
+            {
+                pMainWindow->setOnlineUsersCount(0);
+                pMainWindow->enableInteractiveElements(true, false);
+
+                bWinSockLaunched = false;
+
+                pMainWindow->printOutput(std::string("Connection closed successfully!\n"), true);
+                pMainWindow->deleteUserFromList("", true);
+            }
+        }
+    }
+}
+
+
+
+
 
 void NetworkService::stop()
 {

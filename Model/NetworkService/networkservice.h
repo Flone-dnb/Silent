@@ -24,16 +24,21 @@ public:
 
     NetworkService(MainWindow* pMainWindow);
 
-    void start(std::string adress, std::string port, std::string userName);
+    std::string getClientVersion();
 
+    void start(std::string adress, std::string port, std::string userName);
     void connectTo(std::string adress, std::string port, std::string userName, std::mutex& mtx);
 
     void listenForServer(std::mutex& mtx);
 
+    void receiveInfoAboutNewUser();
+    void receiveMessage();
+    void deleteDisconnectedUserFromList();
+
     void sendMessage(std::wstring message);
 
     void disconnect();
-
+    void answerToFIN();
     void stop();
 
 private:
@@ -48,4 +53,7 @@ private:
 
     bool bWinSockLaunched;
     bool bListen;
+
+
+    std::string clientVersion;
 };

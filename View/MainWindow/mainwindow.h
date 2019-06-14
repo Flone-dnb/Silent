@@ -24,6 +24,7 @@ class QMouseEvent;
 class Controller;
 
 
+
 namespace Ui {
 class MainWindow;
 }
@@ -37,8 +38,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     void connectTo(std::string adress, std::string port, std::string userName);
-
-    void showThisWindow();
 
     // Model will call that
         void printOutput(std::string text, bool bEmitSignal = false);
@@ -61,9 +60,11 @@ signals:
 
     void signalEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
 
+
 protected:
 
     void closeEvent(QCloseEvent *event);
+
 
 private slots:
 
@@ -83,13 +84,12 @@ private slots:
 
     void on_plainTextEdit_2_textChanged();
 
+
 private:
 
     void closeApp();
 
     Ui::MainWindow* ui;
-
-    connectWindow* pConnectWindow;
-
-    Controller* pController;
+    connectWindow*  pConnectWindow;
+    Controller*     pController;
 };

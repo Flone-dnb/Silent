@@ -64,7 +64,9 @@ color: rgb(216, 216, 216);</string>
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.461538 rgba(255, 255, 255, 0));</string>
+         <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.461538 rgba(255, 255, 255, 0));
+
+border: 1px solid red;</string>
         </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
@@ -110,6 +112,9 @@ color: rgb(216, 216, 216);</string>
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="styleSheet">
+         <string notr="true">border: 1px solid red;</string>
+        </property>
         <property name="inputMask">
          <string>000.000.000.000;_</string>
         </property>
@@ -145,6 +150,9 @@ color: rgb(216, 216, 216);</string>
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="styleSheet">
+         <string notr="true">border: 1px solid red;</string>
+        </property>
         <property name="inputMask">
          <string>00000;_</string>
         </property>
@@ -167,12 +175,12 @@ color: rgb(216, 216, 216);</string>
         <property name="styleSheet">
          <string notr="true">QPushButton
 {
+	border: 1px solid red;
 	color: rgb(255, 255, 255);
 }
 QPushButton:hover
 {
 	background-color: rgb(30,30,30);
-	border: 1px solid white;
 }</string>
         </property>
         <property name="text">

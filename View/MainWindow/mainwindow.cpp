@@ -10,12 +10,15 @@
 #include <QMouseEvent>
 #include <QAction>
 
+
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    pController = new Controller(this);
+    pController    = new Controller(this);
     pConnectWindow = nullptr;
 
     // Set ContextMenu to ListWidget
@@ -24,29 +27,29 @@ MainWindow::MainWindow(QWidget *parent) :
     // Connect window
     pConnectWindow = new connectWindow(nullptr);
     connect(pConnectWindow, &connectWindow::connectTo,      this, &MainWindow::connectTo);
-    connect(pConnectWindow, &connectWindow::showMainWindow, this, &MainWindow::showThisWindow);
+    connect(pConnectWindow, &connectWindow::showMainWindow, this, &MainWindow::show);
 
     // connect to 'this'
     // we use this to send signals to main thread when working with GI
-    connect(this, &MainWindow::signalTypeOnScreen,                 this,&MainWindow::typeSomeOnScreen);
-    connect(this, &MainWindow::signalEnableInteractiveElements,    this,&MainWindow::slotEnableInteractiveElements);
+    connect(this, &MainWindow::signalTypeOnScreen,                 this, &MainWindow::typeSomeOnScreen);
+    connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
     connect(this, &MainWindow::signalShowMessage,                  this, &MainWindow::slotShowMessage);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    pController->stop();
-}
+
+
+
+
 
 void MainWindow::slotShowMessage(char type, std::string message)
 {
     if (type == 0)
     {
-        QMessageBox::warning(nullptr,"Warning",QString::fromStdString(message));
+        QMessageBox::warning(nullptr, "Warning", QString::fromStdString(message));
     }
     else if (type == 1)
     {
-        QMessageBox::information(nullptr,"Information",QString::fromStdString(message));
+        QMessageBox::information(nullptr, "Information", QString::fromStdString(message));
     }
 }
 
@@ -87,19 +90,14 @@ void MainWindow::connectTo(std::string adress, std::string port, std::string use
     pController->connectTo(adress,port,userName);
 }
 
-void MainWindow::showThisWindow()
-{
-    show();
-}
-
 void MainWindow::printOutput(std::string text, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
         // This function (printOutput) was called from another thread (not main thread)
-        // so if we will append text to 'plaintTextEdit' we will have errors because you
-        // cannot append info from another thread.
-        // Because of that we will emit signal to main thread to append text
+        // so if we will append text to 'plaintTextEdit' crash can occur because you
+        // cannot change GDI from another thread (it's something with how Windows and GDI works with threads)
+        // Because of that we will emit signal to main thread to append text.
         // Right? I dunno "it just works". :p
         emit signalTypeOnScreen(QString::fromStdString(text));
     }
@@ -114,9 +112,9 @@ void MainWindow::printOutputW(std::wstring text, bool bEmitSignal)
     if (bEmitSignal)
     {
         // This function (printOutput) was called from another thread (not main thread)
-        // so if we will append text to 'plaintTextEdit' we will have errors because you
-        // cannot append info from another thread.
-        // Because of that we will emit signal to main thread to append text
+        // so if we will append text to 'plaintTextEdit' crash can occur because you
+        // cannot change GDI from another thread (it's something with how Windows and GDI works with threads)
+        // Because of that we will emit signal to main thread to append text.
         // Right? I dunno "it just works". :p
         emit signalTypeOnScreen(QString::fromStdWString(text));
     }
@@ -145,7 +143,7 @@ void MainWindow::enableInteractiveElements(bool bMenu, bool bTypeAndSend)
 
 void MainWindow::setOnlineUsersCount(int onlineCount)
 {
-    ui->label_3->setText( "Main lobby: " + QString::number(onlineCount) );
+    ui->label_3->setText( "Connected: " + QString::number(onlineCount) );
 }
 
 void MainWindow::addNewUserToList(std::string name)
@@ -182,16 +180,9 @@ void MainWindow::clearTextEdit()
     ui->plainTextEdit_2->clear();
 }
 
-MainWindow::~MainWindow()
-{
-    delete pController;
-    delete pConnectWindow;
-    delete ui;
-}
-
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(nullptr,"FChat","FChat (client). Version: 1.05 (09.05.2019)");
+    QMessageBox::about(nullptr,"FChat","FChat Client. Version: " + QString::fromStdString(pController->getClientVersion()) + ".");
 }
 
 void MainWindow::on_actionConnect_triggered()
@@ -228,4 +219,21 @@ void MainWindow::on_plainTextEdit_2_textChanged()
             pController->sendMessage(text);
         }
     }
+}
+
+
+
+
+
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    pController->stop();
+}
+
+MainWindow::~MainWindow()
+{
+    delete pController;
+    delete pConnectWindow;
+    delete ui;
 }
