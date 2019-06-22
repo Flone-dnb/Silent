@@ -4,14 +4,18 @@
 // Custom
 #include "View/ConnectWindow/connectwindow.h"
 #include "Controller/controller.h"
+#include "View/SettingsWindow/settingswindow.h"
 
 // Qt
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QAction>
+#include <QTimer>
 
-
-
+// C++
+#include <fstream>
+#include <thread>
+#include <shlobj.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     pController    = new Controller(this);
     pConnectWindow = nullptr;
+
+    qRegisterMetaType<std::string>("std::string");
 
     // Set ContextMenu to ListWidget
     ui->listWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -34,6 +40,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalTypeOnScreen,                 this, &MainWindow::typeSomeOnScreen);
     connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
     connect(this, &MainWindow::signalShowMessage,                  this, &MainWindow::slotShowMessage);
+    connect(this, &MainWindow::signalSetPingToUser,                this, &MainWindow::slotSetPingToUser);
+
+
+    // We use a timer because here (in the constructor) the main (from the main.cpp) event handler is not launched so it won't
+    // show our SettingsWindow with opacity change (see 'checkIfSettingsExists() function). We will wait for some time and then show it.
+    pTimer = new QTimer();
+    pTimer->setInterval(600);
+    connect(pTimer, &QTimer::timeout, this, &MainWindow::checkIfSettingsExist);
+    pTimer->start();
 }
 
 
@@ -50,6 +65,37 @@ void MainWindow::slotShowMessage(char type, std::string message)
     else if (type == 1)
     {
         QMessageBox::information(nullptr, "Information", QString::fromStdString(message));
+    }
+}
+
+void MainWindow::slotSetPingToUser(std::string userName, int ping)
+{
+    for (int i = 0; i < ui->listWidget_2->model()->rowCount(); i++)
+    {
+        QString userNameWithPing = ui->listWidget_2->item(i)->text();
+        QString userNameInList = "";
+        for (int j = 0; j < userNameWithPing.size(); j++)
+        {
+            if (userNameWithPing[j] != " ")
+            {
+                userNameInList += userNameWithPing[j];
+            }
+            else break;
+        }
+
+        if ( userNameInList == QString::fromStdString(userName) )
+        {
+            if (ping >= 125)
+            {
+                userNameInList += (" [" + QString::number(ping) + " ms (!!!)]");
+            }
+            else
+            {
+                userNameInList += (" [" + QString::number(ping) + " ms]");
+            }
+            ui->listWidget_2->item(i)->setText( userNameInList );
+            break;
+        }
     }
 }
 
@@ -128,17 +174,17 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, bo
 {
     if (bEmitSignal)
     {
-        emit signalTypeOnScreen( QString(QString::fromStdString(timeInfo) + QString::fromStdWString(message)) );
+        emit signalTypeOnScreen( QString::fromStdString(timeInfo) + QString::fromStdWString(message) + "\n" );
     }
     else
     {
-        ui->plainTextEdit->appendPlainText( QString(QString::fromStdString(timeInfo) + QString::fromStdWString(message)) );
+        ui->plainTextEdit->appendPlainText( QString::fromStdString(timeInfo) + QString::fromStdWString(message) + "\n" );
     }
 }
 
 void MainWindow::enableInteractiveElements(bool bMenu, bool bTypeAndSend)
 {
-    emit signalEnableInteractiveElements(bMenu,bTypeAndSend);
+    emit signalEnableInteractiveElements(bMenu, bTypeAndSend);
 }
 
 void MainWindow::setOnlineUsersCount(int onlineCount)
@@ -146,8 +192,14 @@ void MainWindow::setOnlineUsersCount(int onlineCount)
     ui->label_3->setText( "Connected: " + QString::number(onlineCount) );
 }
 
+void MainWindow::setPingToUser(std::string userName, int ping)
+{
+    emit signalSetPingToUser(userName, ping);
+}
+
 void MainWindow::addNewUserToList(std::string name)
 {
+    name += " [-- ms]";
     ui->listWidget_2->addItem( QString::fromStdString(name) );
 }
 
@@ -161,7 +213,18 @@ void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
     {
         for (int i = 0; i < ui->listWidget_2->model()->rowCount(); i++)
         {
-            if (ui->listWidget_2->item(i)->text() == QString::fromStdString(name))
+            QString userNameWithPing = ui->listWidget_2->item(i)->text();
+            QString userName = "";
+            for (int j = 0; j < userNameWithPing.size(); j++)
+            {
+                if (userNameWithPing[j] != " ")
+                {
+                    userName += userNameWithPing[j];
+                }
+                else break;
+            }
+
+            if ( userName == QString::fromStdString(name))
             {
                 delete ui->listWidget_2->item(i);
                 break;
@@ -178,6 +241,67 @@ void MainWindow::showMessageBox(char type, std::string message)
 void MainWindow::clearTextEdit()
 {
     ui->plainTextEdit_2->clear();
+}
+
+void MainWindow::saveUserName(std::string userName)
+{
+    TCHAR my_documents[MAX_PATH];
+    HRESULT result = SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
+
+    if (result != S_OK)
+    {
+        QMessageBox::warning(nullptr, "Warning", "Error. Settings will not be saved.");
+    }
+    else
+    {
+        std::wstring adressToSettings = std::wstring(my_documents);
+        std::wstring adressToTempSettings = std::wstring(my_documents);
+        adressToSettings += L"\\FChatSettings.data";
+        adressToTempSettings += L"\\FChatSettings~.data";
+
+        // Check if settings file exists
+        std::ifstream settingsFile(adressToSettings, std::ios::binary);
+        if (settingsFile.is_open())
+        {
+            std::ofstream newSettingsFile(adressToTempSettings, std::ios::binary);
+
+            int iKey = 0;
+            settingsFile.read(reinterpret_cast<char*>(&iKey), 4);
+            newSettingsFile.write(reinterpret_cast<char*>(&iKey), 4);
+
+            unsigned short int iVolume = 0;
+            settingsFile.read(reinterpret_cast<char*>(&iVolume), 2);
+            newSettingsFile.write(reinterpret_cast<char*>(&iVolume), 2);
+
+            unsigned char userNameSize = userName.size();
+            newSettingsFile.write(reinterpret_cast<char*>(&userNameSize), 1);
+            newSettingsFile.write(userName.c_str(), userNameSize);
+
+            newSettingsFile.close();
+            settingsFile.close();
+
+            _wremove(adressToSettings.c_str());
+            _wrename(adressToTempSettings.c_str(), adressToSettings.c_str());
+        }
+        else
+        {
+            std::ofstream newSettingFile(adressToSettings, std::ios::binary);
+
+            // T button
+            int iPushToTalkKey = 0x54;
+            newSettingFile.write(reinterpret_cast<char*>(&iPushToTalkKey), 4);
+
+            // 100%
+            unsigned short int iVolume = 65535;
+            newSettingFile.write(reinterpret_cast<char*>(&iVolume), 2);
+
+            unsigned char nameSize = userName.size();
+            newSettingFile.write(reinterpret_cast<char*>(&nameSize), 1);
+            newSettingFile.write(userName.c_str(), nameSize);
+
+            newSettingFile.close();
+        }
+    }
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -221,6 +345,84 @@ void MainWindow::on_plainTextEdit_2_textChanged()
     }
 }
 
+void MainWindow::checkIfSettingsExist()
+{
+    pTimer->stop();
+
+    TCHAR my_documents[MAX_PATH];
+    HRESULT result = SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
+
+    if (result != S_OK)
+    {
+        QMessageBox::warning(nullptr, "Warning", "Error. Settings will not be saved.");
+    }
+    else
+    {
+        std::wstring adressToSettings = std::wstring(my_documents);
+        adressToSettings += L"\\FChatSettings.data";
+
+        // Check if settings file exists
+        std::ifstream settingsFile(adressToSettings, std::ios::binary);
+        if (settingsFile.is_open())
+        {
+            int iKey = 0;
+
+            settingsFile.read(reinterpret_cast<char*>(&iKey), 4);
+
+            unsigned short int iVolume = 0;
+            settingsFile.read(reinterpret_cast<char*>(&iVolume), 2);
+
+            pController->setPushToTalkButtonAndVolume(iKey, iVolume);
+
+            unsigned char userNameSize = 0;
+            settingsFile.read(reinterpret_cast<char*>(&userNameSize), 1);
+            if (userNameSize != 0)
+            {
+                char nameBuffer[21];
+                memset(nameBuffer, 0, 21);
+
+                settingsFile.read(nameBuffer, userNameSize);
+
+                pConnectWindow->setUserName( std::string(nameBuffer) );
+            }
+
+            settingsFile.close();
+        }
+        else
+        {
+            // Show SettingsWindow
+            SettingsWindow* pSettingsWindow = new SettingsWindow(this);
+            connect(pSettingsWindow, &SettingsWindow::signalSetPushToTalkButton, this, &MainWindow::slotSetPushToTalkButton);
+            pSettingsWindow->setWindowModality(Qt::ApplicationModal);
+            pSettingsWindow->setWindowOpacity(0);
+            pSettingsWindow->show();
+
+            qreal opacity = 0.1;
+
+            for (int i = 1; i < 11; i++)
+            {
+                pSettingsWindow->setWindowOpacity( opacity * i );
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+        }
+    }
+}
+
+void MainWindow::slotSetPushToTalkButton(int iKey, unsigned short int iVolume)
+{
+    pController->setPushToTalkButtonAndVolume(iKey, iVolume);
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    // Show SettingsWindow
+    SettingsWindow* pSettingsWindow = new SettingsWindow(this);
+    connect(pSettingsWindow, &SettingsWindow::signalSetPushToTalkButton, this, &MainWindow::slotSetPushToTalkButton);
+    pSettingsWindow->setWindowModality(Qt::ApplicationModal);
+    pSettingsWindow->show();
+}
+
+
 
 
 
@@ -233,6 +435,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 MainWindow::~MainWindow()
 {
+    delete pTimer;
     delete pController;
     delete pConnectWindow;
     delete ui;

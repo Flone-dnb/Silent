@@ -16,26 +16,32 @@
 
 
 class MainWindow;
+class AudioService;
 
 
 class NetworkService
 {
 public:
 
-    NetworkService(MainWindow* pMainWindow);
+    NetworkService(MainWindow* pMainWindow, AudioService* pAudioService);
 
     std::string getClientVersion();
+    std::string getUserName();
 
     void start(std::string adress, std::string port, std::string userName);
-    void connectTo(std::string adress, std::string port, std::string userName, std::mutex& mtx);
+    void connectTo(std::string adress, std::string port, std::string userName);
+    void setupVoiceConnection();
 
-    void listenForServer(std::mutex& mtx);
+    void listenTCPFromServer();
+    void listenUDPFromServer();
 
     void receiveInfoAboutNewUser();
     void receiveMessage();
     void deleteDisconnectedUserFromList();
+    void receivePing();
 
     void sendMessage(std::wstring message);
+    void sendVoiceMessage(char* pVoiceMessage, int iMessageSize, bool bLast);
 
     void disconnect();
     void answerToFIN();
@@ -44,15 +50,17 @@ public:
 private:
 
     MainWindow* pMainWindow;
+    AudioService* pAudioService;
 
-    SOCKET userSocket;
+    SOCKET userTCPSocket;
+    SOCKET userUDPSocket;
+    sockaddr_in serverAddr;
 
     std::string userName;
 
-    std::mutex mtx;
-
     bool bWinSockLaunched;
-    bool bListen;
+    bool bTextListen;
+    bool bVoiceListen;
 
 
     std::string clientVersion;

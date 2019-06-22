@@ -4,6 +4,7 @@
 #include <string>
 
 class NetworkService;
+class AudioService;
 class MainWindow;
 
 
@@ -14,6 +15,10 @@ public:
     Controller(MainWindow* pMainWindow);
 
     std::string getClientVersion();
+    std::string getUserName();
+
+    void setPushToTalkButtonAndVolume(int iKey, unsigned short int volume);
+
 
     void connectTo(std::string adress, std::string port, std::string userName);
 
@@ -28,4 +33,5 @@ public:
 private:
 
     NetworkService* pNetworkService;
+    AudioService*   pAudioService;
 };

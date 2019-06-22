@@ -111,7 +111,7 @@ border: 1px solid red;</string>
            <widget class="QListWidget" name="listWidget_2">
             <property name="font">
              <font>
-              <pointsize>12</pointsize>
+              <pointsize>10</pointsize>
              </font>
             </property>
             <property name="styleSheet">
@@ -243,9 +243,9 @@ QMenu::item:selected
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
+    <addaction name="actionSettings"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
-    <addaction name="separator"/>
    </widget>
    <addaction name="menuChat"/>
   </widget>
@@ -262,6 +262,11 @@ QMenu::item:selected
   <action name="actionDisconnect">
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

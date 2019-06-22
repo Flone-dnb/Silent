@@ -24,22 +24,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-SOURCES += \
-        main.cpp \
-        View/MainWindow/mainwindow.cpp \
-        View/ConnectWindow/connectwindow.cpp \
-    Controller/controller.cpp \
-    Model/NetworkService/networkservice.cpp \
-
-HEADERS += \
-        View/MainWindow/mainwindow.h \
-        View/ConnectWindow/connectwindow.h \
-    Controller/controller.h \
-    Model/NetworkService/networkservice.h \
 
 FORMS += \
-        View/MainWindow/mainwindow.ui \
-        View/ConnectWindow/connectwindow.ui \
+    View/ConnectWindow/connectwindow.ui \
+    View/MainWindow/mainwindow.ui \
+    View/SettingsWindow/settingswindow.ui \
+
+HEADERS += \
+    Controller/controller.h \
+    Model/AudioService/audioservice.h \
+    Model/NetworkService/networkservice.h \
+    View/ConnectWindow/connectwindow.h \
+    View/MainWindow/mainwindow.h \
+    View/SettingsWindow/settingswindow.h \
+
+SOURCES += \
+    Controller/controller.cpp \
+    Model/AudioService/audioservice.cpp \
+    Model/NetworkService/networkservice.cpp \
+    View/ConnectWindow/connectwindow.cpp \
+    View/MainWindow/mainwindow.cpp \
+    main.cpp \
+    View/SettingsWindow/settingswindow.cpp \
 
 win32
 {
@@ -53,3 +59,4 @@ win32
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+

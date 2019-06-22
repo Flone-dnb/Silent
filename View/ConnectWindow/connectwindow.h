@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QMainWindow>
+#include <string>
 
-class string;
 class QMouseEvent;
 
 namespace Ui {
@@ -16,6 +16,8 @@ class connectWindow : public QMainWindow
 public:
 
     explicit connectWindow(QWidget *parent = nullptr);
+
+    void setUserName(std::string userName);
 
     ~connectWindow();
 

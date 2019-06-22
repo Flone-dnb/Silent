@@ -12,6 +12,11 @@ connectWindow::connectWindow(QWidget *parent) :
     setFixedSize(width(), height());
 }
 
+void connectWindow::setUserName(std::string userName)
+{
+    ui->lineEdit_3->setText( QString::fromStdString(userName) );
+}
+
 connectWindow::~connectWindow()
 {
     delete ui;
