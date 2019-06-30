@@ -10,7 +10,7 @@
 
 NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioService)
 {
-    clientVersion = "2.0";
+    clientVersion = "2.05";
 
     this->pMainWindow   = pMainWindow;
     this->pAudioService = pAudioService;
@@ -166,19 +166,6 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 WSACleanup();
                 bWinSockLaunched = false;
             }
-            else if (readBuffer[0] == 1)
-            {
-                if (recv(userTCPSocket, readBuffer, 1, 0) == 0)
-                {
-                    shutdown(userTCPSocket,SD_SEND);
-                }
-
-                pMainWindow->printOutput(std::string("\nUser with your IP is already connected."), true);
-                pMainWindow->enableInteractiveElements(true, false);
-                closesocket(userTCPSocket);
-                WSACleanup();
-                bWinSockLaunched = false;
-            }
             else if (readBuffer[0] == 2)
             {
                 // Server is full
@@ -296,6 +283,7 @@ void NetworkService::setupVoiceConnection()
     {
         pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
                                               "NetworkService::setupVoiceConnection::socket() error: ") + std::to_string(WSAGetLastError()), true );
+        return;
     }
     else
     {
@@ -307,20 +295,33 @@ void NetworkService::setupVoiceConnection()
             pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
                                                   "NetworkService::setupVoiceConnection::connect() error: ") + std::to_string(WSAGetLastError()), true );
             closesocket(userUDPSocket);
+            return;
         }
         else
         {
-            sockaddr_in myUDPAddr;
-            int len = sizeof(myUDPAddr);
-            getsockname(userUDPSocket, reinterpret_cast<sockaddr*>(&myUDPAddr), &len);
+            char firstMessage[23];
+            firstMessage[0] = -1;
+            firstMessage[1] = userName.size();
+            std::memcpy(firstMessage + 2, userName.c_str(), userName.size());
 
-            unsigned short int myUDPport = ntohs(myUDPAddr.sin_port);
-
-            // Tell server that we are ready for connect
-            char myUDPportMassive[3];
-            myUDPportMassive[0] = 2;
-            std::memcpy(myUDPportMassive + 1, &myUDPport, 2);
-            send(userTCPSocket, myUDPportMassive, 3, 0);
+            int iSentSize = sendto(userUDPSocket, firstMessage, 2 + userName.size(), 0, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr));
+            if ( iSentSize != (2 + userName.size()) )
+            {
+                if (iSentSize == SOCKET_ERROR)
+                {
+                    pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
+                                                          "NetworkService::setupVoiceConnection::sendto() error: ") + std::to_string(WSAGetLastError()), true );
+                    closesocket(userUDPSocket);
+                    return;
+                }
+                else
+                {
+                    pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
+                                                          "NetworkService::setupVoiceConnection::sendto() sent only: " + std::to_string(iSentSize) + " out of " + std::to_string(2 + userName.size())), true );
+                    closesocket(userUDPSocket);
+                    return;
+                }
+            }
 
             // Translate socket to non-blocking mode
             u_long arg = true;
@@ -329,17 +330,16 @@ void NetworkService::setupVoiceConnection()
                 pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
                                                       "NetworkService::setupVoiceConnection::ioctlsocket() error: ") + std::to_string(WSAGetLastError()), true );
                 closesocket(userUDPSocket);
+                return;
             }
-            else
-            {
-                pMainWindow->printOutput(std::string("Connected to voice chat.\n"), true);
-                bVoiceListen = true;
-            }
+
+            pMainWindow->printOutput(std::string("Connected to voice chat.\n"), true);
+            bVoiceListen = true;
+
+            std::thread listenVoiceThread (&NetworkService::listenUDPFromServer, this);
+            listenVoiceThread.detach();
         }
     }
-
-    std::thread listenVoiceThread (&NetworkService::listenUDPFromServer, this);
-    listenVoiceThread.detach();
 }
 
 void NetworkService::listenTCPFromServer()
@@ -414,7 +414,6 @@ void NetworkService::listenUDPFromServer()
         int iSize = recvfrom(userUDPSocket, readBuffer, 1450, 0, reinterpret_cast<sockaddr*>(&senderInfo), &iLen);
         while (iSize > 0)
         {
-
             if (readBuffer[0] == 0)
             {
                 // it's ping check
