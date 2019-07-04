@@ -17,8 +17,6 @@
 struct UserAudioStruct
 {
     std::string userName;
-    // From 0 to 100
-    char userVolume;
 
     std::vector<short*> audioPackets;
     bool bPacketsArePlaying;
@@ -27,12 +25,15 @@ struct UserAudioStruct
 
     // Waveform-audio output device
     HWAVEOUT hWaveOut;
+    HWAVEOUT hWaveOut2;
 
     // Audio buffers
     WAVEHDR WaveOutHdr1;
     WAVEHDR WaveOutHdr2;
     WAVEHDR WaveOutHdr3;
-    WAVEHDR WaveOutHdr4;
+    WAVEHDR WaveOutHdr12;
+    WAVEHDR WaveOutHdr22;
+    WAVEHDR WaveOutHdr32;
 };
 
 
@@ -65,6 +66,7 @@ public:
     void uncompressAndPlay(char* pAudio, std::string userName, bool bLast);
     void play(UserAudioStruct* user);
 
+    void waitForAllBuffers(UserAudioStruct* user);
     void stop();
 
 

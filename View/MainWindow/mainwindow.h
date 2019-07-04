@@ -23,6 +23,8 @@ class connectWindow;
 class QMouseEvent;
 class Controller;
 class QTimer;
+class QMenu;
+class QAction;
 
 
 
@@ -94,15 +96,15 @@ private slots:
 
     void on_plainTextEdit_2_textChanged();
 
-
     void on_actionSettings_triggered();
 
 private:
 
     void checkIfSettingsExist();
 
-
     void closeApp();
+
+
 
     Ui::MainWindow* ui;
     connectWindow*  pConnectWindow;

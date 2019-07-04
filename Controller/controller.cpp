@@ -33,6 +33,7 @@ void Controller::setPushToTalkButtonAndVolume(int iKey, unsigned short int volum
 {
     pAudioService->setPushToTalkButtonAndVolume(iKey, volume);
 }
+
 void Controller::sendMessage(std::wstring message)
 {
     pNetworkService->sendMessage(message);

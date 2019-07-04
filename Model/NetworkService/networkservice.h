@@ -1,8 +1,7 @@
 #pragma once
 
 // C++
-#include <string>
-#include <mutex>
+#include <string>s
 
 // ============== Network ==============
 // Sockets and stuff

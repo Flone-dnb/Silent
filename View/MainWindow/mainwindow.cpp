@@ -9,7 +9,6 @@
 // Qt
 #include <QMessageBox>
 #include <QMouseEvent>
-#include <QAction>
 #include <QTimer>
 
 // C++
@@ -26,9 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
     pConnectWindow = nullptr;
 
     qRegisterMetaType<std::string>("std::string");
-
-    // Set ContextMenu to ListWidget
-    ui->listWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Connect window
     pConnectWindow = new connectWindow(nullptr);
@@ -85,7 +81,7 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
 
         if ( userNameInList == QString::fromStdString(userName) )
         {
-            if (ping >= 125)
+            if (ping >= 200)
             {
                 userNameInList += (" [" + QString::number(ping) + " ms (!!!)]");
             }
@@ -432,6 +428,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     pController->stop();
 }
+
 
 MainWindow::~MainWindow()
 {
