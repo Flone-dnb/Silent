@@ -29,6 +29,7 @@ FORMS += \
     View/ConnectWindow/connectwindow.ui \
     View/MainWindow/mainwindow.ui \
     View/SettingsWindow/settingswindow.ui \
+    View/SingleUserSettings/singleusersettings.ui
 
 HEADERS += \
     Controller/controller.h \
@@ -37,6 +38,8 @@ HEADERS += \
     View/ConnectWindow/connectwindow.h \
     View/MainWindow/mainwindow.h \
     View/SettingsWindow/settingswindow.h \
+    View/SingleUserSettings/singleusersettings.h \
+    globalparams.h
 
 SOURCES += \
     Controller/controller.cpp \
@@ -44,6 +47,7 @@ SOURCES += \
     Model/NetworkService/networkservice.cpp \
     View/ConnectWindow/connectwindow.cpp \
     View/MainWindow/mainwindow.cpp \
+    View/SingleUserSettings/singleusersettings.cpp \
     main.cpp \
     View/SettingsWindow/settingswindow.cpp \
 

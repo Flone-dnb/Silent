@@ -1,6 +1,8 @@
 #include "connectwindow.h"
 #include "ui_connectwindow.h"
 
+#include "globalparams.h"
+
 #include <QMessageBox>
 #include <QMouseEvent>
 
@@ -10,6 +12,7 @@ connectWindow::connectWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setFixedSize(width(), height());
+    ui->lineEdit_3->setMaxLength(MAX_NAME_LENGTH);
 }
 
 void connectWindow::setUserName(std::string userName)
@@ -43,7 +46,7 @@ void connectWindow::on_pushButton_clicked()
             }
             else
             {
-                if ( (ui->lineEdit_3->text().at(i).unicode() >=58) && (ui->lineEdit_3->text().at(i).unicode() <= 64) )
+                if ( (ui->lineEdit_3->text().at(i).unicode() >= 58) && (ui->lineEdit_3->text().at(i).unicode() <= 64) )
                 {
                     bOnlyEnglish = false;
                     break;
@@ -68,16 +71,16 @@ void connectWindow::on_pushButton_clicked()
             }
             else
             {
-               QMessageBox::information(nullptr,"IP","Please fill IPv4 adress field.\n");
+               QMessageBox::information(nullptr, "IP", "Please fill IPv4 adress field.\n");
             }
         }
         else
         {
-            QMessageBox::information(nullptr,"Name","User name must consist only of A-Z, a-z, 0-9 characters.\n");
+            QMessageBox::information(nullptr, "Name", "User name must consist only of A-Z, a-z, 0-9 characters.\n");
         }
     }
     else
     {
-        QMessageBox::information(nullptr,"Name","User name must be 2 characters or longer.\n");
+        QMessageBox::information(nullptr, "Name", "User name must be 2 characters or longer.\n");
     }
 }

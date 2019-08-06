@@ -10,7 +10,7 @@ AudioService::AudioService(MainWindow* pMainWindow)
 {
     this->pMainWindow = pMainWindow;
 
-    bInputReady  = false;
+    bInputReady = false;
 
     pWaveIn1 = nullptr;
     pWaveIn2 = nullptr;
@@ -20,8 +20,8 @@ AudioService::AudioService(MainWindow* pMainWindow)
     // T button
     iPushToTalkButton = 0x54;
 
-    // 55535 ~ 85%
-    iVolume = 55535;
+    // 60000 ~ 91%
+    iVolume = 60000;
 }
 
 
@@ -48,12 +48,50 @@ void AudioService::setPushToTalkButtonAndVolume(int key, unsigned short int volu
     mtxUsersAudio.unlock();
 }
 
-void AudioService::start()
+void AudioService::setNewUserVolume(std::string userName, float fVolume)
 {
-    pWaveIn1  = new short int[static_cast<unsigned long long>(sampleCount)];
-    pWaveIn2  = new short int[static_cast<unsigned long long>(sampleCount)];
-    pWaveIn3  = new short int[static_cast<unsigned long long>(sampleCount)];
-    pWaveIn4  = new short int[static_cast<unsigned long long>(sampleCount)];
+    mtxUsersAudio.lock();
+
+    for (size_t i = 0; i < usersAudio.size(); i++)
+    {
+        if (usersAudio[i]->userName == userName)
+        {
+            usersAudio[i]->fUserDefinedVolume = fVolume;
+
+            break;
+        }
+    }
+
+    mtxUsersAudio.unlock();
+}
+
+float AudioService::getUserCurrentVolume(std::string userName)
+{
+    mtxUsersAudio.lock();
+
+    float fCurrentVolume = 1.0f;
+
+    for (size_t i = 0; i < usersAudio.size(); i++)
+    {
+        if (usersAudio[i]->userName == userName)
+        {
+            fCurrentVolume = usersAudio[i]->fUserDefinedVolume;
+
+            break;
+        }
+    }
+
+    mtxUsersAudio.unlock();
+
+    return fCurrentVolume;
+}
+
+void AudioService::prepareForStart()
+{
+    pWaveIn1  = new short int[static_cast<size_t>(sampleCount)];
+    pWaveIn2  = new short int[static_cast<size_t>(sampleCount)];
+    pWaveIn3  = new short int[static_cast<size_t>(sampleCount)];
+    pWaveIn4  = new short int[static_cast<size_t>(sampleCount)];
 
     Format.wFormatTag      = WAVE_FORMAT_PCM;
     //  '1' - mono, '2' - stereo
@@ -101,8 +139,10 @@ void AudioService::start()
     WaveInHdr4.dwUser = 0L;
     WaveInHdr4.dwFlags = 0L;
     WaveInHdr4.dwLoops = 0L;
+}
 
-
+bool AudioService::start()
+{
     MMRESULT result;
 
     // Start input device
@@ -127,7 +167,7 @@ void AudioService::start()
         delete[] pWaveIn4;
         pWaveIn4 = nullptr;
 
-        return;
+        return false;
     }
     else
     {
@@ -136,23 +176,30 @@ void AudioService::start()
 
     std::thread recordThread(&AudioService::recordOnPress, this);
     recordThread.detach();
+
+    return true;
 }
 
 void AudioService::playSound(bool bConnectSound)
 {
     if (bConnectSound)
     {
-        PlaySoundW(L"sounds/connect.wav", NULL, SND_FILENAME | SND_ASYNC);
+        PlaySoundW(L"sounds/connect.wav", nullptr, SND_FILENAME | SND_ASYNC);
     }
     else
     {
-        PlaySoundW(L"sounds/disconnect.wav", NULL, SND_FILENAME | SND_ASYNC);
+        PlaySoundW(L"sounds/disconnect.wav", nullptr, SND_FILENAME | SND_ASYNC);
     }
 }
 
 void AudioService::playNewMessageSound()
 {
-    PlaySoundW(L"sounds/newmessage.wav", NULL, SND_FILENAME | SND_ASYNC);
+    PlaySoundW(L"sounds/newmessage.wav", nullptr, SND_FILENAME | SND_ASYNC);
+}
+
+void AudioService::playLostConnectionSound()
+{
+    PlaySoundW(L"sounds/lostconnection.wav", nullptr, SND_FILENAME);
 }
 
 void AudioService::addNewUser(std::string userName)
@@ -163,7 +210,8 @@ void AudioService::addNewUser(std::string userName)
     usersAudio.back()->userName = userName;
     usersAudio.back()->bPacketsArePlaying   = false;
     usersAudio.back()->bDeletePacketsAtLast = false;
-    usersAudio.back()->bLastPacketCame  = false;
+    usersAudio.back()->bLastPacketCame      = false;
+    usersAudio.back()->fUserDefinedVolume   = 1.0f;
 
 
     // Audio buffer1
@@ -272,8 +320,8 @@ void AudioService::deleteAll()
 
         waveOutClose(usersAudio[i]->hWaveOut);
         delete usersAudio[i];
-        usersAudio.erase(usersAudio.begin() + i);
     }
+    usersAudio.clear();
 
     mtxUsersAudio.unlock();
 }
@@ -289,13 +337,12 @@ void AudioService::recordOnPress()
 
     while(bInputReady)
     {
-
         while ( GetAsyncKeyState(iPushToTalkButton) & 0x8000 )
         {
             // Button pressed
             if (bButtonPressed == false)
             {
-                PlaySoundW(L"sounds/press.wav", NULL, SND_FILENAME | SND_ASYNC);
+                PlaySoundW(L"sounds/press.wav", nullptr, SND_FILENAME | SND_ASYNC);
             }
             bButtonPressed = true;
 
@@ -342,7 +389,7 @@ void AudioService::recordOnPress()
                 std::memcpy(pAudioCopy4, pWaveIn4, static_cast<unsigned long long>(sampleCount * 2));
 
                 // Compress and send in other thread
-                std::thread compressThread4(&AudioService::compressAndSend, this, pAudioCopy4);
+                std::thread compressThread4(&AudioService::sendAudioData, this, pAudioCopy4);
                 compressThread4.detach();
 
                 ///////////////////////////////
@@ -364,7 +411,7 @@ void AudioService::recordOnPress()
             std::memcpy(pAudioCopy, pWaveIn1, static_cast<unsigned long long>(sampleCount * 2));
 
             // Compress and send in other thread
-            std::thread compressThread(&AudioService::compressAndSend, this, pAudioCopy);
+            std::thread compressThread(&AudioService::sendAudioData, this, pAudioCopy);
             compressThread.detach();
 
 
@@ -387,7 +434,7 @@ void AudioService::recordOnPress()
             std::memcpy(pAudioCopy2, pWaveIn2, static_cast<unsigned long long>(sampleCount * 2));
 
             // Compress and send in other thread
-            std::thread compressThread2(&AudioService::compressAndSend, this, pAudioCopy2);
+            std::thread compressThread2(&AudioService::sendAudioData, this, pAudioCopy2);
             compressThread2.detach();
 
 
@@ -409,7 +456,7 @@ void AudioService::recordOnPress()
             std::memcpy(pAudioCopy3, pWaveIn3, static_cast<unsigned long long>(sampleCount * 2));
 
             // Compress and send in other thread
-            std::thread compressThread3(&AudioService::compressAndSend, this, pAudioCopy3);
+            std::thread compressThread3(&AudioService::sendAudioData, this, pAudioCopy3);
             compressThread3.detach();
 
 
@@ -470,7 +517,7 @@ void AudioService::recordOnPress()
             std::memcpy(pAudioCopy4, pWaveIn4, static_cast<unsigned long long>(sampleCount * 2));
 
             // Compress and send in other thread
-            std::thread compressThread4(&AudioService::compressAndSend, this, pAudioCopy4);
+            std::thread compressThread4(&AudioService::sendAudioData, this, pAudioCopy4);
             compressThread4.detach();
 
 
@@ -486,7 +533,7 @@ void AudioService::recordOnPress()
             std::memcpy(pAudioCopy, pWaveIn1, static_cast<unsigned long long>(sampleCount * 2));
 
             // Compress and send in other thread
-            std::thread compressThread(&AudioService::compressAndSend, this, pAudioCopy);
+            std::thread compressThread(&AudioService::sendAudioData, this, pAudioCopy);
             compressThread.detach();
 
 
@@ -502,7 +549,7 @@ void AudioService::recordOnPress()
             std::memcpy(pAudioCopy2, pWaveIn2, static_cast<unsigned long long>(sampleCount * 2));
 
             // Compress and send in other thread
-            std::thread compressThread2(&AudioService::compressAndSend, this, pAudioCopy2);
+            std::thread compressThread2(&AudioService::sendAudioData, this, pAudioCopy2);
             compressThread2.detach();
 
 
@@ -511,7 +558,7 @@ void AudioService::recordOnPress()
 
             pNetworkService->sendVoiceMessage(nullptr, 1, true);
 
-            PlaySoundW(L"sounds/unpress.wav", NULL, SND_FILENAME | SND_ASYNC);
+            PlaySoundW(L"sounds/unpress.wav", nullptr, SND_FILENAME | SND_ASYNC);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(15));
@@ -572,25 +619,17 @@ bool AudioService::addOutBuffer(HWAVEOUT hWaveOut, LPWAVEHDR buffer)
 }
 
 
-void AudioService::compressAndSend(short *pAudio)
+void AudioService::sendAudioData(short *pAudio)
 {
-    // For now, we will refuse to compress audio data, because of the fact that due to compression distortion appears on a loud sound.
+    char* pAudioSamples = new char[static_cast<size_t>(sampleCount * 2)];
+    std::memcpy(pAudioSamples, pAudio, static_cast<size_t>(sampleCount * 2));
 
-//    char* pCompressedAudio = new char [static_cast<unsigned long long>(sampleCount)];
+    delete[] pAudio;
 
-//    // Compress
-//    for (int i = 0; i < sampleCount; i++)
-//    {
-//        pCompressedAudio[i] = MuLaw_Encode(pAudio[i]);
-//    }
-
-
-    pNetworkService->sendVoiceMessage(reinterpret_cast<char*>(pAudio), sampleCount * 2, false);
-
-    //delete[] pAudio;
+    pNetworkService->sendVoiceMessage(pAudioSamples, sampleCount * 2, false);
 }
 
-void AudioService::uncompressAndPlay(char *pAudio, std::string userName, bool bLast)
+void AudioService::playAudioData(short int *pAudio, std::string userName, bool bLast)
 {
     if (bLast)
     {
@@ -634,13 +673,26 @@ void AudioService::uncompressAndPlay(char *pAudio, std::string userName, bool bL
         {
             if (usersAudio[i]->userName == userName)
             {
-//                short* pUncompressedAudio = new short[static_cast<unsigned long long>(sampleCount)];
-//                for (int j = 0; j < sampleCount; j++)
-//                {
-//                    pUncompressedAudio[j] = MuLaw_Decode(pAudio[j]);
-//                }
+                if (usersAudio[i]->fUserDefinedVolume != 1.0f)
+                {
+                    // Set user volume
+                    for (int t = 0; t < sampleCount; t++)
+                    {
+                        int iNewValue = static_cast<int>(pAudio[t] * usersAudio[i]->fUserDefinedVolume);
+                        if (iNewValue > SHRT_MAX)
+                        {
+                            pAudio[t] = SHRT_MAX;
+                        }
+                        else
+                        {
+                            pAudio[t] = static_cast<short>(iNewValue);
+                        }
+                    }
+                }
 
-                usersAudio[i]->audioPackets.push_back(reinterpret_cast<short*>(pAudio));
+                usersAudio[i]->audioPackets.push_back(pAudio);
+
+
 
                 if ( (usersAudio[i]->audioPackets.size() > 5) && (usersAudio[i]->bPacketsArePlaying == false) )
                 {
@@ -659,8 +711,6 @@ void AudioService::uncompressAndPlay(char *pAudio, std::string userName, bool bL
         }
 
         mtxUsersAudio.unlock();
-
-        //delete[] pAudio;
     }
 }
 
@@ -1025,47 +1075,6 @@ void AudioService::waitForAllBuffers(UserAudioStruct* user)
     };
 }
 
-char AudioService::MuLaw_Encode(short number)
-{
-    const short MULAW_MAX = 0x1FFF;
-    const short MULAW_BIAS = 33;
-    short mask = 0x1000;
-    char sign = 0;
-    char position = 12;
-    char lsb = 0;
-    if (number < 0)
-    {
-        number = -number;
-        sign = 0x80;
-    }
-    number += MULAW_BIAS;
-    if (number > MULAW_MAX)
-    {
-        number = MULAW_MAX;
-    }
-    for (; ((number & mask) != mask && position >= 5); mask >>= 1, position--)
-        ;
-    lsb = (number >> (position - 4)) & 0x0f;
-    return (~(sign | ((position - 5) << 4) | lsb));
-}
-
-short AudioService::MuLaw_Decode(char number)
-{
-    const short MULAW_BIAS = 33;
-    char sign = 0, position = 0;
-    short decoded = 0;
-    number = ~number;
-    if (number & 0x80)
-    {
-        number &= ~(1 << 7);
-        sign = -1;
-    }
-    position = ((number & 0xF0) >> 4) + 5;
-    decoded = ((1 << position) | ((number & 0x0F) << (position - 4))
-        | (1 << (position - 5))) - MULAW_BIAS;
-    return (sign == 0) ? (decoded) : (-(decoded));
-}
-
 void AudioService::stop()
 {
     if (bInputReady)
@@ -1099,6 +1108,8 @@ void AudioService::stop()
         delete[] pWaveIn4;
         pWaveIn4 = nullptr;
     }
+
+    deleteAll();
 }
 
 

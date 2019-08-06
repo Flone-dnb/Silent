@@ -28,8 +28,9 @@ class QAction;
 
 
 
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -78,25 +79,24 @@ protected:
 
 private slots:
 
+    // Context menu in list
+    void slotChangeUserVolume();
+
+    void slotSetNewUserVolume(QString userName, float fVolume);
+
     void slotShowMessage(char type, std::string message);
-
     void slotSetPingToUser(std::string userName, int ping);
-
     void typeSomeOnScreen(QString text);
-
     void slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
 
     void on_actionAbout_triggered();
-
     void on_actionConnect_triggered();
-
     void on_actionDisconnect_triggered();
+    void on_actionSettings_triggered();
 
     void on_pushButton_clicked();
-
     void on_plainTextEdit_2_textChanged();
-
-    void on_actionSettings_triggered();
+    void on_listWidget_2_customContextMenuRequested(const QPoint &pos);
 
 private:
 
@@ -109,6 +109,10 @@ private:
     Ui::MainWindow* ui;
     connectWindow*  pConnectWindow;
     Controller*     pController;
+
+    // Context menu in list
+    QMenu*   pMenuContextMenu;
+    QAction* pActionChangeVolume;
 
     QTimer* pTimer;
 };

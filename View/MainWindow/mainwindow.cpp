@@ -5,10 +5,13 @@
 #include "View/ConnectWindow/connectwindow.h"
 #include "Controller/controller.h"
 #include "View/SettingsWindow/settingswindow.h"
+#include "View/SingleUserSettings/singleusersettings.h"
 
 // Qt
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QMenu>
+#include <QAction>
 #include <QTimer>
 
 // C++
@@ -24,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     pController    = new Controller(this);
     pConnectWindow = nullptr;
 
+    ui->listWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
+
     qRegisterMetaType<std::string>("std::string");
 
     // Connect window
@@ -37,6 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
     connect(this, &MainWindow::signalShowMessage,                  this, &MainWindow::slotShowMessage);
     connect(this, &MainWindow::signalSetPingToUser,                this, &MainWindow::slotSetPingToUser);
+
+    // Context menu in list
+    pMenuContextMenu = new QMenu(this);
+    pMenuContextMenu->setStyleSheet("QMenu::item\n{\n	background-color: qlineargradient(spread:pad, x1:0.480769, y1:1, x2:0.476, y2:0, stop:0 rgba(17, 17, 17, 255), stop:1 rgba(19, 19, 19, 255));\n    color: rgb(200, 200, 200);\n}\nQMenu::item:selected\n{\n	background-color: rgb(50, 50, 50);\n	color: white;\n}");
+    pActionChangeVolume = new QAction("Change Volume");
+    pMenuContextMenu->addAction(pActionChangeVolume);
+    connect(pActionChangeVolume, &QAction::triggered, this, &MainWindow::slotChangeUserVolume);
 
 
     // We use a timer because here (in the constructor) the main (from the main.cpp) event handler is not launched so it won't
@@ -87,9 +99,15 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
             }
             else
             {
-                userNameInList += (" [" + QString::number(ping) + " ms]");
+                if (ping == 0)
+                {
+                    userNameInList += (" [-- ms]");
+                }
+                else userNameInList += (" [" + QString::number(ping) + " ms]");
             }
+
             ui->listWidget_2->item(i)->setText( userNameInList );
+
             break;
         }
     }
@@ -418,6 +436,66 @@ void MainWindow::on_actionSettings_triggered()
     pSettingsWindow->show();
 }
 
+void MainWindow::on_listWidget_2_customContextMenuRequested(const QPoint &pos)
+{
+    QListWidgetItem* pItem = ui->listWidget_2->itemAt(pos);
+    if (pItem)
+    {
+        QString nameWithPing = pItem->text();
+        QString nameWithoutPing = "";
+
+        for (int i = 0; i < nameWithPing.size(); i++)
+        {
+            if (nameWithPing[i] == ' ')
+            {
+                break;
+            }
+            else
+            {
+                nameWithoutPing += nameWithPing[i];
+            }
+        }
+
+        if ( nameWithoutPing.toStdString() != pController->getUserName() )
+        {
+            QPoint globalPos = ui->listWidget_2->mapToGlobal(pos);
+
+            pMenuContextMenu->exec(globalPos);
+        }
+    }
+}
+
+void MainWindow::slotChangeUserVolume()
+{
+    if (ui->listWidget_2->currentRow() >= 0)
+    {
+        QString nameWithPing = ui->listWidget_2->item( ui->listWidget_2->currentRow() )->text();
+        QString nameWithoutPing = "";
+
+        for (int i = 0; i < nameWithPing.size(); i++)
+        {
+            if (nameWithPing[i] == ' ')
+            {
+                break;
+            }
+            else
+            {
+                nameWithoutPing += nameWithPing[i];
+            }
+        }
+
+        SingleUserSettings* pUserSettings = new SingleUserSettings(nameWithoutPing, pController->getUserCurrentVolume(nameWithoutPing.toStdString()), this);
+        connect(pUserSettings, &SingleUserSettings::signalChangeUserVolume, this, &MainWindow::slotSetNewUserVolume);
+        pUserSettings->setWindowModality(Qt::WindowModality::WindowModal);
+        pUserSettings->show();
+    }
+}
+
+void MainWindow::slotSetNewUserVolume(QString userName, float fVolume)
+{
+    pController->setNewUserVolume(userName.toStdString(), fVolume);
+}
+
 
 
 
@@ -432,6 +510,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 MainWindow::~MainWindow()
 {
+    delete pActionChangeVolume;
+    delete pMenuContextMenu;
+
     delete pTimer;
     delete pController;
     delete pConnectWindow;

@@ -1,7 +1,9 @@
 #pragma once
 
 // C++
-#include <string>s
+#include <string>
+#include <vector>
+#include <ctime>
 
 // ============== Network ==============
 // Sockets and stuff
@@ -18,12 +20,14 @@ class MainWindow;
 class AudioService;
 
 
+
 class NetworkService
 {
 public:
 
     NetworkService(MainWindow* pMainWindow, AudioService* pAudioService);
 
+    // get
     std::string getClientVersion();
     std::string getUserName();
 
@@ -43,10 +47,14 @@ public:
     void sendVoiceMessage(char* pVoiceMessage, int iMessageSize, bool bLast);
 
     void disconnect();
+    void lostConnection();
     void answerToFIN();
     void stop();
 
 private:
+
+    void serverMonitor();
+
 
     MainWindow* pMainWindow;
     AudioService* pAudioService;
@@ -61,6 +69,7 @@ private:
     bool bTextListen;
     bool bVoiceListen;
 
+    clock_t lastTimeServerKeepAliveCame;
 
     std::string clientVersion;
 };
