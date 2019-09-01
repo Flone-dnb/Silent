@@ -10,7 +10,7 @@
 
 NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioService)
 {
-    clientVersion = "2.15";
+    clientVersion = "2.16";
 
     this->pMainWindow   = pMainWindow;
     this->pAudioService = pAudioService;

@@ -27,15 +27,11 @@ struct UserAudioStruct
 
     // Waveform-audio output device
     HWAVEOUT hWaveOut;
-    HWAVEOUT hWaveOut2;
 
     // Audio buffers
     WAVEHDR WaveOutHdr1;
     WAVEHDR WaveOutHdr2;
     WAVEHDR WaveOutHdr3;
-    WAVEHDR WaveOutHdr12;
-    WAVEHDR WaveOutHdr22;
-    WAVEHDR WaveOutHdr32;
 };
 
 
@@ -119,6 +115,7 @@ private:
     int iPushToTalkButton;
 
     unsigned short int iVolume;
+    float fMasterVolumeMult;
 
 
     std::vector<UserAudioStruct*> usersAudio;
