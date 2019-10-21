@@ -1,8 +1,8 @@
-#include "audioservice.h"
+﻿#include "audioservice.h"
 
 // Custom
-#include "View/MainWindow/mainwindow.h"
-#include "Model/NetworkService/networkservice.h"
+#include "../src/View/MainWindow/mainwindow.h"
+#include "../src/Model/NetworkService/networkservice.h"
 
 #include <thread>
 
@@ -187,22 +187,22 @@ void AudioService::playSound(bool bConnectSound)
 {
     if (bConnectSound)
     {
-        PlaySoundW(L"sounds/connect.wav", nullptr, SND_FILENAME | SND_ASYNC);
+        PlaySoundW(L"../res/sounds/connect.wav", nullptr, SND_FILENAME | SND_ASYNC);
     }
     else
     {
-        PlaySoundW(L"sounds/disconnect.wav", nullptr, SND_FILENAME | SND_ASYNC);
+        PlaySoundW(L"../res/sounds/disconnect.wav", nullptr, SND_FILENAME | SND_ASYNC);
     }
 }
 
 void AudioService::playNewMessageSound()
 {
-    PlaySoundW(L"sounds/newmessage.wav", nullptr, SND_FILENAME | SND_ASYNC);
+    PlaySoundW(L"../res/sounds/newmessage.wav", nullptr, SND_FILENAME | SND_ASYNC);
 }
 
 void AudioService::playLostConnectionSound()
 {
-    PlaySoundW(L"sounds/lostconnection.wav", nullptr, SND_FILENAME);
+    PlaySoundW(L"../res/sounds/lostconnection.wav", nullptr, SND_FILENAME);
 }
 
 void AudioService::addNewUser(std::string userName)
@@ -313,7 +313,7 @@ void AudioService::recordOnPress()
             // Button pressed
             if (bButtonPressed == false)
             {
-                PlaySoundW(L"sounds/press.wav", nullptr, SND_FILENAME | SND_ASYNC);
+                PlaySoundW(L"../res/sounds/press.wav", nullptr, SND_FILENAME | SND_ASYNC);
             }
             bButtonPressed = true;
 
@@ -529,7 +529,7 @@ void AudioService::recordOnPress()
 
             pNetworkService->sendVoiceMessage(nullptr, 1, true);
 
-            PlaySoundW(L"sounds/unpress.wav", nullptr, SND_FILENAME | SND_ASYNC);
+            PlaySoundW(L"../res/sounds/unpress.wav", nullptr, SND_FILENAME | SND_ASYNC);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(15));

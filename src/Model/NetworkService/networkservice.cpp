@@ -1,16 +1,16 @@
-#include "networkservice.h"
+﻿#include "networkservice.h"
 
 // Custom
-#include "View/MainWindow/mainwindow.h"
-#include "Model/AudioService/audioservice.h"
-#include "globalparams.h"
+#include "../src/View/MainWindow/mainwindow.h"
+#include "../src/Model/AudioService/audioservice.h"
+#include "../src/globalparams.h"
 
 // C++
 #include <thread>
 
 NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioService)
 {
-    clientVersion = "2.16";
+    clientVersion = "2.16.1";
 
     this->pMainWindow   = pMainWindow;
     this->pAudioService = pAudioService;

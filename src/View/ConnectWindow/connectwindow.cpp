@@ -1,7 +1,7 @@
-#include "connectwindow.h"
+﻿#include "connectwindow.h"
 #include "ui_connectwindow.h"
 
-#include "globalparams.h"
+#include "../src/globalparams.h"
 
 #include <QMessageBox>
 #include <QMouseEvent>

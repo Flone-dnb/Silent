@@ -1,11 +1,11 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 // Custom
-#include "View/ConnectWindow/connectwindow.h"
-#include "Controller/controller.h"
-#include "View/SettingsWindow/settingswindow.h"
-#include "View/SingleUserSettings/singleusersettings.h"
+#include "../src/View/ConnectWindow/connectwindow.h"
+#include "../src/Controller/controller.h"
+#include "../src/View/SettingsWindow/settingswindow.h"
+#include "../src/View/SingleUserSettings/singleusersettings.h"
 
 // Qt
 #include <QMessageBox>
@@ -320,7 +320,8 @@ void MainWindow::saveUserName(std::string userName)
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(nullptr,"FChat","FChat Client. Version: " + QString::fromStdString(pController->getClientVersion()) + ".");
+    QMessageBox::about(this, "FChat", "FChat Client. Version: " + QString::fromStdString(pController->getClientVersion()) + "."
+                                       "\nCopyright (c) 2019 Aleksandr \"Flone\" Tretyakov (github.com/Flone-dnb).");
 }
 
 void MainWindow::on_actionConnect_triggered()

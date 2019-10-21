@@ -1,12 +1,12 @@
-#include "controller.h"
+﻿#include "controller.h"
 
 // Custom
-#include "Model/AudioService/audioservice.h"
-#include "Model/NetworkService/networkservice.h"
+#include "../src/Model/AudioService/audioservice.h"
+#include "../src/Model/NetworkService/networkservice.h"
 
 Controller::Controller(MainWindow* pMainWindow)
 {
-    pAudioService  = new AudioService(pMainWindow);
+    pAudioService   = new AudioService(pMainWindow);
     pNetworkService = new NetworkService(pMainWindow, pAudioService);
     pAudioService->setNetworkService(pNetworkService);
 }
