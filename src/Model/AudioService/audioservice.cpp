@@ -20,12 +20,12 @@ AudioService::AudioService(MainWindow* pMainWindow)
     // T button
     iPushToTalkButton = 0x54;
 
-    // 52428 ~ 80%
+    // Master volume: 52428 ~ 80%
     iVolume = 52428;
 
-    // All audio will be x1.75 volume
+    // All audio will be x1.5 volume
     // Because waveOutVolume does not make it loud enough
-    fMasterVolumeMult = 1.75f;
+    fMasterVolumeMult = 1.5f;
 }
 
 
