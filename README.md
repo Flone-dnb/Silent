@@ -1,5 +1,5 @@
 # FChat Client
-FChat is a simple and very lightweight text/voice chat client application. Must be used with FChat Server application. 
+FChat Client is a simple and very lightweight text/voice chat client application. Must be used with FChat Server application. 
 <p align="center">
   <img width="400" height="450" src="screenshot.png">
 </p>
