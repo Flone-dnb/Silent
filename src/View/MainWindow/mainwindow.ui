@@ -228,11 +228,18 @@ QPushButton:hover
    <property name="styleSheet">
     <string notr="true">QMenuBar
 {
-	color: rgb(255, 255, 255);
+	background-color: rgb(11, 11, 11);
+	color: white;
 }
+
+QMenuBar::item
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(1, 1, 1, 255), stop:0.605809 rgba(5, 5, 5, 255), stop:1 rgba(21, 21, 21, 255));
+}
+
 QMenuBar::item::selected
 {
-	background-color: rgb(50, 50, 50);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(156, 11, 11, 255), stop:1 rgba(168, 0, 0, 255));
 }</string>
    </property>
    <widget class="QMenu" name="menuChat">
@@ -242,15 +249,20 @@ QMenuBar::item::selected
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">QMenu::item
+     <string notr="true">QMenu
 {
-	background-color: qlineargradient(spread:pad, x1:0.480769, y1:1, x2:0.476, y2:0, stop:0 rgba(17, 17, 17, 255), stop:1 rgba(19, 19, 19, 255));
-    color: rgb(200, 200, 200);
-}
-QMenu::item:selected
-{
-	background-color: rgb(50, 50, 50);
+	background-color: rgb(11, 11, 11);
 	color: white;
+}
+
+QMenu::item
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(1, 1, 1, 255), stop:0.605809 rgba(5, 5, 5, 255), stop:1 rgba(21, 21, 21, 255));
+}
+
+QMenu::item::selected
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(156, 11, 11, 255), stop:1 rgba(168, 0, 0, 255));
 }</string>
     </property>
     <property name="title">
@@ -269,20 +281,40 @@ QMenu::item:selected
    <property name="text">
     <string>About</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionConnect">
    <property name="text">
     <string>Connect</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionDisconnect">
    <property name="text">
     <string>Disconnect</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
  </widget>

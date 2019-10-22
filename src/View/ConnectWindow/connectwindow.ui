@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>326</width>
-    <height>364</height>
+    <height>388</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: qlineargradient(spread:pad, x1:0.480769, y1:1, x2:0.476, y2:0, stop:0 rgba(17, 17, 17, 255), stop:1 rgba(19, 19, 19, 255));
-color: rgb(216, 216, 216);</string>
+color: white;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -32,7 +32,7 @@ color: rgb(216, 216, 216);</string>
      <number>5</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="5,15,5,15,5,15,40">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="10,20,10,20,10,20,10">
       <item>
        <widget class="QLabel" name="label_3">
         <property name="font">
@@ -166,6 +166,12 @@ border: 1px solid red;</string>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -178,9 +184,17 @@ border: 1px solid red;</string>
 	border: 1px solid red;
 	color: rgb(255, 255, 255);
 }
+
+QPushButton:disabled
+{
+	border: 1px solid darkred;
+	color: rgb(50, 50, 50);
+}
+
 QPushButton:hover
 {
 	background-color: rgb(30,30,30);
+	border: 1px solid white;
 }</string>
         </property>
         <property name="text">

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QMainWindow>
 
@@ -33,13 +33,15 @@ protected:
 private slots:
 
     void on_pushButton_clicked();
-
     void on_pushButton_2_clicked();
+    void on_horizontalSlider_valueChanged(int value);
 
 private:
 
     void showKeyOnScreen(int key);
     void setKeyInSettingsFile(int key);
+
+    void refreshSliderText();
 
 
 

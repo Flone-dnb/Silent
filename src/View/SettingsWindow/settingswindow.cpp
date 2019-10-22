@@ -1,4 +1,4 @@
-#include "settingswindow.h"
+﻿#include "settingswindow.h"
 #include "ui_settingswindow.h"
 
 // Qt
@@ -66,6 +66,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
             ui->pushButton->setText("T");
         }
     }
+
+    refreshSliderText();
 }
 
 
@@ -225,7 +227,21 @@ void SettingsWindow::setKeyInSettingsFile(int key)
     }
 }
 
+void SettingsWindow::refreshSliderText()
+{
+    // 0%    -  ui ->horizontalSlider ->minimum()
+    // 100%  -  ui ->horizontalSlider ->maximum()
 
+    int iInterval = ui ->horizontalSlider ->maximum()  -  ui ->horizontalSlider ->minimum();
+    int iCurrent  = ui ->horizontalSlider ->value();
+
+    ui ->label_4 ->setText (QString::number( (iCurrent / static_cast<double>(iInterval) * 100), 'f', 0 ) + "%");
+}
+
+void SettingsWindow::on_horizontalSlider_valueChanged(int value)
+{
+    refreshSliderText();
+}
 
 
 
@@ -239,3 +255,4 @@ void SettingsWindow::on_pushButton_2_clicked()
     setKeyInSettingsFile(iPushToTalkKey);
     close();
 }
+

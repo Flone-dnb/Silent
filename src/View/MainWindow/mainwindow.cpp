@@ -32,7 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType<std::string>("std::string");
 
     // Connect window
-    pConnectWindow = new connectWindow(nullptr);
+    pConnectWindow = new connectWindow(this);
+    pConnectWindow ->setWindowModality(Qt::WindowModality::WindowModal);
     connect(pConnectWindow, &connectWindow::connectTo,      this, &MainWindow::connectTo);
     connect(pConnectWindow, &connectWindow::showMainWindow, this, &MainWindow::show);
 
@@ -68,11 +69,11 @@ void MainWindow::slotShowMessage(char type, std::string message)
 {
     if (type == 0)
     {
-        QMessageBox::warning(nullptr, "Warning", QString::fromStdString(message));
+        QMessageBox::warning(this, "Warning", QString::fromStdString(message));
     }
     else if (type == 1)
     {
-        QMessageBox::information(nullptr, "Information", QString::fromStdString(message));
+        QMessageBox::information(this, "Information", QString::fromStdString(message));
     }
 }
 
@@ -149,7 +150,6 @@ void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
 
 void MainWindow::connectTo(std::string adress, std::string port, std::string userName)
 {
-    show();
     ui->plainTextEdit->clear();
     pController->connectTo(adress,port,userName);
 }
@@ -158,11 +158,6 @@ void MainWindow::printOutput(std::string text, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
-        // This function (printOutput) was called from another thread (not main thread)
-        // so if we will append text to 'plaintTextEdit' crash can occur because you
-        // cannot change GDI from another thread (it's something with how Windows and GDI works with threads)
-        // Because of that we will emit signal to main thread to append text.
-        // Right? I dunno "it just works". :p
         emit signalTypeOnScreen(QString::fromStdString(text));
     }
     else
@@ -179,11 +174,6 @@ void MainWindow::printOutputW(std::wstring text, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
-        // This function (printOutput) was called from another thread (not main thread)
-        // so if we will append text to 'plaintTextEdit' crash can occur because you
-        // cannot change GDI from another thread (it's something with how Windows and GDI works with threads)
-        // Because of that we will emit signal to main thread to append text.
-        // Right? I dunno "it just works". :p
         emit signalTypeOnScreen(QString::fromStdWString(text));
     }
     else
@@ -276,7 +266,7 @@ void MainWindow::saveUserName(std::string userName)
 
     if (result != S_OK)
     {
-        QMessageBox::warning(nullptr, "Warning", "Error. Settings will not be saved.");
+        QMessageBox::warning(this, "Warning", "Error. Settings will not be saved.");
     }
     else
     {
@@ -333,12 +323,11 @@ void MainWindow::saveUserName(std::string userName)
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "FChat", "FChat Client. Version: " + QString::fromStdString(pController->getClientVersion()) + "."
-                                       "\nCopyright (c) 2019 Aleksandr \"Flone\" Tretyakov (github.com/Flone-dnb).");
+                                       "\n\nCopyright (c) 2019 Aleksandr \"Flone\" Tretyakov (github.com/Flone-dnb).");
 }
 
 void MainWindow::on_actionConnect_triggered()
 {
-    hide();
     pConnectWindow->show();
 }
 
@@ -381,7 +370,7 @@ void MainWindow::checkIfSettingsExist()
 
     if (result != S_OK)
     {
-        QMessageBox::warning(nullptr, "Warning", "Error. Settings will not be saved.");
+        QMessageBox::warning(this, "Warning", "Error. Settings will not be saved.");
     }
     else
     {

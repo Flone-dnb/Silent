@@ -15,10 +15,10 @@
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: qlineargradient(spread:pad, x1:0.480769, y1:1, x2:0.476, y2:0, stop:0 rgba(17, 17, 17, 255), stop:1 rgba(19, 19, 19, 255));
-color: rgb(202, 202, 202);</string>
+color: white;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="20,30,20,30">
     <item>
      <widget class="QLabel" name="label">
       <property name="font">
@@ -39,6 +39,39 @@ color: rgb(202, 202, 202);</string>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="80,20">
       <item>
        <widget class="QSlider" name="horizontalSlider">
+        <property name="styleSheet">
+         <string notr="true">QSlider::handle
+{
+	background-color: black;
+	border: 1px solid rgb(179, 0, 0);
+}
+
+QSlider::add-page 
+{
+    background: gray;
+}
+
+QSlider::sub-page
+ {
+    background: rgb(179, 0, 0);
+}
+
+QSlider::handle:disabled
+{
+	background-color: rgb(59, 59, 59);
+	border: 1px solid gray;
+}
+
+QSlider::add-page:disabled 
+{
+    background: gray;
+}
+
+QSlider::sub-page:disabled
+{
+    background: gray;
+}</string>
+        </property>
         <property name="maximum">
          <number>150</number>
         </property>
@@ -109,11 +142,36 @@ color: rgb(202, 202, 202);</string>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
           <pointsize>10</pointsize>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton
+{
+	border: 1px solid red;
+	color: rgb(255, 255, 255);
+}
+
+QPushButton:disabled
+{
+	border: 1px solid darkred;
+	color: rgb(50, 50, 50);
+}
+
+QPushButton:hover
+{
+	background-color: rgb(30,30,30);
+	border: 1px solid white;
+}</string>
         </property>
         <property name="text">
          <string>Apply</string>
