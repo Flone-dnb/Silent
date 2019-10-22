@@ -14,7 +14,7 @@
 #include <QAction>
 #include <QTimer>
 
-// C++
+// STL
 #include <fstream>
 #include <thread>
 #include <shlobj.h>
@@ -115,7 +115,11 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
 
 void MainWindow::typeSomeOnScreen(QString text)
 {
-    ui->plainTextEdit->appendPlainText(text);
+    mtxPrintOutput .lock   ();
+
+    ui ->plainTextEdit ->appendPlainText (text);
+
+    mtxPrintOutput .unlock ();
 }
 
 void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
@@ -163,7 +167,11 @@ void MainWindow::printOutput(std::string text, bool bEmitSignal)
     }
     else
     {
-        ui->plainTextEdit->appendPlainText(QString::fromStdString(text));
+        mtxPrintOutput .lock   ();
+
+        ui ->plainTextEdit ->appendPlainText ( QString::fromStdString(text) );
+
+        mtxPrintOutput .unlock ();
     }
 }
 
@@ -180,7 +188,11 @@ void MainWindow::printOutputW(std::wstring text, bool bEmitSignal)
     }
     else
     {
-        ui->plainTextEdit->appendPlainText(QString::fromStdWString(text));
+        mtxPrintOutput .lock   ();
+
+        ui ->plainTextEdit ->appendPlainText ( QString::fromStdWString(text) );
+
+        mtxPrintOutput .unlock ();
     }
 }
 

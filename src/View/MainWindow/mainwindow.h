@@ -1,11 +1,12 @@
-#pragma once
+﻿#pragma once
 
 // Qt
 #include <QMainWindow>
 #include <QTimer>
 
-// C++
+// STL
 #include <string>
+#include <mutex>
 
 // ============== Network ==============
 // Sockets and stuff
@@ -61,11 +62,8 @@ public:
 signals:
 
     void signalTypeOnScreen(QString text);
-
     void signalShowMessage(char type, std::string message);
-
     void signalSetPingToUser(std::string userName, int ping);
-
     void signalEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
 
 public slots:
@@ -106,13 +104,21 @@ private:
 
 
 
+    // ------------------------------------------
+
+
     Ui::MainWindow* ui;
     connectWindow*  pConnectWindow;
     Controller*     pController;
 
-    // Context menu in list
-    QMenu*   pMenuContextMenu;
-    QAction* pActionChangeVolume;
 
-    QTimer* pTimer;
+    // Context menu in list
+    QMenu*          pMenuContextMenu;
+    QAction*        pActionChangeVolume;
+
+
+    QTimer*         pTimer;
+
+
+    std::mutex      mtxPrintOutput;
 };
