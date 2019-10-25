@@ -21,11 +21,12 @@
 
 
 class connectWindow;
-class QMouseEvent;
 class Controller;
+class QMouseEvent;
 class QTimer;
 class QMenu;
 class QAction;
+class QSystemTrayIcon;
 
 
 
@@ -72,6 +73,7 @@ public slots:
 
 protected:
 
+    void hideEvent(QHideEvent* event);
     void closeEvent(QCloseEvent *event);
 
 
@@ -86,8 +88,9 @@ private slots:
     void slotSetPingToUser(std::string userName, int ping);
     void typeSomeOnScreen(QString text);
     void slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
+    void slotTrayIconActivated();
 
-    void on_actionAbout_triggered();
+    void on_actionAbout_2_triggered();
     void on_actionConnect_triggered();
     void on_actionDisconnect_triggered();
     void on_actionSettings_triggered();
@@ -99,7 +102,6 @@ private slots:
 private:
 
     void checkIfSettingsExist();
-
     void closeApp();
 
 
@@ -107,18 +109,21 @@ private:
     // ------------------------------------------
 
 
-    Ui::MainWindow* ui;
-    connectWindow*  pConnectWindow;
-    Controller*     pController;
+    Ui::MainWindow*  ui;
+    connectWindow*   pConnectWindow;
+    Controller*      pController;
 
 
     // Context menu in list
-    QMenu*          pMenuContextMenu;
-    QAction*        pActionChangeVolume;
+    QMenu*           pMenuContextMenu;
+    QAction*         pActionChangeVolume;
 
 
-    QTimer*         pTimer;
+    QTimer*          pTimer;
 
 
-    std::mutex      mtxPrintOutput;
+    QSystemTrayIcon* pTrayIcon;
+
+
+    std::mutex       mtxPrintOutput;
 };

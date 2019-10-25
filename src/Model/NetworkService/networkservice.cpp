@@ -204,8 +204,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     shutdown(userTCPSocket,SD_SEND);
                 }
 
-                pMainWindow->printOutput(std::string("\nYour FChat version (" + clientVersion + ") does not match with the server version (" + std::string(versionBuffer) + ").\n"
-                                                                          "Please update your FChat Client to version " + std::string(versionBuffer) + "."), true);
+                pMainWindow->printOutput(std::string("\nYour Silent version (" + clientVersion + ") does not match with the server version (" + std::string(versionBuffer) + ").\n"
+                                                                          "Please update your Silent to version " + std::string(versionBuffer) + "."), true);
                 pMainWindow->enableInteractiveElements(true, false);
                 closesocket(userTCPSocket);
                 WSACleanup();

@@ -10,20 +10,31 @@
 // Qt
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QCloseEvent>
+#include <QHideEvent>
 #include <QMenu>
 #include <QAction>
 #include <QTimer>
+#include <QSystemTrayIcon>
 
 // STL
 #include <fstream>
 #include <thread>
 #include <shlobj.h>
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    // Tray icon
+    pTrayIcon      = new QSystemTrayIcon(this);
+    QIcon icon     = QIcon(":/appMainIcon.png");
+    pTrayIcon->setIcon(icon);
+    connect(pTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::slotTrayIconActivated);
+
     pController    = new Controller(this);
     pConnectWindow = nullptr;
 
@@ -146,6 +157,14 @@ void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
         ui->pushButton->setEnabled(false);
         ui->plainTextEdit_2->setEnabled(false);
     }
+}
+
+void MainWindow::slotTrayIconActivated()
+{
+    pTrayIcon->hide();
+    raise();
+    activateWindow();
+    showNormal();
 }
 
 void MainWindow::connectTo(std::string adress, std::string port, std::string userName)
@@ -272,8 +291,8 @@ void MainWindow::saveUserName(std::string userName)
     {
         std::wstring adressToSettings = std::wstring(my_documents);
         std::wstring adressToTempSettings = std::wstring(my_documents);
-        adressToSettings += L"\\FChatSettings.data";
-        adressToTempSettings += L"\\FChatSettings~.data";
+        adressToSettings += L"\\SilentSettings.data";
+        adressToTempSettings += L"\\SilentSettings~.data";
 
         // Check if settings file exists
         std::ifstream settingsFile(adressToSettings, std::ios::binary);
@@ -318,12 +337,6 @@ void MainWindow::saveUserName(std::string userName)
             newSettingFile.close();
         }
     }
-}
-
-void MainWindow::on_actionAbout_triggered()
-{
-    QMessageBox::about(this, "FChat", "FChat Client. Version: " + QString::fromStdString(pController->getClientVersion()) + "."
-                                       "\n\nCopyright (c) 2019 Aleksandr \"Flone\" Tretyakov (github.com/Flone-dnb).");
 }
 
 void MainWindow::on_actionConnect_triggered()
@@ -375,7 +388,7 @@ void MainWindow::checkIfSettingsExist()
     else
     {
         std::wstring adressToSettings = std::wstring(my_documents);
-        adressToSettings += L"\\FChatSettings.data";
+        adressToSettings += L"\\SilentSettings.data";
 
         // Check if settings file exists
         std::ifstream settingsFile(adressToSettings, std::ios::binary);
@@ -427,6 +440,12 @@ void MainWindow::checkIfSettingsExist()
 void MainWindow::slotSetPushToTalkButton(int iKey, unsigned short int iVolume)
 {
     pController->setPushToTalkButtonAndVolume(iKey, iVolume);
+}
+
+void MainWindow::hideEvent(QHideEvent *event)
+{
+    hide();
+    pTrayIcon->show();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -498,7 +517,11 @@ void MainWindow::slotSetNewUserVolume(QString userName, float fVolume)
     pController->setNewUserVolume(userName.toStdString(), fVolume);
 }
 
-
+void MainWindow::on_actionAbout_2_triggered()
+{
+    QMessageBox::about(this, "Silent", "Silent. Version: " + QString::fromStdString(pController->getClientVersion()) + "."
+                                       "\n\nCopyright (c) 2019 Aleksandr \"Flone\" Tretyakov (github.com/Flone-dnb).");
+}
 
 
 

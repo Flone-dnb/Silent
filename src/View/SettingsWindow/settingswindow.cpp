@@ -29,7 +29,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     else
     {
         std::wstring adressToSettings = std::wstring(my_documents);
-        adressToSettings += L"\\FChatSettings.data";
+        adressToSettings += L"\\SilentSettings.data";
 
         std::ifstream settingsFile (adressToSettings, std::ios::binary);
 
@@ -170,8 +170,8 @@ void SettingsWindow::setKeyInSettingsFile(int key)
     {
         std::wstring adressToSettings = std::wstring(my_documents);
         std::wstring adressToTempSettings = std::wstring(my_documents);
-        adressToSettings += L"\\FChatSettings.data";
-        adressToTempSettings += L"\\FChatSettings~.data";
+        adressToSettings += L"\\SilentSettings.data";
+        adressToTempSettings += L"\\SilentSettings~.data";
 
         std::ifstream settingsFile (adressToSettings, std::ios::binary);
 
