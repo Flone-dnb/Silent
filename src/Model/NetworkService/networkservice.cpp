@@ -4,6 +4,7 @@
 #include "../src/View/MainWindow/mainwindow.h"
 #include "../src/Model/AudioService/audioservice.h"
 #include "../src/globalparams.h"
+#include "../src/Model/OutputTextType.h"
 
 // C++
 #include <thread>
@@ -53,7 +54,8 @@ void NetworkService::start(std::string adress, std::string port, std::string use
     returnCode = WSAStartup(MAKEWORD(2, 2), &WSAData);
     if (returnCode != 0)
     {
-        pMainWindow->printOutput(std::string("NetworkService::start()::WSAStartup() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\nTry again.\n"));
+        pMainWindow->printOutput(std::string("NetworkService::start()::WSAStartup() function failed and returned: " + std::to_string(WSAGetLastError())
+                                             + ".\nTry again.\n"), SilentMessageColor(false));
     }
     else
     {
@@ -63,7 +65,8 @@ void NetworkService::start(std::string adress, std::string port, std::string use
         userTCPSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (userTCPSocket == INVALID_SOCKET)
         {
-            pMainWindow->printOutput(std::string("NetworkService::start()::socket() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\nTry again.\n"));
+            pMainWindow->printOutput(std::string("NetworkService::start()::socket() function failed and returned: " + std::to_string(WSAGetLastError())
+                                                 + ".\nTry again.\n"), SilentMessageColor(false));
 
             WSACleanup();
             bWinSockLaunched = false;
@@ -97,7 +100,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
     inet_pton(AF_INET, adress.c_str(), &serverAddr.sin_addr);
 
 
-    pMainWindow->printOutput(std::string("Connecting... (time out after 20 sec.)"), true);
+    pMainWindow->printOutput(std::string("Connecting... (time out after 20 sec.)"), SilentMessageColor(false), true);
 
 
     returnCode = connect(userTCPSocket, reinterpret_cast<sockaddr*>(&sockaddrToConnect), sizeof(sockaddrToConnect));
@@ -106,17 +109,19 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
         returnCode = WSAGetLastError();
         if (returnCode == 10060)
         {
-            pMainWindow->printOutput(std::string("Time out.\nTry again.\n"),true);
+            pMainWindow->printOutput(std::string("Time out.\nTry again.\n"), SilentMessageColor(false), true);
             pMainWindow->enableInteractiveElements(true,false);
         }
         else if (returnCode == 10051)
         {
-            pMainWindow->printOutput(std::string("NetworkService::connectTo()::connect() function failed and returned: " + std::to_string(returnCode) + ".\nPossible cause: no internet.\nTry again.\n"),true);
+            pMainWindow->printOutput(std::string("NetworkService::connectTo()::connect() function failed and returned: " + std::to_string(returnCode)
+                                                 + ".\nPossible cause: no internet.\nTry again.\n"), SilentMessageColor(false), true);
             pMainWindow->enableInteractiveElements(true,false);
         }
         else
         {
-            pMainWindow->printOutput(std::string("NetworkService::connectTo()::connect() function failed and returned: " + std::to_string(returnCode) + ".\nTry again.\n"),true);
+            pMainWindow->printOutput(std::string("NetworkService::connectTo()::connect() function failed and returned: " + std::to_string(returnCode)
+                                                 + ".\nTry again.\n"), SilentMessageColor(false), true);
             pMainWindow->enableInteractiveElements(true,false);
         }
 
@@ -131,7 +136,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
         returnCode = setsockopt(userTCPSocket, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char*>(&bOptVal), bOptLen);
         if (returnCode == SOCKET_ERROR)
         {
-            pMainWindow->printOutput(std::string("NetworkService::connectTo()::setsockopt (Nagle algorithm) failed and returned: "+std::to_string(WSAGetLastError())+".\nTry again.\n"),true);
+            pMainWindow->printOutput(std::string("NetworkService::connectTo()::setsockopt (Nagle algorithm) failed and returned: "+std::to_string(WSAGetLastError())
+                                                 +".\nTry again.\n"), SilentMessageColor(false), true);
             closesocket(userTCPSocket);
             WSACleanup();
             bWinSockLaunched = false;
@@ -166,7 +172,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     shutdown(userTCPSocket,SD_SEND);
                 }
 
-                pMainWindow->printOutput(std::string("\nA user with this name is already present on the server. Select another name."), true);
+                pMainWindow->printOutput(std::string("\nA user with this name is already present on the server. Select another name."),
+                                         SilentMessageColor(false), true);
                 pMainWindow->enableInteractiveElements(true, false);
                 closesocket(userTCPSocket);
                 WSACleanup();
@@ -181,7 +188,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     shutdown(userTCPSocket,SD_SEND);
                 }
 
-                pMainWindow->printOutput(std::string("\nServer is full."), true);
+                pMainWindow->printOutput(std::string("\nServer is full."), SilentMessageColor(false), true);
                 pMainWindow->enableInteractiveElements(true, false);
                 closesocket(userTCPSocket);
                 WSACleanup();
@@ -205,7 +212,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 }
 
                 pMainWindow->printOutput(std::string("\nYour Silent version (" + clientVersion + ") does not match with the server version (" + std::string(versionBuffer) + ").\n"
-                                                                          "Please update your Silent to version " + std::string(versionBuffer) + "."), true);
+                                                                          "Please update your Silent to version " + std::string(versionBuffer) + "."),
+                                         SilentMessageColor(false), true);
                 pMainWindow->enableInteractiveElements(true, false);
                 closesocket(userTCPSocket);
                 WSACleanup();
@@ -221,7 +229,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
                 // Receive data
                 iReceivedSize = recv(userTCPSocket, readBuffer, iPacketSize, 0);
-                pMainWindow->printOutput(std::string("Received " + std::to_string(iReceivedSize + 3) + " bytes of data from the server.\n"), true);
+                pMainWindow->printOutput(std::string("Received " + std::to_string(iReceivedSize + 3) + " bytes of data from the server.\n"),
+                                         SilentMessageColor(false), true);
 
                 pAudioService->prepareForStart();
 
@@ -256,7 +265,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 u_long arg = true;
                 if (ioctlsocket(userTCPSocket, static_cast<long>(FIONBIO), &arg) == SOCKET_ERROR)
                 {
-                    pMainWindow->printOutput(std::string("NetworkService::connectTo()::ioctsocket() (non-blocking mode) failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),true);
+                    pMainWindow->printOutput(std::string("NetworkService::connectTo()::ioctsocket() (non-blocking mode) failed and returned: " + std::to_string(WSAGetLastError()) + ".\n")
+                                             , SilentMessageColor(false), true);
 
                     closesocket(userTCPSocket);
                     WSACleanup();
@@ -266,7 +276,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 }
 
                 this->userName = userName;
-                pMainWindow->printOutput(std::string("WARNING:\nThe data transmitted over the network is not encrypted.\n\nConnected to text chat."),true);
+                pMainWindow->printOutput(std::string("WARNING:\nThe data transmitted over the network is not encrypted.\n\nConnected to text chat.")
+                                         , SilentMessageColor(false), true);
                 pMainWindow->enableInteractiveElements(true, true);
 
                 bTextListen = true;
@@ -293,7 +304,8 @@ void NetworkService::setupVoiceConnection()
     if (userUDPSocket == INVALID_SOCKET)
     {
         pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
-                                              "NetworkService::setupVoiceConnection::socket() error: ") + std::to_string(WSAGetLastError()), true );
+                                              "NetworkService::setupVoiceConnection::socket() error: ") + std::to_string(WSAGetLastError()),
+                                  SilentMessageColor(false), true );
         return;
     }
     else
@@ -303,7 +315,8 @@ void NetworkService::setupVoiceConnection()
         if (connect(userUDPSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR)
         {
             pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
-                                                  "NetworkService::setupVoiceConnection::connect() error: ") + std::to_string(WSAGetLastError()), true );
+                                                  "NetworkService::setupVoiceConnection::connect() error: ") + std::to_string(WSAGetLastError()),
+                                      SilentMessageColor(false), true );
             closesocket(userUDPSocket);
             return;
         }
@@ -320,14 +333,17 @@ void NetworkService::setupVoiceConnection()
                 if (iSentSize == SOCKET_ERROR)
                 {
                     pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
-                                                          "NetworkService::setupVoiceConnection::sendto() error: ") + std::to_string(WSAGetLastError()), true );
+                                                          "NetworkService::setupVoiceConnection::sendto() error: ") + std::to_string(WSAGetLastError()),
+                                              SilentMessageColor(false), true );
                     closesocket(userUDPSocket);
                     return;
                 }
                 else
                 {
                     pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
-                                                          "NetworkService::setupVoiceConnection::sendto() sent only: " + std::to_string(iSentSize) + " out of " + std::to_string(2 + userName.size())), true );
+                                                          "NetworkService::setupVoiceConnection::sendto() sent only: " + std::to_string(iSentSize) + " out of "
+                                                          + std::to_string(2 + userName.size())),
+                                              SilentMessageColor(false), true );
                     closesocket(userUDPSocket);
                     return;
                 }
@@ -338,7 +354,8 @@ void NetworkService::setupVoiceConnection()
             if (ioctlsocket(userUDPSocket, static_cast<long>(FIONBIO),&arg) == SOCKET_ERROR)
             {
                 pMainWindow->printOutput( std::string("Cannot start voice connection.\n"
-                                                      "NetworkService::setupVoiceConnection::ioctlsocket() error: ") + std::to_string(WSAGetLastError()), true );
+                                                      "NetworkService::setupVoiceConnection::ioctlsocket() error: ") + std::to_string(WSAGetLastError())
+                                          , SilentMessageColor(false), true );
                 closesocket(userUDPSocket);
                 return;
             }
@@ -434,12 +451,12 @@ void NetworkService::listenUDPFromServer()
 {
     if ( pAudioService->start() )
     {
-        pMainWindow->printOutput(std::string("Connected to voice chat.\n"), true);
+        pMainWindow->printOutput(std::string("Connected to voice chat.\n"), SilentMessageColor(false), true);
         bVoiceListen = true;
     }
     else
     {
-        pMainWindow->printOutput( std::string("An error occurred while starting the voice chat.\n"), true );
+        pMainWindow->printOutput( std::string("An error occurred while starting the voice chat.\n"), SilentMessageColor(false), true );
         return;
     }
 
@@ -458,11 +475,13 @@ void NetworkService::listenUDPFromServer()
                 {
                     if (iSize == SOCKET_ERROR)
                     {
-                        pMainWindow->printOutput(std::string("\nWARNING:\nNetworkService::listenUDPFromServer::sendto() failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+                        pMainWindow->printOutput(std::string("\nWARNING:\nNetworkService::listenUDPFromServer::sendto() failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                                 SilentMessageColor(false), true);
                     }
                     else
                     {
-                        pMainWindow->printOutput(std::string("\nWARNING:\nSomething went wrong and your ping check wasn't sent fully.\n"), true);
+                        pMainWindow->printOutput(std::string("\nWARNING:\nSomething went wrong and your ping check wasn't sent fully.\n"),
+                                                 SilentMessageColor(false), true);
                     }
                 }
             }
@@ -562,7 +581,7 @@ void NetworkService::receiveMessage()
     std::memcpy(pWCharText, pReadBuffer + iFirstWCharPos, static_cast<unsigned long long>(receivedAmount - iFirstWCharPos));
 
     // Show data on screen
-    pMainWindow->printUserMessage(std::string(timeText), std::wstring(pWCharText), true);
+    pMainWindow->printUserMessage(std::string(timeText), std::wstring(pWCharText), SilentMessageColor(true), true);
     pAudioService->playNewMessageSound();
 
     delete[] pWCharText;
@@ -656,19 +675,21 @@ void NetworkService::sendMessage(std::wstring message)
                 if (error == 10054)
                 {
                     pMainWindow->printOutput(std::string("\nWARNING:\nYour message has not been sent!\n"
-                                                     "NetworkService::sendMessage()::send() failed and returned: " + std::to_string(error) + "."));
+                                                     "NetworkService::sendMessage()::send() failed and returned: " + std::to_string(error) + "."), SilentMessageColor(false));
                     lostConnection();
                     pMainWindow->clearTextEdit();
                 }
                 else
                 {
                     pMainWindow->printOutput(std::string("\nWARNING:\nYour message has not been sent!\n"
-                                                     "NetworkService::sendMessage()::send() failed and returned: " + std::to_string(error) + ".\n"));
+                                                     "NetworkService::sendMessage()::send() failed and returned: " + std::to_string(error) + ".\n"),
+                                             SilentMessageColor(false));
                 }
             }
             else
             {
-                pMainWindow->printOutput(std::string("\nWARNING:\nWe could not send the whole message, because not enough space in the outgoing socket buffer.\n"));
+                pMainWindow->printOutput(std::string("\nWARNING:\nWe could not send the whole message, because not enough space in the outgoing socket buffer.\n"),
+                                         SilentMessageColor(false));
 
                 pMainWindow->clearTextEdit();
             }
@@ -713,11 +734,13 @@ void NetworkService::sendVoiceMessage(char *pVoiceMessage, int iMessageSize, boo
             if (iSize == SOCKET_ERROR)
             {
                 pMainWindow->printOutput(std::string("\nWARNING:\nYour voice message has not been sent!\n"
-                                                     "NetworkService::sendVoiceMessage()::sendto() failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+                                                     "NetworkService::sendVoiceMessage()::sendto() failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                         SilentMessageColor(false), true);
             }
             else
             {
-                pMainWindow->printOutput(std::string("\nWARNING:\nSomething went wrong and your voice message wasn't sent fully.\n"), true);
+                pMainWindow->printOutput(std::string("\nWARNING:\nSomething went wrong and your voice message wasn't sent fully.\n"),
+                                         SilentMessageColor(false), true);
             }
         }
     }
@@ -743,7 +766,8 @@ void NetworkService::disconnect()
         int returnCode = shutdown(userTCPSocket, SD_SEND);
         if (returnCode == SOCKET_ERROR)
         {
-            pMainWindow->printOutput(std::string("NetworkService::disconnect()::shutdown() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"));
+            pMainWindow->printOutput(std::string("NetworkService::disconnect()::shutdown() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                     SilentMessageColor(false));
             closesocket(userTCPSocket);
             WSACleanup();
             bWinSockLaunched = false;
@@ -754,7 +778,8 @@ void NetworkService::disconnect()
             u_long arg = false;
             if (ioctlsocket(userTCPSocket, static_cast<long>(FIONBIO), &arg) == SOCKET_ERROR)
             {
-                pMainWindow->printOutput(std::string("NetworkService::disconnect()::ioctsocket() (blocking mode) failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"));
+                pMainWindow->printOutput(std::string("NetworkService::disconnect()::ioctsocket() (blocking mode) failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                         SilentMessageColor(false));
                 closesocket(userTCPSocket);
                 WSACleanup();
                 bWinSockLaunched = false;
@@ -765,16 +790,19 @@ void NetworkService::disconnect()
                 returnCode = closesocket(userTCPSocket);
                 if (returnCode == SOCKET_ERROR)
                 {
-                    pMainWindow->printOutput(std::string("NetworkService::disconnect()::closesocket() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"));
+                    pMainWindow->printOutput(std::string("NetworkService::disconnect()::closesocket() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                             SilentMessageColor(false));
                     WSACleanup();
                     bWinSockLaunched = false;
                 }
                 else
                 {
-                    pMainWindow->printOutput(std::string("Connection closed successfully.\n"));
+                    pMainWindow->printOutput(std::string("Connection closed successfully.\n"),
+                                             SilentMessageColor(false));
                     if (WSACleanup() == SOCKET_ERROR)
                     {
-                        pMainWindow->printOutput(std::string("NetworkService::disconnect()::WSACleanup() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"));
+                        pMainWindow->printOutput(std::string("NetworkService::disconnect()::WSACleanup() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                                 SilentMessageColor(false));
                     }
                     else
                     {
@@ -788,7 +816,7 @@ void NetworkService::disconnect()
             }
             else
             {
-                pMainWindow->printOutput(std::string("Server has not responded.\n"));
+                pMainWindow->printOutput(std::string("Server has not responded.\n"), SilentMessageColor(false));
 
                 closesocket(userTCPSocket);
                 WSACleanup();
@@ -811,7 +839,7 @@ void NetworkService::disconnect()
 
 void NetworkService::lostConnection()
 {
-    pMainWindow->printOutput( std::string("\nThe server is not responding. Disconnecting...\n"), true );
+    pMainWindow->printOutput( std::string("\nThe server is not responding. Disconnecting...\n"), SilentMessageColor(false), true );
 
     bTextListen  = false;
     if (bVoiceListen)
@@ -841,11 +869,12 @@ void NetworkService::answerToFIN()
         pAudioService->stop();
     }
 
-    pMainWindow->printOutput(std::string("Server is closing connection.\n"),true);
+    pMainWindow->printOutput(std::string("Server is closing connection.\n"), SilentMessageColor(false), true);
     int returnCode = shutdown(userTCPSocket, SD_SEND);
     if (returnCode == SOCKET_ERROR)
     {
-         pMainWindow->printOutput(std::string("NetworkService::listenForServer()::shutdown() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+         pMainWindow->printOutput(std::string("NetworkService::listenForServer()::shutdown() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                  SilentMessageColor(false), true);
          closesocket(userTCPSocket);
          WSACleanup();
          bWinSockLaunched = false;
@@ -855,7 +884,8 @@ void NetworkService::answerToFIN()
         returnCode = closesocket(userTCPSocket);
         if (returnCode == SOCKET_ERROR)
         {
-            pMainWindow->printOutput(std::string("NetworkService::listenForServer()::closesocket() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+            pMainWindow->printOutput(std::string("NetworkService::listenForServer()::closesocket() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                     SilentMessageColor(false), true);
             WSACleanup();
             bWinSockLaunched = false;
         }
@@ -863,7 +893,8 @@ void NetworkService::answerToFIN()
         {
             if (WSACleanup() == SOCKET_ERROR)
             {
-                pMainWindow->printOutput(std::string("NetworkService::listenForServer()::WSACleanup() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"), true);
+                pMainWindow->printOutput(std::string("NetworkService::listenForServer()::WSACleanup() function failed and returned: " + std::to_string(WSAGetLastError()) + ".\n"),
+                                         SilentMessageColor(false), true);
             }
             else
             {
@@ -872,7 +903,8 @@ void NetworkService::answerToFIN()
 
                 bWinSockLaunched = false;
 
-                pMainWindow->printOutput(std::string("Connection closed successfully!\n"), true);
+                pMainWindow->printOutput(std::string("Connection closed successfully.\n"),
+                                         SilentMessageColor(false), true);
                 pMainWindow->deleteUserFromList("", true);
             }
         }

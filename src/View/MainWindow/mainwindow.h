@@ -8,6 +8,9 @@
 #include <string>
 #include <mutex>
 
+// Custom
+#include "../src/Model/OutputTextType.h"
+
 // ============== Network ==============
 // Sockets and stuff
 #include <winsock2.h>
@@ -46,9 +49,9 @@ public:
     void connectTo(std::string adress, std::string port, std::string userName);
 
     // Model will call that
-        void printOutput(std::string text, bool bEmitSignal = false);
-        void printOutputW(std::wstring text, bool bEmitSignal = false);
-        void printUserMessage(std::string timeInfo, std::wstring message, bool bEmitSignal = false);
+        void printOutput(std::string text, SilentMessageColor messageColor, bool bEmitSignal = false);
+        void printOutputW(std::wstring text, SilentMessageColor messageColor, bool bEmitSignal = false);
+        void printUserMessage(std::string timeInfo, std::wstring message, SilentMessageColor messageColor, bool bEmitSignal = false);
         void enableInteractiveElements(bool bMenu, bool bTypeAndSend);
         void setOnlineUsersCount(int onlineCount);
         void setPingToUser(std::string userName, int ping);
@@ -62,7 +65,7 @@ public:
 
 signals:
 
-    void signalTypeOnScreen(QString text);
+    void signalTypeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
     void signalShowMessage(char type, std::string message);
     void signalSetPingToUser(std::string userName, int ping);
     void signalEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
@@ -86,7 +89,7 @@ private slots:
 
     void slotShowMessage(char type, std::string message);
     void slotSetPingToUser(std::string userName, int ping);
-    void typeSomeOnScreen(QString text);
+    void typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
     void slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
     void slotTrayIconActivated();
 
@@ -126,4 +129,8 @@ private:
 
 
     std::mutex       mtxPrintOutput;
+
+
+    QString          outputHTMLmessageStart;
+    QString          outputHTMLmessageEnd;
 };

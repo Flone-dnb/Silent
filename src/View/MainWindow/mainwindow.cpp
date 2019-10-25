@@ -35,11 +35,15 @@ MainWindow::MainWindow(QWidget *parent) :
     pTrayIcon->setIcon(icon);
     connect(pTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::slotTrayIconActivated);
 
+    outputHTMLmessageStart = "<font color=\"";
+    outputHTMLmessageEnd   = "</font>";
+
     pController    = new Controller(this);
     pConnectWindow = nullptr;
 
     ui->listWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    qRegisterMetaType<SilentMessageColor>("SilentMessageColor");
     qRegisterMetaType<std::string>("std::string");
 
     // Connect window
@@ -125,11 +129,22 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
     }
 }
 
-void MainWindow::typeSomeOnScreen(QString text)
+void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage)
 {
     mtxPrintOutput .lock   ();
 
-    ui ->plainTextEdit ->appendPlainText (text);
+    if (bUserMessage)
+    {
+        ui ->plainTextEdit ->appendHtml ( text );
+    }
+    else
+    {
+        text.replace("\n", "<br>");
+        QString color = QString::fromStdString(messageColor.message);
+
+        ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + text + outputHTMLmessageEnd );
+    }
+
 
     mtxPrintOutput .unlock ();
 }
@@ -173,47 +188,90 @@ void MainWindow::connectTo(std::string adress, std::string port, std::string use
     pController->connectTo(adress,port,userName);
 }
 
-void MainWindow::printOutput(std::string text, bool bEmitSignal)
+void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
-        emit signalTypeOnScreen(QString::fromStdString(text));
+        emit signalTypeOnScreen(QString::fromStdString(text), messageColor);
     }
     else
     {
         mtxPrintOutput .lock   ();
 
-        ui ->plainTextEdit ->appendPlainText ( QString::fromStdString(text) );
+        QString message = QString::fromStdString(text);
+        message.replace("\n", "<br>");
+        QString color = QString::fromStdString(messageColor.message);
+
+        ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
 
         mtxPrintOutput .unlock ();
     }
 }
 
-void MainWindow::printOutputW(std::wstring text, bool bEmitSignal)
+void MainWindow::printOutputW(std::wstring text, SilentMessageColor messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
-        emit signalTypeOnScreen(QString::fromStdWString(text));
+        emit signalTypeOnScreen(QString::fromStdWString(text), messageColor);
     }
     else
     {
         mtxPrintOutput .lock   ();
 
-        ui ->plainTextEdit ->appendPlainText ( QString::fromStdWString(text) );
+        QString message = QString::fromStdWString(text);
+        message.replace("\n", "<br>");
+        QString color = QString::fromStdString(messageColor.message);
+
+        ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
 
         mtxPrintOutput .unlock ();
     }
 }
 
-void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, bool bEmitSignal)
+void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, SilentMessageColor messageColor, bool bEmitSignal)
 {
+    QString qtimeRaw = QString::fromStdString(timeInfo);
+    QString qtime = "";
+    int inamepos = 0;
+    for (int i = 0; i < qtimeRaw.size(); i++)
+    {
+        if (qtimeRaw[i] == ' ')
+        {
+            inamepos = i;
+            break;
+        }
+        else
+        {
+            qtime += qtimeRaw[i];
+        }
+    }
+    QString timeColor = QString::fromStdString(messageColor.time);
+
+
+    QString qmessage = "";
+
+    for (int i = inamepos; i < timeInfo.size(); i++)
+    {
+        qmessage += timeInfo[i];
+    }
+
+    qmessage += QString::fromStdWString(message);
+    qmessage.replace("\n", "<br>");
+    QString color = QString::fromStdString(messageColor.message);
+
+    qmessage += "<br>";
+
+
+    QString out = "<font style=\"color: " + timeColor + "\">" + qtime + outputHTMLmessageEnd;
+    out += outputHTMLmessageStart + color + "\">" + qmessage + outputHTMLmessageEnd;
+
     if (bEmitSignal)
     {
-        emit signalTypeOnScreen( QString::fromStdString(timeInfo) + QString::fromStdWString(message) + "\n" );
+        emit signalTypeOnScreen( out, messageColor, true);
     }
     else
     {
-        ui->plainTextEdit->appendPlainText( QString::fromStdString(timeInfo) + QString::fromStdWString(message) + "\n" );
+        ui ->plainTextEdit ->appendHtml ( out );
     }
 }
 
