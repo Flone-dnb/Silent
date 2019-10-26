@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>549</width>
+    <width>530</width>
     <height>203</height>
    </rect>
   </property>
@@ -20,7 +20,7 @@
    <string>Settings</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: qlineargradient(spread:pad, x1:0.480769, y1:1, x2:0.476, y2:0, stop:0 rgba(17, 17, 17, 255), stop:1 rgba(19, 19, 19, 255));
+   <string notr="true">background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
 color: white;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -126,19 +126,22 @@ color: white;</string>
             <property name="styleSheet">
              <string notr="true">QPushButton
 {
-	border: 1px solid red;
-	color: rgb(255, 255, 255);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(28, 28, 28, 255));
+	border: 1px solid rgb(240, 0, 0);
+	border-radius: 6px;
+	color: white;
 }
 
 QPushButton:disabled
 {
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(4, 4, 4, 200), stop:1 rgba(29, 29, 29, 230));
 	border: 1px solid darkred;
 	color: rgb(50, 50, 50);
 }
 
 QPushButton:hover
 {
-	background-color: rgb(30,30,30);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(37, 37, 37, 255), stop:1 rgba(58, 58, 58, 255));
 	border: 1px solid white;
 }</string>
             </property>
@@ -257,19 +260,22 @@ QSlider::sub-page:disabled
         <property name="styleSheet">
          <string notr="true">QPushButton
 {
-	border: 1px solid red;
-	color: rgb(255, 255, 255);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(28, 28, 28, 255));
+	border: 1px solid rgb(240, 0, 0);
+	border-radius: 6px;
+	color: white;
 }
 
 QPushButton:disabled
 {
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(4, 4, 4, 200), stop:1 rgba(29, 29, 29, 230));
 	border: 1px solid darkred;
 	color: rgb(50, 50, 50);
 }
 
 QPushButton:hover
 {
-	background-color: rgb(30,30,30);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(37, 37, 37, 255), stop:1 rgba(58, 58, 58, 255));
 	border: 1px solid white;
 }</string>
         </property>
@@ -300,7 +306,7 @@ QPushButton:hover
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>549</width>
+     <width>530</width>
      <height>30</height>
     </rect>
    </property>

@@ -26,6 +26,7 @@ CONFIG += c++11
 
 
 FORMS += \
+    ../src/View/AboutWindow/aboutwindow.ui \
     ../src/View/ConnectWindow/connectwindow.ui \
     ../src/View/MainWindow/mainwindow.ui \
     ../src/View/SettingsWindow/settingswindow.ui \
@@ -37,6 +38,7 @@ HEADERS += \
     ../src/Model/NetworkService/networkservice.h \
     ../src/Model/OutputTextType.h \
     ../src/Model/PingColor.h \
+    ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
     ../src/View/MainWindow/mainwindow.h \
     ../src/View/SettingsWindow/settingswindow.h \
@@ -47,6 +49,7 @@ SOURCES += \
     ../src/Controller/controller.cpp \
     ../src/Model/AudioService/audioservice.cpp \
     ../src/Model/NetworkService/networkservice.cpp \
+    ../src/View/AboutWindow/aboutwindow.cpp \
     ../src/View/ConnectWindow/connectwindow.cpp \
     ../src/View/MainWindow/mainwindow.cpp \
     ../src/View/SingleUserSettings/singleusersettings.cpp \
