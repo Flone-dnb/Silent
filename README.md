@@ -1,7 +1,7 @@
 # Silent
 Silent is a very lightweight text/voice chat client application. Must be used with the Silent Server application. 
 <p align="center">
-  <img width="550" height="400" src="screenshot.png">
+  <img width="590" height="400" src="screenshot.png">
 </p>
 
 # Build
