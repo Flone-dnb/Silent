@@ -536,6 +536,8 @@ void NetworkService::receiveInfoAboutNewUser()
     pAudioService->addNewUser(std::string(readBuffer + 5));
 
     pAudioService->playSound(true);
+
+    pMainWindow ->showUserConnectNotice(std::string(readBuffer + 5), SilentMessageColor(true));
 }
 
 void NetworkService::receiveMessage()
@@ -590,8 +592,12 @@ void NetworkService::receiveMessage()
 
 void NetworkService::deleteDisconnectedUserFromList()
 {
-    char readBuffer[MAX_NAME_LENGTH + 11];
-    memset(readBuffer, 0, MAX_NAME_LENGTH + 11);
+    char readBuffer[MAX_NAME_LENGTH + 15];
+    memset(readBuffer, 0, MAX_NAME_LENGTH + 15);
+
+    // Read disconnect type
+    char iDisconnectType = 0;
+    recv(userTCPSocket, &iDisconnectType, 1, 0);
 
     // Read packet size
     recv(userTCPSocket, readBuffer, 1, 0);
@@ -605,17 +611,13 @@ void NetworkService::deleteDisconnectedUserFromList()
     std::memcpy(&iOnline, readBuffer, 4);
     pMainWindow->setOnlineUsersCount(iOnline);
 
-//    // Max user name length = 20 (in ConnectWindow textEdit element) + 1 for null terminator char
-//    char userName[21];
-//    memset(userName, 0, 21);
 
-//    std::memcpy(userName, readBuffer + 4, iPacketSize - 4);
-
-    pMainWindow->deleteUserFromList(std::string(readBuffer + 4));
-
-    pAudioService->deleteUser(std::string(readBuffer + 4));
+    pMainWindow   ->deleteUserFromList(std::string(readBuffer + 4));
+    pAudioService ->deleteUser(std::string(readBuffer + 4));
 
     pAudioService->playSound(false);
+
+    pMainWindow ->showUserDisconnectNotice(std::string(readBuffer + 4), SilentMessageColor(true), iDisconnectType);
 }
 
 void NetworkService::receivePing()

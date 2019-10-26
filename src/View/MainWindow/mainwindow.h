@@ -62,6 +62,8 @@ public:
         void  setPingToUser             (std::string userName, int ping);
         void  addNewUserToList          (std::string name);
         void  deleteUserFromList        (std::string name, bool bDeleteAll = false);
+        void  showUserDisconnectNotice  (std::string name, SilentMessageColor messageColor, bool bUserLost);
+        void  showUserConnectNotice     (std::string name, SilentMessageColor messageColor);
         void  showMessageBox            (char type, std::string message);
         void  clearTextEdit             ();
         void  saveUserName              (std::string userName);
@@ -70,6 +72,8 @@ public:
 
 signals:
 
+    void signalShowUserConnectNotice(std::string name, SilentMessageColor messageColor);
+    void signalShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost);
     void signalTypeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
     void signalShowMessage(char type, std::string message);
     void signalSetPingToUser(std::string userName, int ping);
@@ -97,6 +101,8 @@ private slots:
     void typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
     void slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
     void slotTrayIconActivated();
+    void slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost);
+    void slotShowUserConnectNotice(std::string name, SilentMessageColor messageColor);
 
     void on_actionAbout_2_triggered();
     void on_actionConnect_triggered();

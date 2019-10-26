@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
     connect(this, &MainWindow::signalShowMessage,                  this, &MainWindow::slotShowMessage);
     connect(this, &MainWindow::signalSetPingToUser,                this, &MainWindow::slotSetPingToUser);
+    connect(this, &MainWindow::signalShowUserDisconnectNotice,     this, &MainWindow::slotShowUserDisconnectNotice);
+    connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
 
     // Context menu in list
     pMenuContextMenu = new QMenu(this);
@@ -195,6 +197,41 @@ void MainWindow::slotTrayIconActivated()
     raise();
     activateWindow();
     showNormal();
+}
+
+void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost)
+{
+    mtxPrintOutput .lock   ();
+
+    QString message = "";
+
+    if (bUserLost)
+    {
+        message = "The server has lost connection with " + QString::fromStdString(name) + ".<br>";
+    }
+    else
+    {
+        message = QString::fromStdString(name) + " disconnected.<br>";
+    }
+
+    QString color = QString::fromStdString(messageColor.sTime);
+
+    ui ->plainTextEdit ->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
+
+    mtxPrintOutput .unlock ();
+}
+
+void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessageColor messageColor)
+{
+    mtxPrintOutput .lock   ();
+
+    QString message = QString::fromStdString(name) + " just connected to the chat.<br>";
+
+    QString color = QString::fromStdString(messageColor.sTime);
+
+    ui ->plainTextEdit ->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
+
+    mtxPrintOutput .unlock ();
 }
 
 void MainWindow::connectTo(std::string adress, std::string port, std::string userName)
@@ -339,6 +376,16 @@ void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
             }
         }
     }
+}
+
+void MainWindow::showUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost)
+{
+    emit signalShowUserDisconnectNotice(name, messageColor, bUserLost);
+}
+
+void MainWindow::showUserConnectNotice(std::string name, SilentMessageColor messageColor)
+{
+    emit signalShowUserConnectNotice(name, messageColor);
 }
 
 void MainWindow::showMessageBox(char type, std::string message)

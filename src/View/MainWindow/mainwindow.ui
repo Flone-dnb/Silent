@@ -315,8 +315,6 @@ QMenu::separator
      <string>Help</string>
     </property>
     <addaction name="actionAbout_2"/>
-    <addaction name="separator"/>
-    <addaction name="actionCheck_for_Updated"/>
    </widget>
    <addaction name="menuChat"/>
    <addaction name="menuHelp"/>
