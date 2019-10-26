@@ -154,7 +154,7 @@ void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor,
     else
     {
         text.replace("\n", "<br>");
-        QString color = QString::fromStdString(messageColor.message);
+        QString color = QString::fromStdString(messageColor.sMessage);
 
         ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + text + outputHTMLmessageEnd );
     }
@@ -214,7 +214,7 @@ void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, 
 
         QString message = QString::fromStdString(text);
         message.replace("\n", "<br>");
-        QString color = QString::fromStdString(messageColor.message);
+        QString color = QString::fromStdString(messageColor.sMessage);
 
         ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
 
@@ -234,7 +234,7 @@ void MainWindow::printOutputW(std::wstring text, SilentMessageColor messageColor
 
         QString message = QString::fromStdWString(text);
         message.replace("\n", "<br>");
-        QString color = QString::fromStdString(messageColor.message);
+        QString color = QString::fromStdString(messageColor.sMessage);
 
         ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
 
@@ -259,7 +259,7 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
             qtime += qtimeRaw[i];
         }
     }
-    QString timeColor = QString::fromStdString(messageColor.time);
+    QString timeColor = QString::fromStdString(messageColor.sTime);
 
 
     QString qmessage = "";
@@ -271,7 +271,7 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
 
     qmessage += QString::fromStdWString(message);
     qmessage.replace("\n", "<br>");
-    QString color = QString::fromStdString(messageColor.message);
+    QString color = QString::fromStdString(messageColor.sMessage);
 
     qmessage += "<br>";
 

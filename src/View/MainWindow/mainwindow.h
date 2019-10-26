@@ -31,12 +31,18 @@ class QMenu;
 class QAction;
 class QSystemTrayIcon;
 
-
-
 namespace Ui
 {
     class MainWindow;
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+
 
 class MainWindow : public QMainWindow
 {
@@ -46,20 +52,19 @@ public:
 
     explicit MainWindow(QWidget *parent = nullptr);
 
-    void connectTo(std::string adress, std::string port, std::string userName);
+    void connectTo                      (std::string adress, std::string port, std::string userName);
 
-    // Model will call that
-        void printOutput(std::string text, SilentMessageColor messageColor, bool bEmitSignal = false);
-        void printOutputW(std::wstring text, SilentMessageColor messageColor, bool bEmitSignal = false);
-        void printUserMessage(std::string timeInfo, std::wstring message, SilentMessageColor messageColor, bool bEmitSignal = false);
-        void enableInteractiveElements(bool bMenu, bool bTypeAndSend);
-        void setOnlineUsersCount(int onlineCount);
-        void setPingToUser(std::string userName, int ping);
-        void addNewUserToList(std::string name);
-        void deleteUserFromList(std::string name, bool bDeleteAll = false);
-        void showMessageBox(char type, std::string message);
-        void clearTextEdit();
-        void saveUserName(std::string userName);
+        void  printOutput               (std::string text, SilentMessageColor messageColor, bool bEmitSignal = false);
+        void  printOutputW              (std::wstring text, SilentMessageColor messageColor, bool bEmitSignal = false);
+        void  printUserMessage          (std::string timeInfo, std::wstring message, SilentMessageColor messageColor, bool bEmitSignal = false);
+        void  enableInteractiveElements (bool bMenu, bool bTypeAndSend);
+        void  setOnlineUsersCount       (int onlineCount);
+        void  setPingToUser             (std::string userName, int ping);
+        void  addNewUserToList          (std::string name);
+        void  deleteUserFromList        (std::string name, bool bDeleteAll = false);
+        void  showMessageBox            (char type, std::string message);
+        void  clearTextEdit             ();
+        void  saveUserName              (std::string userName);
 
     ~MainWindow();
 

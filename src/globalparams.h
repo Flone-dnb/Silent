@@ -1,11 +1,15 @@
-#pragma once
+﻿#pragma once
 
+// Audio
+#define BUFFER_UPDATE_CHECK_MS 2
+
+// Limits
 #define MAX_NAME_LENGTH 20
 #define MAX_BUFFER_SIZE 1420
 #define MAX_VERSION_STRING_LENGTH 20
 #define MAX_MESSAGE_LENGTH 550
 
-// tcp/udp
+// TCP / UDP
 #define INTERVAL_TCP_MESSAGE_MS 150
 #define INTERVAL_UDP_MESSAGE_MS 4
 #define INTERVAL_KEEPALIVE_SEC 15

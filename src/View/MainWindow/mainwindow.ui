@@ -15,7 +15,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
-color: rgb(202, 202, 202);</string>
+color: white;</string>
   </property>
   <property name="locale">
    <locale language="English" country="UnitedStates"/>

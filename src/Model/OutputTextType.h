@@ -2,6 +2,12 @@
 
 #include <string>
 
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+
 class SilentMessageColor
 {
 public:
@@ -11,15 +17,15 @@ public:
     {
         if (bUserMessage)
         {
-            time = "rgb(170,170,170)";
-            message = "white";
+            sTime = "rgb(170,170,170)";
+            sMessage = "white";
         }
         else
         {
-            message = "red";
+            sMessage = "red";
         }
     }
 
-    std::string time;
-    std::string message;
+    std::string sTime;
+    std::string sMessage;
 };

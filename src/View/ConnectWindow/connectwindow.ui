@@ -14,7 +14,7 @@
    <string>Connect</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: qlineargradient(spread:pad, x1:0.480769, y1:1, x2:0.476, y2:0, stop:0 rgba(17, 17, 17, 255), stop:1 rgba(19, 19, 19, 255));
+   <string notr="true">background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
 color: white;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -64,9 +64,11 @@ color: white;</string>
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.461538 rgba(255, 255, 255, 0));
-
-border: 1px solid red;</string>
+         <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgba(25, 25, 25, 255), stop:0.211618 rgba(12, 12, 12, 255), stop:0.5 rgba(5, 5, 5, 255), stop:0.73029 rgba(9, 9, 9, 255), stop:1 rgba(25, 25, 25, 255));
+selection-background-color: rgb(140, 0, 0);
+color: white;
+border: 1px solid rgb(240, 0, 0);
+border-radius: 6px;</string>
         </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
@@ -113,7 +115,11 @@ border: 1px solid red;</string>
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">border: 1px solid red;</string>
+         <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgba(25, 25, 25, 255), stop:0.211618 rgba(12, 12, 12, 255), stop:0.5 rgba(5, 5, 5, 255), stop:0.73029 rgba(9, 9, 9, 255), stop:1 rgba(25, 25, 25, 255));
+selection-background-color: rgb(140, 0, 0);
+color: white;
+border: 1px solid rgb(240, 0, 0);
+border-radius: 6px;</string>
         </property>
         <property name="inputMask">
          <string>000.000.000.000;_</string>
@@ -151,7 +157,11 @@ border: 1px solid red;</string>
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">border: 1px solid red;</string>
+         <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgba(25, 25, 25, 255), stop:0.211618 rgba(12, 12, 12, 255), stop:0.5 rgba(5, 5, 5, 255), stop:0.73029 rgba(9, 9, 9, 255), stop:1 rgba(25, 25, 25, 255));
+selection-background-color: rgb(140, 0, 0);
+color: white;
+border: 1px solid rgb(240, 0, 0);
+border-radius: 6px;</string>
         </property>
         <property name="inputMask">
          <string>00000;_</string>
@@ -181,19 +191,22 @@ border: 1px solid red;</string>
         <property name="styleSheet">
          <string notr="true">QPushButton
 {
-	border: 1px solid red;
-	color: rgb(255, 255, 255);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(28, 28, 28, 255));
+	border: 1px solid rgb(240, 0, 0);
+	border-radius: 6px;
+	color: white;
 }
 
 QPushButton:disabled
 {
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(4, 4, 4, 200), stop:1 rgba(29, 29, 29, 230));
 	border: 1px solid darkred;
 	color: rgb(50, 50, 50);
 }
 
 QPushButton:hover
 {
-	background-color: rgb(30,30,30);
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(37, 37, 37, 255), stop:1 rgba(58, 58, 58, 255));
 	border: 1px solid white;
 }</string>
         </property>

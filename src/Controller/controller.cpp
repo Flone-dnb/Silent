@@ -4,60 +4,69 @@
 #include "../src/Model/AudioService/audioservice.h"
 #include "../src/Model/NetworkService/networkservice.h"
 
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+
 Controller::Controller(MainWindow* pMainWindow)
 {
-    pAudioService   = new AudioService(pMainWindow);
-    pNetworkService = new NetworkService(pMainWindow, pAudioService);
-    pAudioService->setNetworkService(pNetworkService);
+    pAudioService    = new AudioService   (pMainWindow);
+    pNetworkService  = new NetworkService (pMainWindow, pAudioService);
+
+    pAudioService    ->setNetworkService  (pNetworkService);
 }
+
 
 
 
 
 std::string Controller::getClientVersion()
 {
-    return pNetworkService->getClientVersion();
+    return pNetworkService ->getClientVersion ();
 }
 
 std::string Controller::getUserName()
 {
-    return pNetworkService->getUserName();
+    return pNetworkService ->getUserName ();
 }
 
-float Controller::getUserCurrentVolume(std::string userName)
+float Controller::getUserCurrentVolume(std::string sUserName)
 {
-    return pAudioService->getUserCurrentVolume(userName);
+    return pAudioService ->getUserCurrentVolume (sUserName);
 }
 
-void Controller::connectTo(std::string adress, std::string port, std::string userName)
+void Controller::connectTo(std::string sAdress, std::string sPort, std::string sUserName)
 {
-    pNetworkService->start(adress,port,userName);
+    pNetworkService ->start (sAdress, sPort, sUserName);
 }
 
-void Controller::setPushToTalkButtonAndVolume(int iKey, unsigned short int volume)
+void Controller::setPushToTalkButtonAndVolume(int iKey, unsigned short int iVolume)
 {
-    pAudioService->setPushToTalkButtonAndVolume(iKey, volume);
+    pAudioService ->setPushToTalkButtonAndVolume (iKey, iVolume);
 }
 
-void Controller::setNewUserVolume(std::string userName, float fVolume)
+void Controller::setNewUserVolume(std::string sUserName, float fVolume)
 {
-    pAudioService->setNewUserVolume(userName, fVolume);
+    pAudioService ->setNewUserVolume (sUserName, fVolume);
 }
 
-void Controller::sendMessage(std::wstring message)
+void Controller::sendMessage(std::wstring sMessage)
 {
-    pNetworkService->sendMessage(message);
+    pNetworkService ->sendMessage (sMessage);
 }
 
 void Controller::disconnect()
 {
-    pNetworkService->disconnect();
+    pNetworkService ->disconnect ();
 }
 
 void Controller::stop()
 {
-    pNetworkService->stop();
+    pNetworkService ->stop ();
 }
+
 
 
 

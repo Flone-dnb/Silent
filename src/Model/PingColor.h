@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 // Ping categories
-#define PING_NORMAL_BELOW 120
+#define PING_NORMAL_BELOW 130
 #define PING_WARNING_BELOW 200
 
 // Normal ping rgb color
