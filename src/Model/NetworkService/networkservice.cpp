@@ -15,12 +15,12 @@ NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioServ
     this->pAudioService = pAudioService;
 
 
-    clientVersion = "2.18.0";
+    clientVersion = "2.18.1";
     userName = "";
 
 
-    iPingNormalBelow  = 130;
-    iPingWarningBelow = 200;
+    iPingNormalBelow  = 190;
+    iPingWarningBelow = 280;
 
 
     bWinSockLaunched = false;
@@ -227,8 +227,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     shutdown(userTCPSocket,SD_SEND);
                 }
 
-                pMainWindow->printOutput(std::string("\nYour Silent version (" + clientVersion + ") does not match with the server version (" + std::string(versionBuffer) + ").\n"
-                                                                          "Please update your Silent to version " + std::string(versionBuffer) + "."),
+                pMainWindow->printOutput(std::string("\nYour Silent version (" + clientVersion + ") does not match with the server's last supported client version (" + std::string(versionBuffer) + ").\n"
+                                                                          "Please change your Silent version to " + std::string(versionBuffer) + " if you want to join this server."),
                                          SilentMessageColor(false), true);
                 pMainWindow->enableInteractiveElements(true, false);
                 closesocket(userTCPSocket);
