@@ -5,6 +5,7 @@
 #include <QTimer>
 
 // STL
+#include <vector>
 #include <string>
 #include <mutex>
 
@@ -30,6 +31,7 @@ class QTimer;
 class QMenu;
 class QAction;
 class QSystemTrayIcon;
+class QListWidgetItem;
 
 namespace Ui
 {
@@ -43,6 +45,28 @@ namespace Ui
 // --------------------------------------------------------------------------------------------------------------------
 
 
+class User
+{
+public:
+
+    User(std::string sUserName, int ping, QListWidgetItem* pItem)
+    {
+        this->sUserName = sUserName;
+        this->ping      = ping;
+        this->pItem     = pItem;
+        bTalking        = false;
+    }
+
+    QListWidgetItem* pItem;
+    std::string sUserName;
+    int ping;
+    bool bTalking;
+};
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 
 class MainWindow : public QMainWindow
 {
@@ -60,6 +84,7 @@ public:
         void  enableInteractiveElements (bool bMenu, bool bTypeAndSend);
         void  setOnlineUsersCount       (int onlineCount);
         void  setPingToUser             (std::string userName, int ping);
+        void  setUserIsTalking          (std::string userName, bool bTalking);
         void  addNewUserToList          (std::string name);
         void  deleteUserFromList        (std::string name, bool bDeleteAll = false);
         void  showUserDisconnectNotice  (std::string name, SilentMessageColor messageColor, bool bUserLost);
@@ -77,6 +102,7 @@ signals:
     void signalTypeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
     void signalShowMessage(char type, std::string message);
     void signalSetPingToUser(std::string userName, int ping);
+    void signalSetUserIsTalking(std::string userName, bool bTalking);
     void signalEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
 
 public slots:
@@ -98,6 +124,7 @@ private slots:
 
     void slotShowMessage(char type, std::string message);
     void slotSetPingToUser(std::string userName, int ping);
+    void slotSetUserIsTalking(std::string userName, bool bTalking);
     void typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
     void slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
     void slotTrayIconActivated();
@@ -144,4 +171,7 @@ private:
 
     QString          outputHTMLmessageStart;
     QString          outputHTMLmessageEnd;
+
+
+    std::vector<User> users;
 };

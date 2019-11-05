@@ -6,7 +6,6 @@
 #include "../src/Controller/controller.h"
 #include "../src/View/SettingsWindow/settingswindow.h"
 #include "../src/View/SingleUserSettings/singleusersettings.h"
-#include "../src/View/PingColor.h"
 #include "../src/View/AboutWindow/aboutwindow.h"
 
 // Qt
@@ -31,19 +30,25 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+
     // Tray icon
     pTrayIcon      = new QSystemTrayIcon(this);
     QIcon icon     = QIcon(":/appMainIcon.png");
     pTrayIcon->setIcon(icon);
     connect(pTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::slotTrayIconActivated);
 
+
     outputHTMLmessageStart = "<font color=\"";
     outputHTMLmessageEnd   = "</font>";
+
 
     pController    = new Controller(this);
     pConnectWindow = nullptr;
 
+
     ui->listWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->listWidget_2->setViewMode(QListView::ListMode);
+
 
     qRegisterMetaType<SilentMessageColor>("SilentMessageColor");
     qRegisterMetaType<std::string>("std::string");
@@ -62,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalSetPingToUser,                this, &MainWindow::slotSetPingToUser);
     connect(this, &MainWindow::signalShowUserDisconnectNotice,     this, &MainWindow::slotShowUserDisconnectNotice);
     connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
+    connect(this, &MainWindow::signalSetUserIsTalking,             this, &MainWindow::slotSetUserIsTalking);
 
     // Context menu in list
     pMenuContextMenu = new QMenu(this);
@@ -113,7 +119,7 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
 
         if ( userNameInList == QString::fromStdString(userName) )
         {
-            if (ping >= 200)
+            if (ping >= pController->getPingWarningBelow())
             {
                 userNameInList += (" [" + QString::number(ping) + " ms (!!!)]");
             }
@@ -129,19 +135,90 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
             ui->listWidget_2->item(i)->setText( userNameInList );
 
 
-            // Set color
+            for (size_t k = 0; k < users.size(); k++)
+            {
+                if (users[k].sUserName == userName)
+                {
+                    users[k].ping = ping;
 
-            if      (ping <= pController->getPingNormalBelow())
-            {
-                ui->listWidget_2->item(i)->setForeground(QColor(PING_NORMAL_R, PING_NORMAL_G, PING_NORMAL_B));
+
+                    if (users[k].bTalking)
+                    {
+                        if      (users[k].ping <= pController->getPingNormalBelow())
+                        {
+                            users[k].pItem->setIcon(QIcon(":user_normal_ping_talking.png"));
+                        }
+                        else if (users[k].ping <= pController->getPingWarningBelow())
+                        {
+                            users[k].pItem->setIcon(QIcon(":user_warning_ping_talking.png"));
+                        }
+                        else
+                        {
+                            users[k].pItem->setIcon(QIcon(":user_bad_ping_talking.png"));
+                        }
+                    }
+                    else
+                    {
+                        if      (users[k].ping <= pController->getPingNormalBelow())
+                        {
+                            users[k].pItem->setIcon(QIcon(":user_normal_ping.png"));
+                        }
+                        else if (users[k].ping <= pController->getPingWarningBelow())
+                        {
+                            users[k].pItem->setIcon(QIcon(":user_warning_ping.png"));
+                        }
+                        else
+                        {
+                            users[k].pItem->setIcon(QIcon(":user_bad_ping.png"));
+                        }
+                    }
+
+                    break;
+                }
             }
-            else if (ping <= pController->getPingWarningBelow())
+
+            break;
+        }
+    }
+}
+
+void MainWindow::slotSetUserIsTalking(std::string userName, bool bTalking)
+{
+    for (size_t i = 0; i < users.size(); i++)
+    {
+        if (users[i].sUserName == userName)
+        {
+            users[i].bTalking = bTalking;
+
+            if (bTalking)
             {
-                ui->listWidget_2->item(i)->setForeground(QColor(PING_WARNING_R, PING_WARNING_G, PING_WARNING_B));
+                if      (users[i].ping <= pController->getPingNormalBelow())
+                {
+                    users[i].pItem->setIcon(QIcon(":user_normal_ping_talking.png"));
+                }
+                else if (users[i].ping <= pController->getPingWarningBelow())
+                {
+                    users[i].pItem->setIcon(QIcon(":user_warning_ping_talking.png"));
+                }
+                else
+                {
+                    users[i].pItem->setIcon(QIcon(":user_bad_ping_talking.png"));
+                }
             }
             else
             {
-                ui->listWidget_2->item(i)->setForeground(QColor(PING_BAD_R, PING_BAD_G, PING_BAD_B));
+                if      (users[i].ping <= pController->getPingNormalBelow())
+                {
+                    users[i].pItem->setIcon(QIcon(":user_normal_ping.png"));
+                }
+                else if (users[i].ping <= pController->getPingWarningBelow())
+                {
+                    users[i].pItem->setIcon(QIcon(":user_warning_ping.png"));
+                }
+                else
+                {
+                    users[i].pItem->setIcon(QIcon(":user_bad_ping.png"));
+                }
             }
 
             break;
@@ -345,10 +422,18 @@ void MainWindow::setPingToUser(std::string userName, int ping)
     emit signalSetPingToUser(userName, ping);
 }
 
+void MainWindow::setUserIsTalking(std::string userName, bool bTalking)
+{
+    emit signalSetUserIsTalking(userName, bTalking);
+}
+
 void MainWindow::addNewUserToList(std::string name)
 {
-    name += " [-- ms]";
-    ui->listWidget_2->addItem( QString::fromStdString(name) );
+    QString qName = QString::fromStdString(name) + " [-- ms]";
+    QListWidgetItem* pNewItem = new QListWidgetItem(qName);
+    ui->listWidget_2->addItem( pNewItem );
+
+    users.push_back(User(name, 0, pNewItem));
 }
 
 void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
@@ -356,6 +441,8 @@ void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
     if (bDeleteAll)
     {
         ui->listWidget_2->clear();
+
+        users.clear();
     }
     else
     {
@@ -375,6 +462,16 @@ void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
             if ( userName == QString::fromStdString(name))
             {
                 delete ui->listWidget_2->item(i);
+
+                for (size_t j = 0; j < users.size(); j++)
+                {
+                    if (users[j].sUserName == userName.toStdString())
+                    {
+                        users.erase( users.begin() + i );
+                        break;
+                    }
+                }
+
                 break;
             }
         }

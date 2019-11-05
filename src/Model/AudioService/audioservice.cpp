@@ -719,6 +719,8 @@ void AudioService::play(UserAudioStruct* pUser)
     // Therefore, we will wait for another 6 packages to start the function again. Because of this, there will be a "hole" in the sound.
     std::this_thread::sleep_for(std::chrono::milliseconds(60));
 
+    pMainWindow->setUserIsTalking(pUser->sUserName, true);
+
     // Add 1st buffer
     pUser->WaveOutHdr1.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
     if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr1) ) {pUser->bDeletePacketsAtLast = true;}
@@ -918,6 +920,7 @@ void AudioService::play(UserAudioStruct* pUser)
     waitForAllBuffers (pUser);
 
 
+    pMainWindow->setUserIsTalking(pUser->sUserName, false);
 
     if (pUser ->bDeletePacketsAtLast == false)
     {
@@ -931,6 +934,7 @@ void AudioService::play(UserAudioStruct* pUser)
 
         pUser ->vAudioPackets .clear ();
         pUser ->bPacketsArePlaying = false;
+
 
 
         mtxUsersAudio .unlock ();

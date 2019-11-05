@@ -3,5 +3,11 @@
 	<file>appMainIcon.png</file>
 	<file>GitHub-Mark-Light.png</file>
 	<file>GitHub-Mark-Light-Hover.png</file>
+	<file>user_normal_ping.png</file>
+	<file>user_normal_ping_talking.png</file>
+	<file>user_warning_ping.png</file>
+	<file>user_warning_ping_talking.png</file>
+	<file>user_bad_ping.png</file>
+	<file>user_bad_ping_talking.png</file>
 </qresource>
 </RCC>

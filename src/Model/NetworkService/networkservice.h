@@ -72,10 +72,10 @@ public:
 
     // GET functions
 
-        std::string    getClientVersion        ();
-        std::string    getUserName             ();
-        unsigned short getPingNormalBelow      ();
-        unsigned short getPingWarningBelow     ();
+        std::string    getClientVersion      ();
+        std::string    getUserName           ();
+        unsigned short getPingNormalBelow    ();
+        unsigned short getPingWarningBelow   ();
 
 
 private:

@@ -37,7 +37,6 @@ HEADERS += \
     ../src/Model/AudioService/audioservice.h \
     ../src/Model/NetworkService/networkservice.h \
     ../src/Model/OutputTextType.h \
-    ../src/View/PingColor.h \
     ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
     ../src/View/MainWindow/mainwindow.h \
