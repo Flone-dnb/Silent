@@ -1,8 +1,5 @@
 ﻿#pragma once
 
-// Audio
-#define BUFFER_UPDATE_CHECK_MS 2
-
 // Limits
 #define MAX_NAME_LENGTH 20
 #define MAX_BUFFER_SIZE 1420

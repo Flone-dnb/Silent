@@ -6,7 +6,7 @@
 #include "../src/Controller/controller.h"
 #include "../src/View/SettingsWindow/settingswindow.h"
 #include "../src/View/SingleUserSettings/singleusersettings.h"
-#include "../src/Model/PingColor.h"
+#include "../src/View/PingColor.h"
 #include "../src/View/AboutWindow/aboutwindow.h"
 
 // Qt
@@ -128,11 +128,14 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
 
             ui->listWidget_2->item(i)->setText( userNameInList );
 
-            if (ping <= PING_NORMAL_BELOW)
+
+            // Set color
+
+            if      (ping <= pController->getPingNormalBelow())
             {
                 ui->listWidget_2->item(i)->setForeground(QColor(PING_NORMAL_R, PING_NORMAL_G, PING_NORMAL_B));
             }
-            else if (ping <= PING_WARNING_BELOW)
+            else if (ping <= pController->getPingWarningBelow())
             {
                 ui->listWidget_2->item(i)->setForeground(QColor(PING_WARNING_R, PING_WARNING_G, PING_WARNING_B));
             }

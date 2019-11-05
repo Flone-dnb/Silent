@@ -1,8 +1,6 @@
 ﻿#include "connectwindow.h"
 #include "ui_connectwindow.h"
 
-#include "../src/globalparams.h"
-
 #include <QMessageBox>
 #include <QMouseEvent>
 
@@ -12,7 +10,7 @@ connectWindow::connectWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setFixedSize(width(), height());
-    ui->lineEdit_3->setMaxLength(MAX_NAME_LENGTH);
+    ui->lineEdit_3->setMaxLength( 20 );
 }
 
 void connectWindow::setUserName(std::string userName)

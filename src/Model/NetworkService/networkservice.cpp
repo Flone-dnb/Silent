@@ -3,7 +3,7 @@
 // Custom
 #include "../src/View/MainWindow/mainwindow.h"
 #include "../src/Model/AudioService/audioservice.h"
-#include "../src/globalparams.h"
+#include "../src/Model/net_params.h"
 #include "../src/Model/OutputTextType.h"
 
 // C++
@@ -11,11 +11,17 @@
 
 NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioService)
 {
-    clientVersion = "2.18.0";
-
     this->pMainWindow   = pMainWindow;
     this->pAudioService = pAudioService;
+
+
+    clientVersion = "2.18.0";
     userName = "";
+
+
+    iPingNormalBelow  = 130;
+    iPingWarningBelow = 200;
+
 
     bWinSockLaunched = false;
     bTextListen      = false;
@@ -34,6 +40,16 @@ std::string NetworkService::getClientVersion()
 std::string NetworkService::getUserName()
 {
     return userName;
+}
+
+unsigned short NetworkService::getPingNormalBelow()
+{
+    return iPingNormalBelow;
+}
+
+unsigned short NetworkService::getPingWarningBelow()
+{
+    return iPingWarningBelow;
 }
 
 void NetworkService::start(std::string adress, std::string port, std::string userName)

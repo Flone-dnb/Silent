@@ -6,7 +6,7 @@
 #include <QMouseEvent>
 #include <QMessageBox>
 
-// C++
+// STL
 #include <fstream>
 #include <shlobj.h>
 

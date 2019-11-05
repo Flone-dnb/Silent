@@ -37,13 +37,13 @@ HEADERS += \
     ../src/Model/AudioService/audioservice.h \
     ../src/Model/NetworkService/networkservice.h \
     ../src/Model/OutputTextType.h \
-    ../src/Model/PingColor.h \
+    ../src/View/PingColor.h \
     ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
     ../src/View/MainWindow/mainwindow.h \
     ../src/View/SettingsWindow/settingswindow.h \
     ../src/View/SingleUserSettings/singleusersettings.h \
-    ../src/globalparams.h
+    ../src/Model/net_params.h
 
 SOURCES += \
     ../src/Controller/controller.cpp \

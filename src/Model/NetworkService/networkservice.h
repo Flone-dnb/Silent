@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // C++
 #include <string>
@@ -21,55 +21,95 @@ class AudioService;
 
 
 
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+
+
 class NetworkService
 {
 public:
 
     NetworkService(MainWindow* pMainWindow, AudioService* pAudioService);
 
-    // get
-    std::string getClientVersion();
-    std::string getUserName();
 
-    void start(std::string adress, std::string port, std::string userName);
-    void connectTo(std::string adress, std::string port, std::string userName);
-    void setupVoiceConnection();
 
-    void listenTCPFromServer();
-    void listenUDPFromServer();
+    // Start
 
-    void receiveInfoAboutNewUser();
-    void receiveMessage();
-    void deleteDisconnectedUserFromList();
-    void receivePing();
+        void  start                          (std::string adress,   std::string port,   std::string userName);
+        void  connectTo                      (std::string adress,   std::string port,   std::string userName);
+        void  setupVoiceConnection           ();
 
-    void sendMessage(std::wstring message);
-    void sendVoiceMessage(char* pVoiceMessage, int iMessageSize, bool bLast);
 
-    void disconnect();
-    void lostConnection();
-    void answerToFIN();
-    void stop();
+    // Listen
+
+        void  listenTCPFromServer            ();
+        void  listenUDPFromServer            ();
+
+
+    // Receive
+
+        void  receiveInfoAboutNewUser        ();
+        void  receiveMessage                 ();
+        void  receivePing                    ();
+
+
+    // Send
+
+        void  sendVoiceMessage               (char* pVoiceMessage,   int iMessageSize,    bool bLast);
+        void  sendMessage                    (std::wstring message);
+
+
+    // Stop / Delete / Disconnect
+
+        void  deleteDisconnectedUserFromList ();
+        void  disconnect                     ();
+        void  lostConnection                 ();
+        void  answerToFIN                    ();
+        void  stop                           ();
+
+
+    // GET functions
+
+        std::string    getClientVersion        ();
+        std::string    getUserName             ();
+        unsigned short getPingNormalBelow      ();
+        unsigned short getPingWarningBelow     ();
+
 
 private:
 
     void serverMonitor();
 
 
-    MainWindow* pMainWindow;
-    AudioService* pAudioService;
 
-    SOCKET userTCPSocket;
-    SOCKET userUDPSocket;
-    sockaddr_in serverAddr;
+    // ------------------------------------
 
-    std::string userName;
 
-    bool bWinSockLaunched;
-    bool bTextListen;
-    bool bVoiceListen;
 
-    clock_t lastTimeServerKeepAliveCame;
+    MainWindow*    pMainWindow;
+    AudioService*  pAudioService;
 
-    std::string clientVersion;
+
+    // Ping
+    unsigned short iPingNormalBelow;
+    unsigned short iPingWarningBelow;
+
+
+    clock_t        lastTimeServerKeepAliveCame;
+
+
+    SOCKET         userTCPSocket;
+    SOCKET         userUDPSocket;
+    sockaddr_in    serverAddr;
+
+
+    std::string    userName;
+    std::string    clientVersion;
+
+
+    bool           bWinSockLaunched;
+    bool           bTextListen;
+    bool           bVoiceListen;
 };

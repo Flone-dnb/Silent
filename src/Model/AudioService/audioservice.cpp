@@ -3,7 +3,6 @@
 // Custom
 #include "../src/View/MainWindow/mainwindow.h"
 #include "../src/Model/NetworkService/networkservice.h"
-#include "../src/globalparams.h"
 
 #include <thread>
 
