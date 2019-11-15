@@ -111,7 +111,7 @@ border-radius: 6px;</string>
            <number>5</number>
           </property>
           <item>
-           <widget class="QListWidget" name="listWidget_2">
+           <widget class="QListWidget" name="listWidget_users">
             <property name="font">
              <font>
               <pointsize>10</pointsize>

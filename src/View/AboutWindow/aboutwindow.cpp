@@ -1,34 +1,56 @@
 ﻿#include "aboutwindow.h"
 #include "ui_aboutwindow.h"
 
+
 // Qt
+#include <QFile>
 #include <QDesktopServices>
 #include <QUrl>
 
+// Custom
+#include "../src/View/StyleAndInfoPaths.h"
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+
 AboutWindow::AboutWindow(QString sSilentVersion, QWidget *parent) : QMainWindow(parent), ui(new Ui::AboutWindow)
 {
+    // Setup window
+
     ui->setupUi(this);
-    setFixedSize ( width (), height () );
+    setFixedSize( width(), height() );
 
 
-    ui ->label_appIcon       ->setPixmap ( QPixmap(":/appMainIcon.png").scaled (128, 128, Qt::KeepAspectRatio) );
-    ui ->label_silentVersion ->setText   ( "Silent. Version: " + sSilentVersion + "." );
-    ui ->label_copyright     ->setText   ( "Copyright (c) 2019.\nAleksandr \"Flone\" Tretyakov." );
+
+
+    // Set appearance
+
+    ui ->label_appIcon       ->setPixmap ( QPixmap(RES_ICONS_MAIN_PATH)
+                                           .scaled (RES_ICONS_MAIN_SIZE_XY, RES_ICONS_MAIN_SIZE_XY, Qt::KeepAspectRatio) );
+
+    ui ->label_silentVersion ->setText   ( QString(INFO_APP_NAME) + " (v" + sSilentVersion + ")." );
+
+    ui ->label_copyright     ->setText   ( INFO_COPYRIGHT );
 }
 
 
 
 void AboutWindow::closeEvent(QCloseEvent *pEvent)
 {
-    deleteLater ();
+    Q_UNUSED(pEvent)
+
+    deleteLater();
 }
 
 
 
 
-void AboutWindow::on_pushButton_clicked()
+void AboutWindow::on_pushButton_github_clicked()
 {
-    QDesktopServices::openUrl (QUrl("https://github.com/Flone-dnb/Silent"));
+    QDesktopServices::openUrl( QUrl(INFO_REPO_URL) );
 }
 
 

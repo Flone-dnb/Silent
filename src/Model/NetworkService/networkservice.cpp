@@ -3,16 +3,19 @@
 // Custom
 #include "../src/View/MainWindow/mainwindow.h"
 #include "../src/Model/AudioService/audioservice.h"
+#include "../src/Model/SettingsManager/settingsmanager.h"
+#include "../src/Model/SettingsManager/SettingsFile.h"
 #include "../src/Model/net_params.h"
 #include "../src/Model/OutputTextType.h"
 
 // C++
 #include <thread>
 
-NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioService)
+NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioService, SettingsManager* pSettingsManager)
 {
-    this->pMainWindow   = pMainWindow;
-    this->pAudioService = pAudioService;
+    this ->pMainWindow      = pMainWindow;
+    this ->pAudioService    = pAudioService;
+    this ->pSettingsManager = pSettingsManager;
 
 
     clientVersion = "2.18.1";
@@ -304,7 +307,11 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 // We can start voice connection
                 setupVoiceConnection();
 
-                pMainWindow->saveUserName(userName);
+                SettingsFile* pUpdatedSettings = new SettingsFile();
+                pUpdatedSettings ->iPushToTalkButton = pSettingsManager ->getCurrentSettings() ->iPushToTalkButton;
+                pUpdatedSettings ->iMasterVolume     = pSettingsManager ->getCurrentSettings() ->iMasterVolume;
+                pUpdatedSettings ->sUsername         = userName;
+                pSettingsManager ->saveSettings( pUpdatedSettings, true );
 
                 lastTimeServerKeepAliveCame = clock();
                 std::thread monitor(&NetworkService::serverMonitor, this);
@@ -668,7 +675,7 @@ void NetworkService::receivePing()
 
 void NetworkService::sendMessage(std::wstring message)
 {
-    if (message.size() > MAX_MESSAGE_LENGTH) pMainWindow->showMessageBox(0, "Your message is too big!");
+    if (message.size() > MAX_MESSAGE_LENGTH) pMainWindow->showMessageBox(true, "Your message is too big!");
     else
     {
         char* pSendBuffer = new char[3 + (message.size() * 2) + 2];
@@ -851,7 +858,7 @@ void NetworkService::disconnect()
     }
     else
     {
-        pMainWindow->showMessageBox(0, std::string("You are not connected.") );
+        pMainWindow->showMessageBox(true, std::string("You are not connected.") );
     }
 }
 

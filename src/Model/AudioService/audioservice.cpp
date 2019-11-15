@@ -1,14 +1,19 @@
 ﻿#include "audioservice.h"
 
+// STL
+#include <thread>
+
 // Custom
 #include "../src/View/MainWindow/mainwindow.h"
 #include "../src/Model/NetworkService/networkservice.h"
+#include "../src/Model/SettingsManager/settingsmanager.h"
+#include "../src/Model/SettingsManager/SettingsFile.h"
 
-#include <thread>
 
-AudioService::AudioService(MainWindow* pMainWindow)
+AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsManager)
 {
-    this->pMainWindow  = pMainWindow;
+    this ->pMainWindow      = pMainWindow;
+    this ->pSettingsManager = pSettingsManager;
 
 
     // Do not record audio now
@@ -20,14 +25,6 @@ AudioService::AudioService(MainWindow* pMainWindow)
     pWaveIn2           = nullptr;
     pWaveIn3           = nullptr;
     pWaveIn4           = nullptr;
-
-
-    // T button
-    iPushToTalkButton  = 0x54;
-
-
-    // Master volume: 52428 ~ 80%
-    iVolume            = 52428;
 
 
     // All audio will be x1.45 volume
@@ -43,12 +40,8 @@ void AudioService::setNetworkService(NetworkService *pNetworkService)
     this ->pNetworkService = pNetworkService;
 }
 
-void AudioService::setPushToTalkButtonAndVolume(int iKey, unsigned short int iVolume)
+void AudioService::setNewMasterVolume(unsigned short int iVolume)
 {
-    iPushToTalkButton  = iKey;
-    this ->iVolume     = iVolume;
-
-
     mtxUsersAudio .lock();
 
     for (size_t i = 0;  i < vUsersAudio .size();  i++)
@@ -253,7 +246,8 @@ void AudioService::addNewUser(std::string sUserName)
                                   true);
     }
 
-    waveOutSetVolume( vUsersAudio .back() ->hWaveOut, MAKELONG(iVolume, iVolume) );
+    waveOutSetVolume( vUsersAudio .back() ->hWaveOut, MAKELONG(pSettingsManager ->getCurrentSettings() ->iMasterVolume,
+                                                               pSettingsManager ->getCurrentSettings() ->iMasterVolume) );
 
 
     mtxUsersAudio .unlock();
@@ -317,7 +311,7 @@ void AudioService::recordOnPress()
 
     while(bInputReady)
     {
-        while ( GetAsyncKeyState(iPushToTalkButton) & 0x8000 )
+        while ( GetAsyncKeyState(pSettingsManager ->getCurrentSettings() ->iPushToTalkButton) & 0x8000 )
         {
             // Button pressed
             if (bButtonPressed == false)
@@ -436,7 +430,7 @@ void AudioService::recordOnPress()
             // 4-1-2-(3).
             ///////////////////
 
-            if ( GetAsyncKeyState(iPushToTalkButton) & 0x8000 )
+            if ( GetAsyncKeyState(pSettingsManager ->getCurrentSettings() ->iPushToTalkButton) & 0x8000 )
             {
                 if ( addInBuffer(&WaveInHdr3) )
                 {

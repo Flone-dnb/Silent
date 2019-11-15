@@ -37,17 +37,21 @@ HEADERS += \
     ../src/Model/AudioService/audioservice.h \
     ../src/Model/NetworkService/networkservice.h \
     ../src/Model/OutputTextType.h \
+    ../src/Model/SettingsManager/SettingsFile.h \
+    ../src/Model/SettingsManager/settingsmanager.h \
     ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
     ../src/View/MainWindow/mainwindow.h \
     ../src/View/SettingsWindow/settingswindow.h \
     ../src/View/SingleUserSettings/singleusersettings.h \
-    ../src/Model/net_params.h
+    ../src/Model/net_params.h \
+    ../src/View/StyleAndInfoPaths.h
 
 SOURCES += \
     ../src/Controller/controller.cpp \
     ../src/Model/AudioService/audioservice.cpp \
     ../src/Model/NetworkService/networkservice.cpp \
+    ../src/Model/SettingsManager/settingsmanager.cpp \
     ../src/View/AboutWindow/aboutwindow.cpp \
     ../src/View/ConnectWindow/connectwindow.cpp \
     ../src/View/MainWindow/mainwindow.cpp \
@@ -55,11 +59,7 @@ SOURCES += \
     ../src/main.cpp \
     ../src/View/SettingsWindow/settingswindow.cpp \
 
-win32
-{
-        RC_FILE += ../res/file.rc
-        OTHER_FILES += ../res/file.rc
-}
+RC_ICONS = ../res/icons/appMainIcon.ico
 
 RESOURCES += ../res/qt_rec_file.qrc
 

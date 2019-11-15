@@ -48,7 +48,7 @@ color: white;</string>
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+         <string notr="true">background-color: transparent;</string>
         </property>
         <property name="text">
          <string/>
@@ -82,7 +82,10 @@ color: white;</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+       <string notr="true">QLabel
+{
+	background-color: transparent;
+}</string>
       </property>
       <property name="text">
        <string>TextLabel</string>
@@ -101,7 +104,10 @@ color: white;</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+       <string notr="true">QLabel
+{
+	background-color: transparent;
+}</string>
       </property>
       <property name="text">
        <string>TextLabel</string>
@@ -127,7 +133,7 @@ color: white;</string>
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="pushButton_github">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -140,18 +146,18 @@ color: white;</string>
 	border: none;
 	width: 80px;
 	height: 80px;
-	background-color: rgba(255, 255, 255, 0);
-	border-image: url(&quot;:/GitHub-Mark-Light.png&quot;);
+	background-color: transparent;
+	border-image: url(&quot;:/icons/GitHub-Mark-Light.png&quot;);
 }
 
 QPushButton:hover
 {
-	border-image: url(&quot;:/GitHub-Mark-Light-Hover.png&quot;);
+	border-image: url(&quot;:/icons/GitHub-Mark-Light-Hover.png&quot;);
 }
 
 QPushButton:pressed
 {
-	border-image: url(&quot;:/GitHub-Mark-Light.png&quot;);
+	border-image: url(&quot;:/icons/GitHub-Mark-Light.png&quot;);
 }</string>
         </property>
         <property name="text">

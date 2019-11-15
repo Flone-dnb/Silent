@@ -1,13 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-// Custom
-#include "../src/View/ConnectWindow/connectwindow.h"
-#include "../src/Controller/controller.h"
-#include "../src/View/SettingsWindow/settingswindow.h"
-#include "../src/View/SingleUserSettings/singleusersettings.h"
-#include "../src/View/AboutWindow/aboutwindow.h"
-
 // Qt
 #include <QMessageBox>
 #include <QMouseEvent>
@@ -17,50 +10,104 @@
 #include <QAction>
 #include <QTimer>
 #include <QSystemTrayIcon>
+#include <QFile>
 
 // STL
-#include <fstream>
 #include <thread>
-#include <shlobj.h>
+
+
+// Custom
+#include "../src/View/ConnectWindow/connectwindow.h"
+#include "../src/Controller/controller.h"
+#include "../src/View/SettingsWindow/settingswindow.h"
+#include "../src/View/SingleUserSettings/singleusersettings.h"
+#include "../src/View/AboutWindow/aboutwindow.h"
+#include "../src/View/StyleAndInfoPaths.h"
+#include "../src/Model/SettingsManager/SettingsFile.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    // Set appearance
+
     ui->setupUi(this);
 
+    QFile File(STYLE_THEME_DEFAULT_PATH);
+    File .open(QFile::ReadOnly);
+    QString StyleSheet = QLatin1String( File .readAll() );
 
-    // Tray icon
+    qApp->setStyleSheet(StyleSheet);
+
+
+
+
+    // Setup tray icon
+
     pTrayIcon      = new QSystemTrayIcon(this);
-    QIcon icon     = QIcon(":/appMainIcon.png");
-    pTrayIcon->setIcon(icon);
+
+    QIcon icon     = QIcon(RES_ICONS_MAIN_PATH);
+    pTrayIcon      ->setIcon(icon);
+
     connect(pTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::slotTrayIconActivated);
 
+
+
+
+    // Output HTML
 
     outputHTMLmessageStart = "<font color=\"";
     outputHTMLmessageEnd   = "</font>";
 
 
+
+
+    // Create Controller
+
     pController    = new Controller(this);
-    pConnectWindow = nullptr;
 
 
-    ui->listWidget_2->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listWidget_2->setViewMode(QListView::ListMode);
 
 
-    qRegisterMetaType<SilentMessageColor>("SilentMessageColor");
-    qRegisterMetaType<std::string>("std::string");
+    // Setup context menu for 'connected users' list
 
-    // Connect window
+    ui->listWidget_users->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->listWidget_users->setViewMode(QListView::ListMode);
+
+    pMenuContextMenu    = new QMenu(this);
+    pMenuContextMenu ->setStyleSheet("QMenu\n{\n	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(26, 26, 26, 100), stop:0.605809 rgba(19, 19, 19, 255), stop:1 rgba(26, 26, 26, 100));\n	color: white;\n}\n\nQMenu::item::selected\n{\n	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(156, 11, 11, 255), stop:1 rgba(168, 0, 0, 255));\n}\n\nQMenu::separator\n{\n	background-color: rgb(50, 0, 0);\n	height: 2px;\n    margin-left: 10px; \n    margin-right: 5px;\n}");
+
+    pActionChangeVolume = new QAction("Change Volume");
+
+    pMenuContextMenu ->addAction(pActionChangeVolume);
+
+    connect(pActionChangeVolume, &QAction::triggered, this, &MainWindow::slotChangeUserVolume);
+
+
+
+
+    // Register types
+
+    qRegisterMetaType <SilentMessageColor> ("SilentMessageColor");
+    qRegisterMetaType <std::string>        ("std::string");
+
+
+
+
+    // Setup Connect window
+
     pConnectWindow = new connectWindow(this);
     pConnectWindow ->setWindowModality(Qt::WindowModality::WindowModal);
+
     connect(pConnectWindow, &connectWindow::connectTo,      this, &MainWindow::connectTo);
     connect(pConnectWindow, &connectWindow::showMainWindow, this, &MainWindow::show);
 
-    // connect to 'this'
-    // we use this to send signals to main thread when working with GI
+
+
+
+    // This to this connects.
+    // We use this to send signals to main thread when working with GI.
     connect(this, &MainWindow::signalTypeOnScreen,                 this, &MainWindow::typeSomeOnScreen);
     connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
     connect(this, &MainWindow::signalShowMessage,                  this, &MainWindow::slotShowMessage);
@@ -69,20 +116,24 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
     connect(this, &MainWindow::signalSetUserIsTalking,             this, &MainWindow::slotSetUserIsTalking);
 
-    // Context menu in list
-    pMenuContextMenu = new QMenu(this);
-    pMenuContextMenu->setStyleSheet("QMenu\n{\n	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(26, 26, 26, 100), stop:0.605809 rgba(19, 19, 19, 255), stop:1 rgba(26, 26, 26, 100));\n	color: white;\n}\n\nQMenu::item::selected\n{\n	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(156, 11, 11, 255), stop:1 rgba(168, 0, 0, 255));\n}\n\nQMenu::separator\n{\n	background-color: rgb(50, 0, 0);\n	height: 2px;\n    margin-left: 10px; \n    margin-right: 5px;\n}");
-    pActionChangeVolume = new QAction("Change Volume");
-    pMenuContextMenu->addAction(pActionChangeVolume);
-    connect(pActionChangeVolume, &QAction::triggered, this, &MainWindow::slotChangeUserVolume);
 
 
-    // We use a timer because here (in the constructor) the main (from the main.cpp) event handler is not launched so it won't
-    // show our SettingsWindow with opacity change (see 'checkIfSettingsExists() function). We will wait for some time and then show it.
-    pTimer = new QTimer();
-    pTimer->setInterval(600);
-    connect(pTimer, &QTimer::timeout, this, &MainWindow::checkIfSettingsExist);
-    pTimer->start();
+
+    if ( pController ->isSettingsCreatedFirstTime() )
+    {
+        // Show SettingsWindow to the user
+
+        // We use a timer because here (in the constructor) the main (from the main.cpp) event handler is not launched so it won't
+        // show our SettingsWindow with opacity change (see 'checkIfSettingsExists() function). We will wait for some time and then show it.
+        pTimer = new QTimer();
+        pTimer->setInterval(650);
+        connect(pTimer, &QTimer::timeout, this, &MainWindow::showSettingsWindow);
+        pTimer->start();
+    }
+    else
+    {
+        pTimer = nullptr;
+    }
 }
 
 
@@ -90,13 +141,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-void MainWindow::slotShowMessage(char type, std::string message)
+void MainWindow::slotShowMessage(bool bWarningBox, std::string message)
 {
-    if (type == 0)
+    if (bWarningBox)
     {
         QMessageBox::warning(this, "Warning", QString::fromStdString(message));
     }
-    else if (type == 1)
+    else
     {
         QMessageBox::information(this, "Information", QString::fromStdString(message));
     }
@@ -104,9 +155,9 @@ void MainWindow::slotShowMessage(char type, std::string message)
 
 void MainWindow::slotSetPingToUser(std::string userName, int ping)
 {
-    for (int i = 0; i < ui->listWidget_2->model()->rowCount(); i++)
+    for (int i = 0; i < ui->listWidget_users->model()->rowCount(); i++)
     {
-        QString userNameWithPing = ui->listWidget_2->item(i)->text();
+        QString userNameWithPing = ui->listWidget_users->item(i)->text();
         QString userNameInList = "";
         for (int j = 0; j < userNameWithPing.size(); j++)
         {
@@ -132,7 +183,7 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
                 else userNameInList += (" [" + QString::number(ping) + " ms]");
             }
 
-            ui->listWidget_2->item(i)->setText( userNameInList );
+            ui->listWidget_users->item(i)->setText( userNameInList );
 
 
             for (size_t k = 0; k < users.size(); k++)
@@ -146,30 +197,30 @@ void MainWindow::slotSetPingToUser(std::string userName, int ping)
                     {
                         if      (users[k].ping <= pController->getPingNormalBelow())
                         {
-                            users[k].pItem->setIcon(QIcon(":user_normal_ping_talking.png"));
+                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
                         }
                         else if (users[k].ping <= pController->getPingWarningBelow())
                         {
-                            users[k].pItem->setIcon(QIcon(":user_warning_ping_talking.png"));
+                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING_TALK));
                         }
                         else
                         {
-                            users[k].pItem->setIcon(QIcon(":user_bad_ping_talking.png"));
+                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD_TALK));
                         }
                     }
                     else
                     {
                         if      (users[k].ping <= pController->getPingNormalBelow())
                         {
-                            users[k].pItem->setIcon(QIcon(":user_normal_ping.png"));
+                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
                         }
                         else if (users[k].ping <= pController->getPingWarningBelow())
                         {
-                            users[k].pItem->setIcon(QIcon(":user_warning_ping.png"));
+                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING));
                         }
                         else
                         {
-                            users[k].pItem->setIcon(QIcon(":user_bad_ping.png"));
+                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD));
                         }
                     }
 
@@ -194,30 +245,30 @@ void MainWindow::slotSetUserIsTalking(std::string userName, bool bTalking)
             {
                 if      (users[i].ping <= pController->getPingNormalBelow())
                 {
-                    users[i].pItem->setIcon(QIcon(":user_normal_ping_talking.png"));
+                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
                 }
                 else if (users[i].ping <= pController->getPingWarningBelow())
                 {
-                    users[i].pItem->setIcon(QIcon(":user_warning_ping_talking.png"));
+                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING_TALK));
                 }
                 else
                 {
-                    users[i].pItem->setIcon(QIcon(":user_bad_ping_talking.png"));
+                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD_TALK));
                 }
             }
             else
             {
                 if      (users[i].ping <= pController->getPingNormalBelow())
                 {
-                    users[i].pItem->setIcon(QIcon(":user_normal_ping.png"));
+                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
                 }
                 else if (users[i].ping <= pController->getPingWarningBelow())
                 {
-                    users[i].pItem->setIcon(QIcon(":user_warning_ping.png"));
+                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING));
                 }
                 else
                 {
-                    users[i].pItem->setIcon(QIcon(":user_bad_ping.png"));
+                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD));
                 }
             }
 
@@ -431,7 +482,7 @@ void MainWindow::addNewUserToList(std::string name)
 {
     QString qName = QString::fromStdString(name) + " [-- ms]";
     QListWidgetItem* pNewItem = new QListWidgetItem(qName);
-    ui->listWidget_2->addItem( pNewItem );
+    ui->listWidget_users->addItem( pNewItem );
 
     users.push_back(User(name, 0, pNewItem));
 }
@@ -440,15 +491,15 @@ void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
 {
     if (bDeleteAll)
     {
-        ui->listWidget_2->clear();
+        ui->listWidget_users->clear();
 
         users.clear();
     }
     else
     {
-        for (int i = 0; i < ui->listWidget_2->model()->rowCount(); i++)
+        for (int i = 0; i < ui->listWidget_users->model()->rowCount(); i++)
         {
-            QString userNameWithPing = ui->listWidget_2->item(i)->text();
+            QString userNameWithPing = ui->listWidget_users->item(i)->text();
             QString userName = "";
             for (int j = 0; j < userNameWithPing.size(); j++)
             {
@@ -461,7 +512,7 @@ void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
 
             if ( userName == QString::fromStdString(name))
             {
-                delete ui->listWidget_2->item(i);
+                delete ui->listWidget_users->item(i);
 
                 for (size_t j = 0; j < users.size(); j++)
                 {
@@ -488,9 +539,9 @@ void MainWindow::showUserConnectNotice(std::string name, SilentMessageColor mess
     emit signalShowUserConnectNotice(name, messageColor);
 }
 
-void MainWindow::showMessageBox(char type, std::string message)
+void MainWindow::showMessageBox(bool bWarningBox, std::string message)
 {
-    emit signalShowMessage(type, message);
+    emit signalShowMessage(bWarningBox, message);
 }
 
 void MainWindow::clearTextEdit()
@@ -498,69 +549,10 @@ void MainWindow::clearTextEdit()
     ui->plainTextEdit_2->clear();
 }
 
-void MainWindow::saveUserName(std::string userName)
-{
-    TCHAR my_documents[MAX_PATH];
-    HRESULT result = SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
-
-    if (result != S_OK)
-    {
-        QMessageBox::warning(this, "Warning", "Error. Settings will not be saved.");
-    }
-    else
-    {
-        std::wstring adressToSettings = std::wstring(my_documents);
-        std::wstring adressToTempSettings = std::wstring(my_documents);
-        adressToSettings += L"\\SilentSettings.data";
-        adressToTempSettings += L"\\SilentSettings~.data";
-
-        // Check if settings file exists
-        std::ifstream settingsFile(adressToSettings, std::ios::binary);
-        if (settingsFile.is_open())
-        {
-            std::ofstream newSettingsFile(adressToTempSettings, std::ios::binary);
-
-            int iKey = 0;
-            settingsFile.read(reinterpret_cast<char*>(&iKey), 4);
-            newSettingsFile.write(reinterpret_cast<char*>(&iKey), 4);
-
-            unsigned short int iVolume = 0;
-            settingsFile.read(reinterpret_cast<char*>(&iVolume), 2);
-            newSettingsFile.write(reinterpret_cast<char*>(&iVolume), 2);
-
-            unsigned char userNameSize = userName.size();
-            newSettingsFile.write(reinterpret_cast<char*>(&userNameSize), 1);
-            newSettingsFile.write(userName.c_str(), userNameSize);
-
-            newSettingsFile.close();
-            settingsFile.close();
-
-            _wremove(adressToSettings.c_str());
-            _wrename(adressToTempSettings.c_str(), adressToSettings.c_str());
-        }
-        else
-        {
-            std::ofstream newSettingFile(adressToSettings, std::ios::binary);
-
-            // T button
-            int iPushToTalkKey = 0x54;
-            newSettingFile.write(reinterpret_cast<char*>(&iPushToTalkKey), 4);
-
-            // 100%
-            unsigned short int iVolume = 65535;
-            newSettingFile.write(reinterpret_cast<char*>(&iVolume), 2);
-
-            unsigned char nameSize = userName.size();
-            newSettingFile.write(reinterpret_cast<char*>(&nameSize), 1);
-            newSettingFile.write(userName.c_str(), nameSize);
-
-            newSettingFile.close();
-        }
-    }
-}
-
 void MainWindow::on_actionConnect_triggered()
 {
+    pConnectWindow ->setUserName( pController ->getCurrentSettingsFile() ->sUsername );
+
     pConnectWindow->show();
 }
 
@@ -594,88 +586,44 @@ void MainWindow::on_plainTextEdit_2_textChanged()
     }
 }
 
-void MainWindow::checkIfSettingsExist()
+void MainWindow::showSettingsWindow()
 {
     pTimer->stop();
 
-    TCHAR my_documents[MAX_PATH];
-    HRESULT result = SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
 
-    if (result != S_OK)
+
+
+    // Show SettingsWindow
+
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), this);
+    connect(pSettingsWindow, &SettingsWindow::signalSaveSettings, this, &MainWindow::slotSaveSettings);
+    pSettingsWindow ->setWindowModality(Qt::ApplicationModal);
+    pSettingsWindow ->setWindowOpacity(0);
+    pSettingsWindow ->show();
+
+
+
+    // Show "cool animation"
+
+    qreal opacity = 0.1;
+
+    for (int i = 1; i < 11; i++)
     {
-        QMessageBox::warning(this, "Warning", "Error. Settings will not be saved.");
-    }
-    else
-    {
-        // Delete FChatSettings if they are exists
-        std::wstring adressToOldSettings = std::wstring(my_documents);
-        adressToOldSettings += L"\\FChatSettings.data";
+        pSettingsWindow ->setWindowOpacity( opacity * i );
 
-        std::ifstream oldSettings (adressToOldSettings);
-        if (oldSettings .is_open())
-        {
-            oldSettings .close();
-            _wremove ( adressToOldSettings .c_str() );
-        }
-
-        // Open new settings
-        std::wstring adressToSettings = std::wstring(my_documents);
-        adressToSettings += L"\\SilentSettings.data";
-
-        // Check if settings file exists
-        std::ifstream settingsFile(adressToSettings, std::ios::binary);
-        if (settingsFile.is_open())
-        {
-            int iKey = 0;
-
-            settingsFile.read(reinterpret_cast<char*>(&iKey), 4);
-
-            unsigned short int iVolume = 0;
-            settingsFile.read(reinterpret_cast<char*>(&iVolume), 2);
-
-            pController->setPushToTalkButtonAndVolume(iKey, iVolume);
-
-            unsigned char userNameSize = 0;
-            settingsFile.read(reinterpret_cast<char*>(&userNameSize), 1);
-            if (userNameSize != 0)
-            {
-                char nameBuffer[21];
-                memset(nameBuffer, 0, 21);
-
-                settingsFile.read(nameBuffer, userNameSize);
-
-                pConnectWindow->setUserName( std::string(nameBuffer) );
-            }
-
-            settingsFile.close();
-        }
-        else
-        {
-            // Show SettingsWindow
-            SettingsWindow* pSettingsWindow = new SettingsWindow(this);
-            connect(pSettingsWindow, &SettingsWindow::signalSetPushToTalkButton, this, &MainWindow::slotSetPushToTalkButton);
-            pSettingsWindow->setWindowModality(Qt::ApplicationModal);
-            pSettingsWindow->setWindowOpacity(0);
-            pSettingsWindow->show();
-
-            qreal opacity = 0.1;
-
-            for (int i = 1; i < 11; i++)
-            {
-                pSettingsWindow->setWindowOpacity( opacity * i );
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
-void MainWindow::slotSetPushToTalkButton(int iKey, unsigned short int iVolume)
+void MainWindow::slotSaveSettings(SettingsFile* pSettingsFile)
 {
-    pController->setPushToTalkButtonAndVolume(iKey, iVolume);
+    pController->saveSettings(pSettingsFile);
 }
 
 void MainWindow::hideEvent(QHideEvent *event)
 {
+    Q_UNUSED(event)
+
     hide();
     pTrayIcon->show();
 }
@@ -683,15 +631,15 @@ void MainWindow::hideEvent(QHideEvent *event)
 void MainWindow::on_actionSettings_triggered()
 {
     // Show SettingsWindow
-    SettingsWindow* pSettingsWindow = new SettingsWindow(this);
-    connect(pSettingsWindow, &SettingsWindow::signalSetPushToTalkButton, this, &MainWindow::slotSetPushToTalkButton);
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), this);
+    connect(pSettingsWindow, &SettingsWindow::signalSaveSettings, this, &MainWindow::slotSaveSettings);
     pSettingsWindow->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow->show();
 }
 
-void MainWindow::on_listWidget_2_customContextMenuRequested(const QPoint &pos)
+void MainWindow::on_listWidget_users_customContextMenuRequested(const QPoint &pos)
 {
-    QListWidgetItem* pItem = ui->listWidget_2->itemAt(pos);
+    QListWidgetItem* pItem = ui->listWidget_users->itemAt(pos);
     if (pItem)
     {
         QString nameWithPing = pItem->text();
@@ -711,7 +659,7 @@ void MainWindow::on_listWidget_2_customContextMenuRequested(const QPoint &pos)
 
         if ( nameWithoutPing.toStdString() != pController->getUserName() )
         {
-            QPoint globalPos = ui->listWidget_2->mapToGlobal(pos);
+            QPoint globalPos = ui->listWidget_users->mapToGlobal(pos);
 
             pMenuContextMenu->exec(globalPos);
         }
@@ -720,9 +668,9 @@ void MainWindow::on_listWidget_2_customContextMenuRequested(const QPoint &pos)
 
 void MainWindow::slotChangeUserVolume()
 {
-    if (ui->listWidget_2->currentRow() >= 0)
+    if (ui->listWidget_users->currentRow() >= 0)
     {
-        QString nameWithPing = ui->listWidget_2->item( ui->listWidget_2->currentRow() )->text();
+        QString nameWithPing = ui->listWidget_users->item( ui->listWidget_users->currentRow() )->text();
         QString nameWithoutPing = "";
 
         for (int i = 0; i < nameWithPing.size(); i++)
@@ -762,6 +710,8 @@ void MainWindow::on_actionAbout_2_triggered()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event)
+
     pController->stop();
 }
 
@@ -771,7 +721,10 @@ MainWindow::~MainWindow()
     delete pActionChangeVolume;
     delete pMenuContextMenu;
 
-    delete pTimer;
+    if (pTimer)
+    {
+        delete pTimer;
+    }
     delete pController;
     delete pConnectWindow;
     delete ui;

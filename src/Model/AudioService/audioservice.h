@@ -18,6 +18,7 @@
 
 class MainWindow;
 class NetworkService;
+class SettingsManager;
 
 
 #define BUFFER_UPDATE_CHECK_MS 2
@@ -66,7 +67,7 @@ class AudioService
 
 public:
 
-    AudioService(MainWindow* pMainWindow);
+    AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsManager);
 
 
 
@@ -108,7 +109,7 @@ public:
     // SET functions
 
         void   setNewUserVolume              (std::string sUserName,  float fVolume);
-        void   setPushToTalkButtonAndVolume  (int iKey,               unsigned short int iVolume);
+        void   setNewMasterVolume            (unsigned short int iVolume);
         void   setNetworkService             (NetworkService* pNetworkService);
 
 
@@ -152,8 +153,9 @@ private:
     short int*      pWaveIn4;
 
 
-    MainWindow*     pMainWindow;
-    NetworkService* pNetworkService;
+    MainWindow*      pMainWindow;
+    NetworkService*  pNetworkService;
+    SettingsManager* pSettingsManager;
 
 
     // Record quality
@@ -165,13 +167,8 @@ private:
 
 
     // Push-to-talk
-    int             iPushToTalkButton;
+    float           fMasterVolumeMult;
     bool            bInputReady;
-
-
-    // Volume
-    unsigned short int iVolume;
-    float              fMasterVolumeMult;
 
 
     // Users

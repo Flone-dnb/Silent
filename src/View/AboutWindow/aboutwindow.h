@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+
 // Qt
 #include <QMainWindow>
 
 
 class QCloseEvent;
+
 namespace Ui
 {
     class AboutWindow;
@@ -22,20 +24,18 @@ class AboutWindow : public QMainWindow
 
 public:
 
-    explicit AboutWindow(QString sSilentVersion, QWidget *parent = nullptr);
+    explicit AboutWindow       (QString sSilentVersion, QWidget *parent = nullptr);
 
 
-
-
-
-    ~AboutWindow();
+    ~AboutWindow               ();
 
 protected:
 
-    void closeEvent (QCloseEvent* pEvent);
+    void closeEvent            (QCloseEvent* pEvent);
 
 private slots:
-    void on_pushButton_clicked();
+
+    void on_pushButton_github_clicked ();
 
 private:
 

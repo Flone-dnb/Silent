@@ -1,84 +1,159 @@
 ﻿#include "connectwindow.h"
 #include "ui_connectwindow.h"
 
+
+// Qt
 #include <QMessageBox>
 #include <QMouseEvent>
 
-connectWindow::connectWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::connectWindow)
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+
+connectWindow::connectWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::connectWindow)
 {
-    ui->setupUi(this);
+    ui ->setupUi(this);
     setFixedSize(width(), height());
-    ui->lineEdit_3->setMaxLength( 20 );
+
+
+    ui ->lineEdit_username ->setMaxLength( 20 );
 }
+
+
+
+
 
 void connectWindow::setUserName(std::string userName)
 {
-    ui->lineEdit_3->setText( QString::fromStdString(userName) );
-}
-
-connectWindow::~connectWindow()
-{
-    delete ui;
+    ui ->lineEdit_username ->setText( QString::fromStdString(userName) );
 }
 
 void connectWindow::closeEvent(QCloseEvent *event)
 {
-    event->ignore();
+    event ->ignore();
     hide();
+
     emit showMainWindow();
 }
 
 void connectWindow::on_pushButton_clicked()
 {
-    if (ui->lineEdit_3->text().size() > 1)
-    {
-        bool bOnlyEnglish = true;
-        for (unsigned int i = 0; i < ui->lineEdit_3->text().size() ;i++)
-        {
-            if ( (ui->lineEdit_3->text().at(i).unicode() > 122) || (ui->lineEdit_3->text().at(i).unicode() < 48))
-            {
-                bOnlyEnglish = false;
-                break;
-            }
-            else
-            {
-                if ( (ui->lineEdit_3->text().at(i).unicode() >= 58) && (ui->lineEdit_3->text().at(i).unicode() <= 64) )
-                {
-                    bOnlyEnglish = false;
-                    break;
-                }
-                else
-                {
-                    if ( (ui->lineEdit_3->text().at(i).unicode() >= 91) && (ui->lineEdit_3->text().at(i).unicode() <= 96) )
-                    {
-                        bOnlyEnglish = false;
-                        break;
-                    }
-                }
-            }
-        }
+    // Check if the entered name has forbidden characters.
+    // Allowed: A-Z, a-z, 0-9.
 
-        if (bOnlyEnglish)
+    const char cUserNameMinLength = 2;
+
+    if ( ui ->lineEdit_username ->text() .size() <= cUserNameMinLength )
+    {
+        QMessageBox::information(this, "Input Error", "The user name must be "
+                                 + QString::number( static_cast <int> (cUserNameMinLength) )
+                                 + " characters or longer.");
+
+        return;
+    }
+
+
+
+
+    // Check if name contains only allowed chars
+
+    bool bOnlyAllowed = true;
+
+    for (int i = 0;   i < ui ->lineEdit_username ->text() .size();   i++)
+    {
+        // Filter ASCII chars to only [48-122]
+
+        if ( (ui ->lineEdit_username ->text() .at(i) .unicode() >= 123)
+             ||
+             (ui ->lineEdit_username ->text() .at(i) .unicode() <= 47) )
         {
-            if (ui->lineEdit->text().size() >= 7)
-            {
-                hide();
-                emit connectTo(ui->lineEdit->text().toStdString(),ui->lineEdit_2->text().toStdString(),ui->lineEdit_3->text().toStdString());
-            }
-            else
-            {
-               QMessageBox::information(nullptr, "IP", "Please fill IPv4 adress field.\n");
-            }
+
+            bOnlyAllowed = false;
+            break;
+
         }
         else
         {
-            QMessageBox::information(nullptr, "Name", "User name must consist only of A-Z, a-z, 0-9 characters.\n");
+
+            // ASCII chars in [58-64] are forbidden
+
+            if ( (ui ->lineEdit_username ->text() .at(i) .unicode() >= 58)
+                 &&
+                 (ui ->lineEdit_username ->text() .at(i) .unicode() <= 64) )
+            {
+
+                bOnlyAllowed = false;
+                break;
+
+            }
+            else
+            {
+                // ASCII chars in [91-96] are forbidden
+
+                if ( (ui ->lineEdit_username ->text() .at(i) .unicode() >= 91)
+                     &&
+                     (ui ->lineEdit_username ->text() .at(i) .unicode() <= 96) )
+                {
+
+                    bOnlyAllowed = false;
+                    break;
+
+                }
+            }
+
         }
     }
-    else
+
+
+
+
+    // Check if only allowed
+
+    if ( bOnlyAllowed == false )
     {
-        QMessageBox::information(nullptr, "Name", "User name must be 2 characters or longer.\n");
+        QMessageBox::information(this, "Input Error", "The user name must consist only of A-Z, a-z, 0-9 characters.");
+
+        return;
     }
+
+
+
+
+    // Check if the IP is entered
+
+    if ( ui ->lineEdit_ip ->text() .size() <= 6 )
+    {
+        QMessageBox::information(this, "Input Error", "Please fill the IPv4 adress field.");
+
+        return;
+    }
+
+
+
+
+    // Check if the port is entered
+    if ( ui ->lineEdit_port ->text() .size() <= 1 )
+    {
+        QMessageBox::information(this, "Input Error", "Please fill the Port field.");
+
+        return;
+    }
+
+
+
+
+    // Send signal to connect
+
+    hide();
+    emit connectTo( ui ->lineEdit_ip       -> text() .toStdString(),
+                    ui ->lineEdit_port     -> text() .toStdString(),
+                    ui ->lineEdit_username -> text() .toStdString() );
+}
+
+
+connectWindow::~connectWindow()
+{
+    delete ui;
 }

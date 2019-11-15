@@ -12,16 +12,6 @@
 // Custom
 #include "../src/Model/OutputTextType.h"
 
-// ============== Network ==============
-// Sockets and stuff
-#include <winsock2.h>
-
-// Adress translation
-#include <ws2tcpip.h>
-
-// Winsock 2 Library
-#pragma comment(lib,"Ws2_32.lib")
-
 
 
 class connectWindow;
@@ -32,6 +22,7 @@ class QMenu;
 class QAction;
 class QSystemTrayIcon;
 class QListWidgetItem;
+class SettingsFile;
 
 namespace Ui
 {
@@ -89,9 +80,8 @@ public:
         void  deleteUserFromList        (std::string name, bool bDeleteAll = false);
         void  showUserDisconnectNotice  (std::string name, SilentMessageColor messageColor, bool bUserLost);
         void  showUserConnectNotice     (std::string name, SilentMessageColor messageColor);
-        void  showMessageBox            (char type, std::string message);
+        void  showMessageBox            (bool bWarningBox, std::string message);
         void  clearTextEdit             ();
-        void  saveUserName              (std::string userName);
 
     ~MainWindow();
 
@@ -100,14 +90,10 @@ signals:
     void signalShowUserConnectNotice(std::string name, SilentMessageColor messageColor);
     void signalShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost);
     void signalTypeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
-    void signalShowMessage(char type, std::string message);
+    void signalShowMessage(bool bWarningBox, std::string message);
     void signalSetPingToUser(std::string userName, int ping);
     void signalSetUserIsTalking(std::string userName, bool bTalking);
     void signalEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
-
-public slots:
-
-    void slotSetPushToTalkButton(int iKey, unsigned short int volume);
 
 protected:
 
@@ -120,9 +106,11 @@ private slots:
     // Context menu in list
     void slotChangeUserVolume();
 
+    void slotSaveSettings(SettingsFile* pSettingsFile);
+
     void slotSetNewUserVolume(QString userName, float fVolume);
 
-    void slotShowMessage(char type, std::string message);
+    void slotShowMessage(bool bWarningBox, std::string message);
     void slotSetPingToUser(std::string userName, int ping);
     void slotSetUserIsTalking(std::string userName, bool bTalking);
     void typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
@@ -138,11 +126,11 @@ private slots:
 
     void on_pushButton_clicked();
     void on_plainTextEdit_2_textChanged();
-    void on_listWidget_2_customContextMenuRequested(const QPoint &pos);
+    void on_listWidget_users_customContextMenuRequested(const QPoint &pos);
 
 private:
 
-    void checkIfSettingsExist();
+    void showSettingsWindow();
     void closeApp();
 
 

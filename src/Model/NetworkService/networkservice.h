@@ -18,7 +18,7 @@
 
 class MainWindow;
 class AudioService;
-
+class SettingsManager;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ class NetworkService
 {
 public:
 
-    NetworkService(MainWindow* pMainWindow, AudioService* pAudioService);
+    NetworkService(MainWindow* pMainWindow, AudioService* pAudioService, SettingsManager* pSettingsManager);
 
 
 
@@ -88,8 +88,9 @@ private:
 
 
 
-    MainWindow*    pMainWindow;
-    AudioService*  pAudioService;
+    MainWindow*      pMainWindow;
+    AudioService*    pAudioService;
+    SettingsManager* pSettingsManager;
 
 
     // Ping

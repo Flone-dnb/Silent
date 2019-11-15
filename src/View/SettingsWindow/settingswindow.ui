@@ -110,7 +110,7 @@ color: white;</string>
            <number>4</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButton_pushtotalk">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -155,7 +155,7 @@ QPushButton:hover
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="80,20">
           <item>
-           <widget class="QSlider" name="horizontalSlider">
+           <widget class="QSlider" name="horizontalSlider_volume">
             <property name="styleSheet">
              <string notr="true">QSlider::handle
 {
@@ -208,6 +208,9 @@ QSlider::sub-page:disabled
           </item>
           <item>
            <widget class="QLabel" name="label_4">
+            <property name="styleSheet">
+             <string notr="true">background-color: transparent;</string>
+            </property>
             <property name="text">
              <string>100%</string>
             </property>

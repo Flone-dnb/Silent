@@ -1,15 +1,24 @@
 ﻿#pragma once
 
+
+// Qt
 #include <QMainWindow>
 
 
 class QKeyEvent;
 class QMouseEvent;
+class SettingsFile;
 
-
-namespace Ui {
-class SettingsWindow;
+namespace Ui
+{
+    class SettingsWindow;
 }
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
 
 class SettingsWindow : public QMainWindow
 {
@@ -17,37 +26,51 @@ class SettingsWindow : public QMainWindow
 
 public:
 
-    explicit SettingsWindow(QWidget *parent = nullptr);
+    explicit SettingsWindow                        (SettingsFile* pSettingsFile, QWidget *parent = nullptr);
 
-    ~SettingsWindow();
+    ~SettingsWindow                                ();
 
 signals:
 
-    void signalSetPushToTalkButton(int iKey, unsigned short int volume);
+    void  signalSaveSettings                       (SettingsFile* pSettingsFile);
 
 protected:
 
-    void keyPressEvent(QKeyEvent* event);
-    void mousePressEvent(QMouseEvent *event);
+    void  keyPressEvent                            (QKeyEvent*   event);
+    void  mousePressEvent                          (QMouseEvent* event);
 
 private slots:
 
-    void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
-    void on_horizontalSlider_valueChanged(int value);
+    void  on_horizontalSlider_volume_valueChanged  (int value);
+    void  on_pushButton_pushtotalk_clicked         ();
+    void  on_pushButton_2_clicked                  ();
 
 private:
 
-    void showKeyOnScreen(int key);
-    void setKeyInSettingsFile(int key);
-
-    void refreshSliderText();
+    void  updateUIToSettings                       (SettingsFile* pSettingsFile);
+    void  refreshVolumeSliderText                  ();
 
 
 
-    int iPushToTalkKey;
-    bool bWaitingForButton;
+    // ----------------------------------------------
 
 
-    Ui::SettingsWindow *ui;
+
+    // Push-to-Talk button
+    int                 iPushToTalkKey;
+    unsigned short int  iMasterVolume;
+    bool                bWaitingForPushToTalkButtonInput;
+
+
+    // Changed settings
+    bool                bPushToTalkChanged;
+    bool                bMasterVolumeChanged;
+
+
+    // Original settings
+    int                 iOriginalPushToTalkButton;
+    unsigned short int  iOriginalMasterVolume;
+
+
+    Ui::SettingsWindow* ui;
 };

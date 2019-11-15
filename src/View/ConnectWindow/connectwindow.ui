@@ -56,7 +56,7 @@ color: white;</string>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_3">
+       <widget class="QLineEdit" name="lineEdit_username">
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -107,7 +107,7 @@ border-radius: 6px;</string>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit">
+       <widget class="QLineEdit" name="lineEdit_ip">
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -149,7 +149,7 @@ border-radius: 6px;</string>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_2">
+       <widget class="QLineEdit" name="lineEdit_port">
         <property name="font">
          <font>
           <family>Segoe UI</family>

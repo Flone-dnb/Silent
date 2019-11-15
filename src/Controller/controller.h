@@ -1,11 +1,15 @@
 ﻿#pragma once
 
+
 // STL
 #include <string>
+
 
 class NetworkService;
 class AudioService;
 class MainWindow;
+class SettingsManager;
+class SettingsFile;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -23,29 +27,31 @@ public:
 
     // Start/stop
 
-        void           connectTo                     (std::string sAdress,    std::string sPort,  std::string sUserName);
-        void           disconnect                    ();
-        void           stop                          ();
+        void           connectTo                  (std::string sAdress,    std::string sPort,  std::string sUserName);
+        void           disconnect                 ();
+        void           stop                       ();
 
 
     // Chat functions
 
-        void           sendMessage                   (std::wstring sMessage);
+        void           sendMessage                (std::wstring sMessage);
 
 
-    // SET functions
+    // Settings
 
-        void           setPushToTalkButtonAndVolume  (int iKey,              unsigned short int iVolume);
-        void           setNewUserVolume              (std::string sUserName,  float fVolume);
+        void           saveSettings               (SettingsFile* pSettingsFile);
+        void           setNewUserVolume           (std::string sUserName,  float fVolume);
 
 
     // GET functions
 
-        float          getUserCurrentVolume          (std::string sUserName);
-        std::string    getClientVersion              ();
-        std::string    getUserName                   ();
-        unsigned short getPingNormalBelow            ();
-        unsigned short getPingWarningBelow           ();
+        float          getUserCurrentVolume       (std::string sUserName);
+        std::string    getClientVersion           ();
+        std::string    getUserName                ();
+        unsigned short getPingNormalBelow         ();
+        unsigned short getPingWarningBelow        ();
+        SettingsFile*  getCurrentSettingsFile     ();
+        bool           isSettingsCreatedFirstTime ();
 
 
 
@@ -55,6 +61,7 @@ public:
 private:
 
 
-    NetworkService* pNetworkService;
-    AudioService*   pAudioService;
+    NetworkService*  pNetworkService;
+    AudioService*    pAudioService;
+    SettingsManager* pSettingsManager;
 };
