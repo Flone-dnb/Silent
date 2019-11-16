@@ -193,7 +193,18 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
 
 
 
-    std::string sOldTheme = pCurrentSettingsFile ->sThemeName;
+    // Save the old theme
+
+    std::string sOldTheme = "";
+
+    if (pCurrentSettingsFile)
+    {
+        sOldTheme = pCurrentSettingsFile ->sThemeName;
+    }
+    else
+    {
+        sOldTheme = pSettingsFile ->sThemeName;
+    }
 
     // Update our 'pCurrentSettingsFile' to new settings
 
