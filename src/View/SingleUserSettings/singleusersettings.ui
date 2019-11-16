@@ -14,8 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
-color: white;</string>
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="20,30,20,30">
@@ -28,7 +27,7 @@ color: white;</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>User's volume:</string>
@@ -40,37 +39,7 @@ color: white;</string>
       <item>
        <widget class="QSlider" name="horizontalSlider">
         <property name="styleSheet">
-         <string notr="true">QSlider::handle
-{
-	background-color: black;
-	border: 1px solid rgb(179, 0, 0);
-}
-
-QSlider::add-page 
-{
-    background: gray;
-}
-
-QSlider::sub-page
- {
-    background: rgb(179, 0, 0);
-}
-
-QSlider::handle:disabled
-{
-	background-color: rgb(59, 59, 59);
-	border: 1px solid gray;
-}
-
-QSlider::add-page:disabled 
-{
-    background: gray;
-}
-
-QSlider::sub-page:disabled
-{
-    background: gray;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="maximum">
          <number>150</number>
@@ -91,7 +60,7 @@ QSlider::sub-page:disabled
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>100%</string>
@@ -112,7 +81,7 @@ QSlider::sub-page:disabled
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgba(255, 255, 255, 0);</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note that these changes are temporary and will reset at the next start.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -155,26 +124,7 @@ QSlider::sub-page:disabled
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">QPushButton
-{
-	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(28, 28, 28, 255));
-	border: 1px solid rgb(240, 0, 0);
-	border-radius: 6px;
-	color: white;
-}
-
-QPushButton:disabled
-{
-	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(4, 4, 4, 200), stop:1 rgba(29, 29, 29, 230));
-	border: 1px solid darkred;
-	color: rgb(50, 50, 50);
-}
-
-QPushButton:hover
-{
-	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(37, 37, 37, 255), stop:1 rgba(58, 58, 58, 255));
-	border: 1px solid white;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>Apply</string>

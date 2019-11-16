@@ -32,13 +32,30 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     // Set appearance
 
-    ui->setupUi(this);
+    ui ->setupUi(this);
 
-    QFile File(STYLE_THEME_DEFAULT_PATH);
-    File .open(QFile::ReadOnly);
-    QString StyleSheet = QLatin1String( File .readAll() );
+    // Set CSS classes
+    ui ->label_2         ->setProperty("cssClass", "mainwindowLabel");
+    ui ->label_3         ->setProperty("cssClass", "mainwindowLabel");
+    ui ->plainTextEdit_2 ->setProperty("cssClass", "userInput");
+    ui ->plainTextEdit   ->setProperty("cssClass", "chatOutput");
 
-    qApp->setStyleSheet(StyleSheet);
+    // Apply style
+    QFile File(STYLE_THEME_DEFAULT_PATH_FROM_EXE);
+    if( File .exists()
+        &&
+        File .open(QFile::ReadOnly) )
+    {
+        QString StyleSheet = QLatin1String( File .readAll() );
+
+        qApp->setStyleSheet(StyleSheet);
+
+        File .close();
+    }
+    else
+    {
+        QMessageBox::warning(this, "Error", "Could not open the \"" + QString(STYLE_THEME_DEFAULT_PATH_FROM_EXE) + "\" file.");
+    }
 
 
 

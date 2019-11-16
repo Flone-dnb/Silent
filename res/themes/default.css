@@ -1,0 +1,289 @@
+QMainWindow
+{
+    background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
+    color: white;
+}
+
+QLabel
+{
+    background-color: transparent;
+    color: white;
+}
+
+QLabel[cssClass="mainwindowLabel"]
+{
+    border: 1px solid rgb(240, 0, 0);
+    border-radius: 6px;
+}
+
+QPushButton
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(28, 28, 28, 255));
+	border: 1px solid rgb(240, 0, 0);
+	border-radius: 6px;
+	color: white;
+}
+
+QPushButton:disabled
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(4, 4, 4, 200), stop:1 rgba(29, 29, 29, 230));
+	border: 1px solid darkred;
+	color: rgb(50, 50, 50);
+}
+
+QPushButton:hover
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(37, 37, 37, 255), stop:1 rgba(58, 58, 58, 255));
+	border: 1px solid white;
+}
+
+QPlainTextEdit[cssClass="userInput"]
+{
+    background-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgba(26, 26, 26, 255), stop:0.211618 rgba(11, 11, 11, 255), stop:0.5 rgba(4, 4, 4, 255), stop:0.73029 rgba(10, 10, 10, 255), stop:1 rgba(26, 26, 26, 255));
+selection-background-color: rgb(140, 0, 0);
+    color: white;
+    border: 1px solid rgb(240, 0, 0);
+    border-radius: 6px;
+}
+
+QPlainTextEdit[cssClass="chatOutput"]
+{
+    background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(5, 5, 5, 255), stop:1 rgba(29, 29, 29, 255));
+selection-background-color: rgb(140, 0, 0);
+    border: 1px solid rgb(240, 0, 0);
+    border-radius: 6px;
+}
+
+QLineEdit
+{
+    background-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgba(25, 25, 25, 255), stop:0.211618 rgba(12, 12, 12, 255), stop:0.5 rgba(5, 5, 5, 255), stop:0.73029 rgba(9, 9, 9, 255), stop:1 rgba(25, 25, 25, 255));
+selection-background-color: rgb(140, 0, 0);
+    color: white;
+    border: 1px solid rgb(240, 0, 0);
+    border-radius: 6px;
+}
+
+QListWidget
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(5, 5, 5, 255), stop:1 rgba(29, 29, 29, 255));
+	color: white;
+	border: 1px solid rgb(240, 0, 0);
+	border-radius: 6px;
+}
+
+QListWidget::item:hover
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(115, 15, 15, 130), stop:1 rgba(100, 16, 16, 130));
+	color: white;
+}
+
+QListWidget::item:selected
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(130, 3, 3, 230), stop:1 rgba(115, 13, 13, 230));
+	color: white;
+}
+
+QScrollBar
+{
+    background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
+}
+
+/* -------------------------------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------- */
+/*                   QMessageBox                             */
+/* --------------------------------------------------------- */
+/*                      Begin                                */
+/* --------------------------------------------------------- */
+
+QMessageBox
+{
+    background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
+    color: white;
+}
+
+QMessageBox > QLabel
+{
+    background-color: transparent;
+    color: white;
+}
+
+QMessageBox QPushButton
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(28, 28, 28, 255));
+	border: 1px solid rgb(240, 0, 0);
+	border-radius: 6px;
+    color: white;
+    min-width: 60px;
+    min-height: 20px;
+}
+
+QMessageBox QPushButton:disabled
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(4, 4, 4, 200), stop:1 rgba(29, 29, 29, 230));
+	border: 1px solid darkred;
+	color: rgb(50, 50, 50);
+}
+
+QMessageBox QPushButton:hover
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(37, 37, 37, 255), stop:1 rgba(58, 58, 58, 255));
+	border: 1px solid white;
+}
+
+/* --------------------------------------------------------- */
+/*                    QMessageBox                            */
+/* --------------------------------------------------------- */
+/*                        End                                */
+/* --------------------------------------------------------- */
+
+
+/* -------------------------------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------- */
+/*                       QMenu                               */
+/* --------------------------------------------------------- */
+/*                       Begin                               */
+/* --------------------------------------------------------- */
+
+
+QMenuBar
+{
+	background-color: rgba(17, 17, 17, 0);
+	color: white;
+}
+
+QMenuBar::item
+{
+	background-color: rgba(255, 255, 255, 0);
+}
+
+QMenuBar::item::selected
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(156, 11, 11, 255), stop:1 rgba(168, 0, 0, 255));
+}
+
+QMenu
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(26, 26, 26, 100), stop:0.605809 rgba(19, 19, 19, 255), stop:1 rgba(26, 26, 26, 100));
+	color: white;
+}
+
+QMenu::item::selected
+{
+	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(156, 11, 11, 255), stop:1 rgba(168, 0, 0, 255));
+}
+
+QMenu::separator
+{
+	background-color: rgb(50, 0, 0);
+	height: 2px;
+    margin-left: 10px; 
+    margin-right: 5px;
+}
+
+
+/* --------------------------------------------------------- */
+/*                        QMenu                              */
+/* --------------------------------------------------------- */
+/*                        End                                */
+/* --------------------------------------------------------- */
+
+
+
+/* -------------------------------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------- */
+/*                       QSlider                             */
+/* --------------------------------------------------------- */
+/*                       Begin                               */
+/* --------------------------------------------------------- */
+
+QSlider::handle
+{
+	background-color: black;
+	border: 1px solid rgb(179, 0, 0);
+}
+
+QSlider::add-page 
+{
+    background: gray;
+}
+
+QSlider::sub-page
+ {
+    background: rgb(179, 0, 0);
+}
+
+QSlider::handle:disabled
+{
+	background-color: rgb(59, 59, 59);
+	border: 1px solid gray;
+}
+
+QSlider::add-page:disabled 
+{
+    background: gray;
+}
+
+QSlider::sub-page:disabled
+{
+    background: gray;
+}
+
+
+/* --------------------------------------------------------- */
+/*                        QSlider                            */
+/* --------------------------------------------------------- */
+/*                        End                                */
+/* --------------------------------------------------------- */
+
+
+
+/* -------------------------------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------- */
+/*                     Help - About                          */
+/* --------------------------------------------------------- */
+/*                      Begin                                */
+/* --------------------------------------------------------- */
+
+
+QPushButton[cssClass="github"]
+{
+    border: none;
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    border-image: url(":/icons/GitHub-Mark-Light.png");
+}
+
+QPushButton[cssClass="github"]:hover
+{
+    border-image: url(":/icons/GitHub-Mark-Light-Hover.png");
+}
+
+QPushButton[cssClass="github"]:pressed
+{
+    border-image: url(":/icons/GitHub-Mark-Light.png");
+}
+
+QLabel[cssClass="appIcon"]
+{
+	background-color: transparent;
+}
+
+
+/* --------------------------------------------------------- */
+/*                     Help - About                          */
+/* --------------------------------------------------------- */
+/*                        End                                */
+/* --------------------------------------------------------- */

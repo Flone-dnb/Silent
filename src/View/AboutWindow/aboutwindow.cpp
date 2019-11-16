@@ -26,6 +26,15 @@ AboutWindow::AboutWindow(QString sSilentVersion, QWidget *parent) : QMainWindow(
 
 
 
+    // Set CSS classes
+
+    ui ->label_appIcon     ->setProperty("cssClass", "appIcon");
+
+    ui ->pushButton_github ->setProperty("cssClass", "github");
+
+
+
+
     // Set appearance
 
     ui ->label_appIcon       ->setPixmap ( QPixmap(RES_ICONS_MAIN_PATH)
