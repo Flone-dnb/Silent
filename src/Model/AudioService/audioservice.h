@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+
 // STL
 #include <string>
 #include <vector>
@@ -10,10 +11,12 @@
 #include <Windows.h>
 #include "Mmsystem.h"
 
+
 // for mmsystem
 #pragma comment(lib,"Winmm.lib")
 // for GetAsyncKeyState
 #pragma comment(lib, "user32.lib")
+
 
 
 class MainWindow;
@@ -21,7 +24,15 @@ class NetworkService;
 class SettingsManager;
 
 
-#define BUFFER_UPDATE_CHECK_MS 2
+
+#define  BUFFER_UPDATE_CHECK_MS      2
+
+#define  AUDIO_CONNECT_PATH          L"sounds/connect.wav"
+#define  AUDIO_DISCONNECT_PATH       L"sounds/disconnect.wav"
+#define  AUDIO_LOST_CONNECTION_PATH  L"sounds/lostconnection.wav"
+#define  AUDIO_NEW_MESSAGE_PATH      L"sounds/newmessage.wav"
+#define  AUDIO_PRESS_PATH            L"sounds/press.wav"
+#define  AUDIO_UNPRESS_PATH          L"sounds/unpress.wav"
 
 
 
@@ -32,17 +43,11 @@ class SettingsManager;
 
 struct UserAudioStruct
 {
-    std::string         sUserName;
-
-
     // Audio packets
     std::vector<short*> vAudioPackets;
     bool                bPacketsArePlaying;
     bool                bDeletePacketsAtLast;
     bool                bLastPacketCame;
-
-
-    float               fUserDefinedVolume;
 
 
     // Waveform-audio output device
@@ -53,6 +58,12 @@ struct UserAudioStruct
     WAVEHDR             WaveOutHdr1;
     WAVEHDR             WaveOutHdr2;
     WAVEHDR             WaveOutHdr3;
+
+
+    std::string         sUserName;
+
+
+    float               fUserDefinedVolume;
 };
 
 
@@ -102,7 +113,6 @@ public:
 
     // Stop
 
-        void   waitForAllBuffers             (UserAudioStruct* pUser);
         void   stop                          ();
 
 
@@ -131,26 +141,35 @@ private:
         bool  addOutBuffer      (HWAVEOUT  hWaveOut, LPWAVEHDR buffer);
         void  waitAndSendBuffer (WAVEHDR* WaveInHdr, short int* pWaveIn);
 
+    // Used in play()
+
+        void  waitForPlayToEnd  (UserAudioStruct* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
+        void  waitForAllBuffers (UserAudioStruct* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
+
+
+    // -------------------------------------------------------------
+
+
 
     // Waveform-audio input device
-    HWAVEIN         hWaveIn;
+    HWAVEIN          hWaveIn;
 
     // Audio format
-    WAVEFORMATEX    Format;
+    WAVEFORMATEX     Format;
 
 
     // Audio buffers
-    WAVEHDR         WaveInHdr1;
-    WAVEHDR         WaveInHdr2;
-    WAVEHDR         WaveInHdr3;
-    WAVEHDR         WaveInHdr4;
+    WAVEHDR          WaveInHdr1;
+    WAVEHDR          WaveInHdr2;
+    WAVEHDR          WaveInHdr3;
+    WAVEHDR          WaveInHdr4;
 
 
     // "In" buffers
-    short int*      pWaveIn1;
-    short int*      pWaveIn2;
-    short int*      pWaveIn3;
-    short int*      pWaveIn4;
+    short int*       pWaveIn1;
+    short int*       pWaveIn2;
+    short int*       pWaveIn3;
+    short int*       pWaveIn4;
 
 
     MainWindow*      pMainWindow;
@@ -162,13 +181,13 @@ private:
     // Do not set 'sampleCout' to more than ~700 (700 * 2 = 1400) (~MTU)
     // we '*2" because audio data in PCM16, 1 sample = 16 bits.
     // Of course, we can send 2 packets, but it's just more headache.
-    const int       sampleCount = 690;   // 46 ms (= 'sampleRate' (15000) * 0.046)
-    unsigned long   sampleRate  = 15000; // 15000 hz (samples per second)
+    const int        sampleCount = 690;   // 46 ms (= 'sampleRate' (15000) * 0.046)
+    unsigned long    sampleRate  = 15000; // 15000 hz (samples per second)
 
 
     // Push-to-talk
-    float           fMasterVolumeMult;
-    bool            bInputReady;
+    float            fMasterVolumeMult;
+    bool             bInputReady;
 
 
     // Users

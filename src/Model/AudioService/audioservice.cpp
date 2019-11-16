@@ -1,5 +1,6 @@
 ﻿#include "audioservice.h"
 
+
 // STL
 #include <thread>
 
@@ -10,6 +11,11 @@
 #include "../src/Model/SettingsManager/SettingsFile.h"
 
 
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+
 AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsManager)
 {
     this ->pMainWindow      = pMainWindow;
@@ -17,19 +23,19 @@ AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsMa
 
 
     // Do not record audio now
-    bInputReady        = false;
+    bInputReady             = false;
 
 
     // "In" (record) buffers
-    pWaveIn1           = nullptr;
-    pWaveIn2           = nullptr;
-    pWaveIn3           = nullptr;
-    pWaveIn4           = nullptr;
+    pWaveIn1                = nullptr;
+    pWaveIn2                = nullptr;
+    pWaveIn3                = nullptr;
+    pWaveIn4                = nullptr;
 
 
     // All audio will be x1.45 volume
     // Because waveOutVolume() does not make it loud enough
-    fMasterVolumeMult  = 1.45f;
+    fMasterVolumeMult       = 1.45f;
 }
 
 
@@ -44,10 +50,12 @@ void AudioService::setNewMasterVolume(unsigned short int iVolume)
 {
     mtxUsersAudio .lock();
 
+
     for (size_t i = 0;  i < vUsersAudio .size();  i++)
     {
         waveOutSetVolume( vUsersAudio[i] ->hWaveOut, MAKELONG(iVolume, iVolume) );
     }
+
 
     mtxUsersAudio .unlock();
 }
@@ -74,6 +82,7 @@ float AudioService::getUserCurrentVolume(std::string sUserName)
 {
     mtxUsersAudio .lock();
 
+
     float fCurrentVolume = 1.0f;
 
     for (size_t i = 0;  i < vUsersAudio .size();  i++)
@@ -85,7 +94,9 @@ float AudioService::getUserCurrentVolume(std::string sUserName)
         }
     }
 
+
     mtxUsersAudio .unlock();
+
 
     return fCurrentVolume;
 }
@@ -186,22 +197,22 @@ void AudioService::playSound(bool bConnectSound)
 {
     if (bConnectSound)
     {
-        PlaySoundW( L"sounds/connect.wav",    nullptr, SND_FILENAME | SND_ASYNC );
+        PlaySoundW( AUDIO_CONNECT_PATH,    nullptr, SND_FILENAME | SND_ASYNC );
     }
     else
     {
-        PlaySoundW( L"sounds/disconnect.wav", nullptr, SND_FILENAME | SND_ASYNC );
+        PlaySoundW( AUDIO_DISCONNECT_PATH, nullptr, SND_FILENAME | SND_ASYNC );
     }
 }
 
 void AudioService::playNewMessageSound()
 {
-    PlaySoundW( L"sounds/newmessage.wav", nullptr, SND_FILENAME | SND_ASYNC );
+    PlaySoundW( AUDIO_NEW_MESSAGE_PATH, nullptr, SND_FILENAME | SND_ASYNC );
 }
 
 void AudioService::playLostConnectionSound()
 {
-    PlaySoundW( L"sounds/lostconnection.wav", nullptr, SND_FILENAME );
+    PlaySoundW( AUDIO_LOST_CONNECTION_PATH, nullptr, SND_FILENAME );
 }
 
 void AudioService::addNewUser(std::string sUserName)
@@ -316,7 +327,7 @@ void AudioService::recordOnPress()
             // Button pressed
             if (bButtonPressed == false)
             {
-                PlaySoundW( L"sounds/press.wav", nullptr, SND_FILENAME | SND_ASYNC );
+                PlaySoundW( AUDIO_PRESS_PATH, nullptr, SND_FILENAME | SND_ASYNC );
             }
 
             bButtonPressed = true;
@@ -493,7 +504,7 @@ void AudioService::recordOnPress()
 
             pNetworkService->sendVoiceMessage(nullptr, 1, true);
 
-            PlaySoundW( L"sounds/unpress.wav", nullptr, SND_FILENAME | SND_ASYNC );
+            PlaySoundW( AUDIO_UNPRESS_PATH, nullptr, SND_FILENAME | SND_ASYNC );
         }
 
         std::this_thread::sleep_for( std::chrono::milliseconds(15) );
@@ -585,6 +596,20 @@ void AudioService::waitAndSendBuffer(WAVEHDR *WaveInHdr, short *pWaveIn)
     compressThread .detach();
 }
 
+void AudioService::waitForPlayToEnd(UserAudioStruct *pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex)
+{
+    // Wait until finished playing buffer
+    while (waveOutUnprepareHeader(pUser->hWaveOut, pWaveOutHdr, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+    }
+
+    delete[] pUser ->vAudioPackets[iLastPlayingPacketIndex];
+    pUser ->vAudioPackets[iLastPlayingPacketIndex] = nullptr;
+
+    iLastPlayingPacketIndex++;
+}
+
 
 void AudioService::sendAudioData(short *pAudio)
 {
@@ -615,7 +640,10 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
 
                     for (size_t j = 0;  j < vUsersAudio[i] ->vAudioPackets .size();  j++)
                     {
-                        delete[] vUsersAudio[i] ->vAudioPackets[j];
+                        if (vUsersAudio[i] ->vAudioPackets[j])
+                        {
+                            delete[] vUsersAudio[i] ->vAudioPackets[j];
+                        }
                     }
 
                     vUsersAudio[i] ->vAudioPackets.clear();
@@ -624,7 +652,7 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
                     vUsersAudio[i] ->bPacketsArePlaying   = false;
 
                     // Wait until finished playing
-                    waitForAllBuffers (vUsersAudio[i]);
+                    waitForAllBuffers (vUsersAudio[i], false, nullptr);
                 }
 
                 vUsersAudio[i] ->bLastPacketCame = true;
@@ -706,7 +734,8 @@ void AudioService::play(UserAudioStruct* pUser)
 {
     MMRESULT result;
 
-    unsigned int i = 0;
+    size_t i = 0;
+    size_t iLastPlayingPacketIndex = 0;
 
     // Let's wait a little more for the remaining packages to come (if there are any). We will wait because if the user has a high ping,
     // then when we will play sound somewhere on the first cycle, it will break and the function will end because at some point due to the high ping, the package had not yet come.
@@ -791,10 +820,8 @@ void AudioService::play(UserAudioStruct* pUser)
 
 
     // Wait until finished playing 1st buffer
-    while (waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-    }
+    waitForPlayToEnd(pUser, &pUser->WaveOutHdr1, iLastPlayingPacketIndex);
+
 
 
     // Buffer queue: 2-3.
@@ -828,11 +855,8 @@ void AudioService::play(UserAudioStruct* pUser)
 
         // Buffer queue: 2-3-1.
 
-        // Wait until finished playing 2nd
-        while (waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-        }
+        // Wait until finished playing 2nd buffer
+        waitForPlayToEnd(pUser, &pUser->WaveOutHdr2, iLastPlayingPacketIndex);
 
 
         if (i == pUser->vAudioPackets.size()) break;
@@ -866,13 +890,11 @@ void AudioService::play(UserAudioStruct* pUser)
         // Buffer queue: 3-1-2.
 
         // Wait until finished playing 3rd
-        while (waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr3, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-        }
+        waitForPlayToEnd(pUser, &pUser->WaveOutHdr3, iLastPlayingPacketIndex);
 
 
         if (i == pUser->vAudioPackets.size()) break;
+
 
         // Buffer queue: 1-2.
 
@@ -902,16 +924,13 @@ void AudioService::play(UserAudioStruct* pUser)
         // Buffer queue: 1-2-3.
 
         // Wait until finished playing 1st buffer
-        while (waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-        }
+        waitForPlayToEnd(pUser, &pUser->WaveOutHdr1, iLastPlayingPacketIndex);
     }
 
 
 
     // Wait until finished playing
-    waitForAllBuffers (pUser);
+    waitForAllBuffers (pUser, true, &iLastPlayingPacketIndex);
 
 
     pMainWindow->setUserIsTalking(pUser->sUserName, false);
@@ -923,7 +942,10 @@ void AudioService::play(UserAudioStruct* pUser)
 
         for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
         {
-            delete[] pUser ->vAudioPackets[i];
+            if (pUser ->vAudioPackets[i])
+            {
+                delete[] pUser ->vAudioPackets[i];
+            }
         }
 
         pUser ->vAudioPackets .clear ();
@@ -940,7 +962,10 @@ void AudioService::play(UserAudioStruct* pUser)
 
         for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
         {
-            delete[] pUser ->vAudioPackets[i];
+            if (pUser ->vAudioPackets[i])
+            {
+                delete[] pUser ->vAudioPackets[i];
+            }
         }
 
         pUser ->vAudioPackets .clear ();
@@ -952,7 +977,7 @@ void AudioService::play(UserAudioStruct* pUser)
     }
 }
 
-void AudioService::waitForAllBuffers(UserAudioStruct* pUser)
+void AudioService::waitForAllBuffers(UserAudioStruct* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex)
 {
     // Wait until finished playing
     while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
@@ -964,6 +989,21 @@ void AudioService::waitForAllBuffers(UserAudioStruct* pUser)
     while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+    }
+
+    // Wait until finished playing
+    while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr3, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+    }
+
+    if (bClearPackets)
+    {
+        for (size_t i = *iLastPlayingPacketIndex;   i < pUser ->vAudioPackets .size();   i++)
+        {
+            delete[] pUser ->vAudioPackets[i];
+            pUser ->vAudioPackets[i] = nullptr;
+        }
     }
 }
 
