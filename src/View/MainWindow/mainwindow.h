@@ -82,6 +82,7 @@ public:
         void  showUserConnectNotice     (std::string name, SilentMessageColor messageColor);
         void  showMessageBox            (bool bWarningBox, std::string message);
         void  clearTextEdit             ();
+        void  applyTheme                ();
 
     ~MainWindow();
 
@@ -94,6 +95,7 @@ signals:
     void signalSetPingToUser(std::string userName, int ping);
     void signalSetUserIsTalking(std::string userName, bool bTalking);
     void signalEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
+    void signalApplyTheme();
 
 protected:
 
@@ -118,6 +120,7 @@ private slots:
     void slotTrayIconActivated();
     void slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost);
     void slotShowUserConnectNotice(std::string name, SilentMessageColor messageColor);
+    void slotApplyTheme();
 
     void on_actionAbout_2_triggered();
     void on_actionConnect_triggered();

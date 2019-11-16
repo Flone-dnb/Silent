@@ -17,7 +17,8 @@
 
 // Style
 
-#define STYLE_THEME_DEFAULT_PATH_FROM_EXE "themes/default.css"
+#define STYLE_THEMES_PATH_FROM_EXE "themes/"
+#define STYLE_THEME_DEFAULT_NAME   "Default"
 
 
 

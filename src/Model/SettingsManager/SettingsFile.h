@@ -12,10 +12,12 @@ public:
 
     SettingsFile(int iPushToTalkButton = 0x54              /* T button */,
                  unsigned short int iMasterVolume = 52428  /* ~80% */,
+                 const std::string& sThemeName = "Default",
                  const std::string& sUserName = "")
     {
         this ->iPushToTalkButton = iPushToTalkButton;
         this ->iMasterVolume     = iMasterVolume;
+        this ->sThemeName        = sThemeName;
         this ->sUsername         = sUserName;
     }
 
@@ -57,6 +59,7 @@ public:
 
 
     std::string        sUsername;
+    std::string        sThemeName;
 
 
     int                iPushToTalkButton;

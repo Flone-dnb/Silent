@@ -308,8 +308,6 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 setupVoiceConnection();
 
                 SettingsFile* pUpdatedSettings = new SettingsFile();
-                pUpdatedSettings ->iPushToTalkButton = pSettingsManager ->getCurrentSettings() ->iPushToTalkButton;
-                pUpdatedSettings ->iMasterVolume     = pSettingsManager ->getCurrentSettings() ->iMasterVolume;
                 pUpdatedSettings ->sUsername         = userName;
                 pSettingsManager ->saveSettings( pUpdatedSettings, true );
 

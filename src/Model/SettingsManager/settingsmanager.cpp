@@ -31,7 +31,7 @@ SettingsManager::SettingsManager(MainWindow* pMainWindow)
 
 
 
-void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetNewUserName)
+void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNewUserName)
 {
     // Get the path to the Documents folder.
 
@@ -72,21 +72,30 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetNewUser
 
 
 
+    if ( bSetOnlyNewUserName )
+    {
+        pSettingsFile ->iPushToTalkButton = pCurrentSettingsFile ->iPushToTalkButton;
+        pSettingsFile ->iMasterVolume     = pCurrentSettingsFile ->iMasterVolume;
+        pSettingsFile ->sThemeName        = pCurrentSettingsFile ->sThemeName;
+    }
+
+
+
+
     // Write new setting to the new file.
 
+    // Push-to-Talk button
     newSettingsFile .write
             ( reinterpret_cast <char*> (&pSettingsFile ->iPushToTalkButton), sizeof(pSettingsFile ->iPushToTalkButton) );
+
+    // Master Volume
     newSettingsFile .write
             ( reinterpret_cast <char*> (&pSettingsFile ->iMasterVolume),     sizeof(pSettingsFile ->iMasterVolume)     );
 
-    // NEW SETTINGS GO HERE
-    // + add new setting to "seekg" and "iOldFileSize -=" below!
-    // + don't forget to update "readSettings()"
 
 
 
-
-    if ( bSetNewUserName )
+    if ( bSetOnlyNewUserName )
     {
         char cUserNameLength = static_cast <char> ( pSettingsFile ->sUsername .size() );
 
@@ -108,7 +117,10 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetNewUser
             iOldFileSize     = static_cast <int> ( settingsFile .tellg() );
             settingsFile .seekg( sizeof(pSettingsFile ->iPushToTalkButton) + sizeof(pSettingsFile ->iMasterVolume) );
 
-            iOldFileSize    -= ( sizeof(pSettingsFile ->iPushToTalkButton) + sizeof(pSettingsFile ->iMasterVolume) );
+
+
+            iOldFileSize    -= ( sizeof(pSettingsFile ->iPushToTalkButton)
+                                 + sizeof(pSettingsFile ->iMasterVolume) );
 
 
 
@@ -145,6 +157,22 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetNewUser
     }
 
 
+    // Theme name
+    unsigned char cThemeLength = static_cast <unsigned char> ( pSettingsFile ->sThemeName .size() );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&cThemeLength),          sizeof(cThemeLength) );
+
+    newSettingsFile .write
+            ( const_cast <char*>       (pSettingsFile ->sThemeName .c_str()), cThemeLength );
+
+    // NEW SETTINGS GO HERE
+    // + don't forget to update "if ( bSetOnlyNewUserName )" above!
+    // + don't forget to update "readSettings()"
+
+
+
+
 
     if ( settingsFile .is_open() )
     {
@@ -165,6 +193,8 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetNewUser
 
 
 
+    std::string sOldTheme = pCurrentSettingsFile ->sThemeName;
+
     // Update our 'pCurrentSettingsFile' to new settings
 
     // Careful here
@@ -172,15 +202,27 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetNewUser
 
     mtxRefreshSettings .lock();
 
+
     if (pCurrentSettingsFile)
     {
         delete pCurrentSettingsFile;
         pCurrentSettingsFile = nullptr;
     }
 
+
     pCurrentSettingsFile = pSettingsFile;
 
     mtxRefreshSettings .unlock();
+
+
+
+
+    // Update theme if it was changed
+
+    if ( pCurrentSettingsFile ->sThemeName != sOldTheme )
+    {
+        pMainWindow ->applyTheme();
+    }
 }
 
 
@@ -239,8 +281,12 @@ SettingsFile *SettingsManager::readSettings()
         // Read push-to-talk button
         settingsFile .read( reinterpret_cast <char*> (&pSettingsFile ->iPushToTalkButton), sizeof(pSettingsFile ->iPushToTalkButton) );
 
+
+
         // Read master volume
         settingsFile .read( reinterpret_cast <char*> (&pSettingsFile ->iMasterVolume),     sizeof(pSettingsFile ->iMasterVolume) );
+
+
 
         // Read user name length
         unsigned char cUserNameLength = 0;
@@ -253,6 +299,19 @@ SettingsFile *SettingsManager::readSettings()
         settingsFile .read( vBuffer, cUserNameLength );
 
         pSettingsFile ->sUsername = vBuffer;
+
+
+
+        // Read theme length
+        unsigned char cThemeLength = 0;
+        settingsFile .read( reinterpret_cast <char*> (&cThemeLength), sizeof(cThemeLength) );
+
+        // Read theme name
+        memset(vBuffer, 0, UCHAR_MAX);
+
+        settingsFile .read( vBuffer, cThemeLength );
+
+        pSettingsFile ->sThemeName = vBuffer;
 
 
 

@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QMessageBox>
+#include <QDir>
 
 // Custom
 #include "../src/View/StyleAndInfoPaths.h"
@@ -164,6 +165,8 @@ void SettingsWindow::on_pushButton_2_clicked()
         pNewSettingsFile ->iMasterVolume = iOriginalMasterVolume;
     }
 
+    pNewSettingsFile ->sThemeName = ui ->comboBox_themes ->currentText() .toStdString();
+
     emit signalSaveSettings( pNewSettingsFile );
     close();
 }
@@ -172,5 +175,21 @@ void SettingsWindow::updateUIToSettings(SettingsFile* pSettingsFile)
 {
     ui ->pushButton_pushtotalk   ->setText  ( QString::fromStdString( pSettingsFile ->getPushToTalkButtonName() ) );
     ui ->horizontalSlider_volume ->setValue ( pSettingsFile ->iMasterVolume );
+
+    showThemes();
+
+    ui ->comboBox_themes ->setCurrentText( QString::fromStdString(pSettingsFile ->sThemeName) );
+}
+
+void SettingsWindow::showThemes()
+{
+    QDir directory(STYLE_THEMES_PATH_FROM_EXE);
+    QStringList themes = directory .entryList(QDir::Files);
+
+    for (int i = 0;   i < themes .size();   i++)
+    {
+        int pos = themes[i].lastIndexOf(QChar('.'));
+        ui ->comboBox_themes ->addItem(themes[i].left(pos));
+    }
 }
 

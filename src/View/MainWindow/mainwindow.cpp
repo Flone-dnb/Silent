@@ -30,8 +30,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    // Set appearance
-
     ui ->setupUi(this);
 
     // Set CSS classes
@@ -39,23 +37,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->label_3         ->setProperty("cssClass", "mainwindowLabel");
     ui ->plainTextEdit_2 ->setProperty("cssClass", "userInput");
     ui ->plainTextEdit   ->setProperty("cssClass", "chatOutput");
-
-    // Apply style
-    QFile File(STYLE_THEME_DEFAULT_PATH_FROM_EXE);
-    if( File .exists()
-        &&
-        File .open(QFile::ReadOnly) )
-    {
-        QString StyleSheet = QLatin1String( File .readAll() );
-
-        qApp->setStyleSheet(StyleSheet);
-
-        File .close();
-    }
-    else
-    {
-        QMessageBox::warning(this, "Error", "Could not open the \"" + QString(STYLE_THEME_DEFAULT_PATH_FROM_EXE) + "\" file.");
-    }
 
 
 
@@ -132,7 +113,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalShowUserDisconnectNotice,     this, &MainWindow::slotShowUserDisconnectNotice);
     connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
     connect(this, &MainWindow::signalSetUserIsTalking,             this, &MainWindow::slotSetUserIsTalking);
+    connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
 
+
+
+
+    slotApplyTheme();
 
 
 
@@ -382,6 +368,68 @@ void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessageColor 
     mtxPrintOutput .unlock ();
 }
 
+void MainWindow::slotApplyTheme()
+{
+    if ( pController ->getCurrentSettingsFile() )
+    {
+        // Apply style
+
+        QFile File(QString(STYLE_THEMES_PATH_FROM_EXE)
+                   + QString::fromStdString(pController ->getCurrentSettingsFile() ->sThemeName)
+                   + ".css");
+
+        if( File .exists()
+            &&
+            File .open(QFile::ReadOnly) )
+        {
+            QString StyleSheet = QLatin1String( File .readAll() );
+
+            qApp->setStyleSheet(StyleSheet);
+
+            File .close();
+        }
+        else
+        {
+            if ( pController ->getCurrentSettingsFile() ->sThemeName == STYLE_THEME_DEFAULT_NAME )
+            {
+                QMessageBox::warning(this, "Error", "Could not open theme file \"" + QString::fromStdString(pController ->getCurrentSettingsFile() ->sThemeName) + ".css\".");
+            }
+            else
+            {
+                // Set the default theme
+
+                File .setFileName(QString(STYLE_THEMES_PATH_FROM_EXE)
+                                  + QString(STYLE_THEME_DEFAULT_NAME)
+                                  + ".css");
+
+                if( File .exists()
+                    &&
+                    File .open(QFile::ReadOnly) )
+                {
+                    QString StyleSheet = QLatin1String( File .readAll() );
+
+                    qApp->setStyleSheet(StyleSheet);
+
+                    File .close();
+
+
+                    SettingsFile* pNewSettings = new SettingsFile();
+                    pNewSettings ->iPushToTalkButton = pController ->getCurrentSettingsFile() ->iPushToTalkButton;
+                    pNewSettings ->iMasterVolume     = pController ->getCurrentSettingsFile() ->iMasterVolume;
+                    pNewSettings ->sUsername         = pController ->getCurrentSettingsFile() ->sUsername;
+                    pNewSettings ->sThemeName        = STYLE_THEME_DEFAULT_NAME;
+
+                    pController ->saveSettings( pNewSettings );
+                }
+                else
+                {
+                    QMessageBox::warning(this, "Error", "Could not open theme file \"" + QString(STYLE_THEME_DEFAULT_NAME) + ".css\".");
+                }
+            }
+        }
+    }
+}
+
 void MainWindow::connectTo(std::string adress, std::string port, std::string userName)
 {
     ui->plainTextEdit->clear();
@@ -564,6 +612,11 @@ void MainWindow::showMessageBox(bool bWarningBox, std::string message)
 void MainWindow::clearTextEdit()
 {
     ui->plainTextEdit_2->clear();
+}
+
+void MainWindow::applyTheme()
+{
+    emit signalApplyTheme();
 }
 
 void MainWindow::on_actionConnect_triggered()

@@ -48,6 +48,7 @@ private slots:
 private:
 
     void  updateUIToSettings                       (SettingsFile* pSettingsFile);
+    void  showThemes                               ();
     void  refreshVolumeSliderText                  ();
 
 
