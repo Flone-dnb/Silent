@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-// C++
+
+// STL
 #include <string>
 #include <vector>
 #include <ctime>
@@ -19,6 +20,11 @@
 class MainWindow;
 class AudioService;
 class SettingsManager;
+
+
+#define  CLIENT_VERSION                "2.18.1"
+
+
 
 
 // ------------------------------------------------------------------------------------------------
@@ -94,23 +100,23 @@ private:
 
 
     // Ping
-    unsigned short iPingNormalBelow;
-    unsigned short iPingWarningBelow;
+    unsigned short   iPingNormalBelow;
+    unsigned short   iPingWarningBelow;
 
 
-    clock_t        lastTimeServerKeepAliveCame;
+    clock_t          lastTimeServerKeepAliveCame;
 
 
-    SOCKET         userTCPSocket;
-    SOCKET         userUDPSocket;
-    sockaddr_in    serverAddr;
+    SOCKET           userTCPSocket;
+    SOCKET           userUDPSocket;
+    sockaddr_in      serverAddr;
 
 
-    std::string    userName;
-    std::string    clientVersion;
+    std::string      userName;
+    std::string      clientVersion;
 
 
-    bool           bWinSockLaunched;
-    bool           bTextListen;
-    bool           bVoiceListen;
+    bool             bWinSockLaunched;
+    bool             bTextListen;
+    bool             bVoiceListen;
 };
