@@ -83,7 +83,11 @@ void Controller::connectTo(std::string sAdress, std::string sPort, std::string s
 void Controller::saveSettings (SettingsFile* pSettingsFile)
 {
     pSettingsManager ->saveSettings(pSettingsFile);
-    pAudioService    ->setNewMasterVolume( pSettingsManager ->getCurrentSettings() ->iMasterVolume );
+
+    if (pAudioService)
+    {
+        pAudioService ->setNewMasterVolume( pSettingsManager ->getCurrentSettings() ->iMasterVolume );
+    }
 }
 
 void Controller::setNewUserVolume(std::string sUserName, float fVolume)

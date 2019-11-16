@@ -423,7 +423,7 @@ void MainWindow::slotApplyTheme()
                 }
                 else
                 {
-                    QMessageBox::warning(this, "Error", "Could not open theme file \"" + QString(STYLE_THEME_DEFAULT_NAME) + ".css\".");
+                    QMessageBox::warning(this, "Error", "Could not open default theme file \"" + QString(STYLE_THEME_DEFAULT_NAME) + ".css\".");
                 }
             }
         }
