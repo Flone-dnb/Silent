@@ -74,7 +74,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listWidget_users->setViewMode(QListView::ListMode);
 
     pMenuContextMenu    = new QMenu(this);
-    pMenuContextMenu ->setStyleSheet("QMenu\n{\n	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(26, 26, 26, 100), stop:0.605809 rgba(19, 19, 19, 255), stop:1 rgba(26, 26, 26, 100));\n	color: white;\n}\n\nQMenu::item::selected\n{\n	background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(156, 11, 11, 255), stop:1 rgba(168, 0, 0, 255));\n}\n\nQMenu::separator\n{\n	background-color: rgb(50, 0, 0);\n	height: 2px;\n    margin-left: 10px; \n    margin-right: 5px;\n}");
 
     pActionChangeVolume = new QAction("Change Volume");
 

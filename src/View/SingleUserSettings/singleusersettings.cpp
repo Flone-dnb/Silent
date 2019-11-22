@@ -13,6 +13,8 @@ SingleUserSettings::SingleUserSettings(QString userName, float fCurrentVolume, Q
 {
     ui ->setupUi(this);
 
+    setFixedSize( width(), height() );
+
 
 
 
