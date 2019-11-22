@@ -9,6 +9,7 @@
 #include "../src/Model/NetworkService/networkservice.h"
 #include "../src/Model/SettingsManager/settingsmanager.h"
 #include "../src/Model/SettingsManager/SettingsFile.h"
+#include "../src/Model/User.h"
 
 
 // ------------------------------------------------------------------------------------------------
@@ -46,59 +47,70 @@ void AudioService::setNetworkService(NetworkService *pNetworkService)
     this ->pNetworkService = pNetworkService;
 }
 
-void AudioService::setNewMasterVolume(unsigned short int iVolume)
+float AudioService::getUserCurrentVolume(const std::string &sUserName)
 {
-    mtxUsersAudio .lock();
+    pNetworkService ->getOtherUsersMutex() ->lock();
 
 
-    for (size_t i = 0;  i < vUsersAudio .size();  i++)
+    float fUserVolume = 0.0f;
+
+    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
     {
-        waveOutSetVolume( vUsersAudio[i] ->hWaveOut, MAKELONG(iVolume, iVolume) );
+        if ( pNetworkService ->getOtherUser(i) ->sUserName == sUserName )
+        {
+            fUserVolume = pNetworkService ->getOtherUser(i) ->fUserDefinedVolume;
+
+            break;
+        }
     }
 
 
-    mtxUsersAudio .unlock();
+
+    pNetworkService ->getOtherUsersMutex() ->unlock();
+
+
+    return fUserVolume;
+}
+
+void AudioService::setNewMasterVolume(unsigned short int iVolume)
+{
+    pNetworkService ->getOtherUsersMutex() ->lock();
+
+
+    for (size_t i = 0;  i < pNetworkService ->getOtherUsersVectorSize();  i++)
+    {
+        waveOutSetVolume( pNetworkService ->getOtherUser(i) ->hWaveOut, MAKELONG(iVolume, iVolume) );
+    }
+
+
+    pNetworkService ->getOtherUsersMutex() ->unlock();
 }
 
 void AudioService::setNewUserVolume(std::string sUserName, float fVolume)
 {
-    mtxUsersAudio .lock();
+    User* pUser = nullptr;
+
+    pNetworkService ->getOtherUsersMutex() ->lock();
 
 
-    for (size_t i = 0;  i < vUsersAudio .size();  i++)
+
+    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
     {
-        if (vUsersAudio[i] ->sUserName == sUserName)
+        if (pNetworkService ->getOtherUser(i) ->sUserName == sUserName)
         {
-            vUsersAudio[i] ->fUserDefinedVolume = fVolume;
+            pUser = pNetworkService ->getOtherUser(i);
             break;
         }
     }
 
-
-    mtxUsersAudio .unlock();
-}
-
-float AudioService::getUserCurrentVolume(std::string sUserName)
-{
-    mtxUsersAudio .lock();
-
-
-    float fCurrentVolume = 1.0f;
-
-    for (size_t i = 0;  i < vUsersAudio .size();  i++)
+    if (pUser)
     {
-        if (vUsersAudio[i] ->sUserName == sUserName)
-        {
-            fCurrentVolume = vUsersAudio[i] ->fUserDefinedVolume;
-            break;
-        }
+       pUser ->fUserDefinedVolume = fVolume;
     }
 
 
-    mtxUsersAudio .unlock();
 
-
-    return fCurrentVolume;
+    pNetworkService ->getOtherUsersMutex() ->unlock();
 }
 
 void AudioService::prepareForStart()
@@ -193,7 +205,7 @@ bool AudioService::start()
     return true;
 }
 
-void AudioService::playSound(bool bConnectSound)
+void AudioService::playConnectDisconnectSound(bool bConnectSound)
 {
     if (bConnectSound)
     {
@@ -215,36 +227,31 @@ void AudioService::playLostConnectionSound()
     PlaySoundW( AUDIO_LOST_CONNECTION_PATH, nullptr, SND_FILENAME );
 }
 
-void AudioService::addNewUser(std::string sUserName)
+void AudioService::setupUserAudio(User *pUser)
 {
-    mtxUsersAudio .lock();
-
-
-    vUsersAudio .push_back ( new UserAudioStruct() );
-    vUsersAudio .back() ->sUserName            = sUserName;
-    vUsersAudio .back() ->bPacketsArePlaying   = false;
-    vUsersAudio .back() ->bDeletePacketsAtLast = false;
-    vUsersAudio .back() ->bLastPacketCame      = false;
-    vUsersAudio .back() ->fUserDefinedVolume   = 1.0f;
+    pUser ->bPacketsArePlaying   = false;
+    pUser ->bDeletePacketsAtLast = false;
+    pUser ->bLastPacketCame      = false;
+    pUser ->fUserDefinedVolume   = 1.0f;
 
 
     // Audio buffer1
-    vUsersAudio .back() ->WaveOutHdr1 .dwBufferLength  = static_cast <unsigned long> (sampleCount * 2);
-    vUsersAudio .back() ->WaveOutHdr1 .dwBytesRecorded = 0;
-    vUsersAudio .back() ->WaveOutHdr1 .dwUser          = 0L;
-    vUsersAudio .back() ->WaveOutHdr1 .dwFlags         = 0L;
-    vUsersAudio .back() ->WaveOutHdr1 .dwLoops         = 0L;
+    pUser ->WaveOutHdr1 .dwBufferLength  = static_cast <unsigned long> (sampleCount * 2);
+    pUser ->WaveOutHdr1 .dwBytesRecorded = 0;
+    pUser ->WaveOutHdr1 .dwUser          = 0L;
+    pUser ->WaveOutHdr1 .dwFlags         = 0L;
+    pUser ->WaveOutHdr1 .dwLoops         = 0L;
 
     // Audio buffer2
-    vUsersAudio .back() ->WaveOutHdr2 = vUsersAudio .back() ->WaveOutHdr1;
+    pUser ->WaveOutHdr2 = pUser ->WaveOutHdr1;
 
     // Audio buffer3
-    vUsersAudio .back() ->WaveOutHdr3 = vUsersAudio .back() ->WaveOutHdr1;
+    pUser ->WaveOutHdr3 = pUser ->WaveOutHdr1;
 
 
 
     // Start output device
-    MMRESULT result = waveOutOpen( &vUsersAudio .back() ->hWaveOut,  WAVE_MAPPER,  &Format,  0L,  0L,  WAVE_FORMAT_DIRECT );
+    MMRESULT result = waveOutOpen( &pUser ->hWaveOut,  WAVE_MAPPER,  &Format,  0L,  0L,  WAVE_FORMAT_DIRECT );
 
     if (result)
     {
@@ -257,57 +264,27 @@ void AudioService::addNewUser(std::string sUserName)
                                   true);
     }
 
-    waveOutSetVolume( vUsersAudio .back() ->hWaveOut, MAKELONG(pSettingsManager ->getCurrentSettings() ->iMasterVolume,
-                                                               pSettingsManager ->getCurrentSettings() ->iMasterVolume) );
-
-
-    mtxUsersAudio .unlock();
+    waveOutSetVolume( pUser ->hWaveOut, MAKELONG(pSettingsManager ->getCurrentSettings() ->iMasterVolume,
+                                                 pSettingsManager ->getCurrentSettings() ->iMasterVolume) );
 }
 
-void AudioService::deleteUser(std::string sUserName)
+void AudioService::deleteUserAudio(User *pUser)
 {
-    mtxUsersAudio .lock();
+    pUser ->mtxUser. lock();
 
 
-    for (size_t i = 0;  i < vUsersAudio .size();  i++)
+    for (size_t j = 0;  j < pUser ->vAudioPackets .size();  j++)
     {
-        if (vUsersAudio[i] ->sUserName == sUserName)
+        if (pUser ->vAudioPackets[j])
         {
-            for (size_t j = 0;  j < vUsersAudio[i] ->vAudioPackets .size();  j++)
-            {
-                delete[] vUsersAudio[i] ->vAudioPackets[j];
-            }
-
-            waveOutClose (vUsersAudio[i]->hWaveOut);
-            delete vUsersAudio[i];
-            vUsersAudio .erase (vUsersAudio.begin() + i);
+            delete[] pUser ->vAudioPackets[j];
         }
     }
 
-
-    mtxUsersAudio .unlock();
-}
-
-void AudioService::deleteAll()
-{
-    mtxUsersAudio .lock();
+    waveOutClose (pUser ->hWaveOut);
 
 
-    for (size_t i = 0;  i < vUsersAudio .size();  i++)
-    {
-        for (size_t j = 0;  j < vUsersAudio[i] ->vAudioPackets .size();  j++)
-        {
-            delete[] vUsersAudio[i] ->vAudioPackets[j];
-        }
-
-        waveOutClose (vUsersAudio[i] ->hWaveOut);
-        delete vUsersAudio[i];
-    }
-
-    vUsersAudio .clear();
-
-
-    mtxUsersAudio .unlock();
+    pUser ->mtxUser. unlock();
 }
 
 void AudioService::recordOnPress()
@@ -596,10 +573,10 @@ void AudioService::waitAndSendBuffer(WAVEHDR *WaveInHdr, short *pWaveIn)
     compressThread .detach();
 }
 
-void AudioService::waitForPlayToEnd(UserAudioStruct *pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex)
+void AudioService::waitForPlayToEnd(User *pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex)
 {
     // Wait until finished playing buffer
-    while (waveOutUnprepareHeader(pUser->hWaveOut, pWaveOutHdr, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+    while (waveOutUnprepareHeader(pUser ->hWaveOut, pWaveOutHdr, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
     }
@@ -625,124 +602,127 @@ void AudioService::sendAudioData(short *pAudio)
 
 void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool bLast)
 {
+    pNetworkService ->getOtherUsersMutex() ->lock();
+
+    User* pUser = nullptr;
+
+    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
+    {
+        if (pNetworkService ->getOtherUser(i) ->sUserName == sUserName)
+        {
+            pUser = pNetworkService ->getOtherUser(i);
+        }
+    }
+
+    pNetworkService ->getOtherUsersMutex() ->unlock();
+
+    if (pUser == nullptr)
+    {
+        delete[] pAudio;
+
+        return;
+    }
+
+
+
     if (bLast)
     {
-        mtxUsersAudio .lock();
-
-
-        for (size_t i = 0;  i < vUsersAudio .size();  i++)
+        if (pUser ->bDeletePacketsAtLast)
         {
-            if (vUsersAudio[i] ->sUserName == sUserName)
+            // Something went wrong, delete all packets
+
+            for (size_t j = 0;  j < pUser ->vAudioPackets .size();  j++)
             {
-                if (vUsersAudio[i] ->bDeletePacketsAtLast)
+                if (pUser ->vAudioPackets[j])
                 {
-                    // Something went wrong, delete all packets
-
-                    for (size_t j = 0;  j < vUsersAudio[i] ->vAudioPackets .size();  j++)
-                    {
-                        if (vUsersAudio[i] ->vAudioPackets[j])
-                        {
-                            delete[] vUsersAudio[i] ->vAudioPackets[j];
-                        }
-                    }
-
-                    vUsersAudio[i] ->vAudioPackets.clear();
-
-                    vUsersAudio[i] ->bDeletePacketsAtLast = false;
-                    vUsersAudio[i] ->bPacketsArePlaying   = false;
-
-                    // Wait until finished playing
-                    waitForAllBuffers (vUsersAudio[i], false, nullptr);
+                    delete[] pUser ->vAudioPackets[j];
                 }
-
-                vUsersAudio[i] ->bLastPacketCame = true;
-
-                break;
             }
+
+            pUser ->vAudioPackets.clear();
+
+            pUser ->bDeletePacketsAtLast = false;
+            pUser ->bPacketsArePlaying   = false;
+
+            // Wait until finished playing
+            waitForAllBuffers (pUser, false, nullptr);
         }
 
-
-        mtxUsersAudio .unlock();
+        pUser ->bLastPacketCame = true;
     }
     else
     {
-        mtxUsersAudio .lock();
+        // Set volume multiplier
+        float fVolumeMult  = fMasterVolumeMult;
 
-
-        for (size_t i = 0;  i < vUsersAudio .size();  i++)
+        if (pUser ->fUserDefinedVolume != 1.0f)
         {
-            if (vUsersAudio[i] ->sUserName == sUserName)
+            fVolumeMult += ( pUser ->fUserDefinedVolume - 1.0f );
+        }
+
+
+        // Set volume
+        for (int t = 0;  t < sampleCount;  t++)
+        {
+            int iNewValue = static_cast <int> (pAudio[t] * fVolumeMult);
+
+            if      (iNewValue > SHRT_MAX)
             {
-                // Set volume multiplier
-                float fVolumeMult  = fMasterVolumeMult;
-
-                if (vUsersAudio[i] ->fUserDefinedVolume != 1.0f)
-                {
-                    fVolumeMult += ( vUsersAudio[i]->fUserDefinedVolume - 1.0f );
-                }
-
-
-                // Set volume
-                for (int t = 0;  t < sampleCount;  t++)
-                {
-                    int iNewValue = static_cast <int> (pAudio[t] * fVolumeMult);
-
-                    if      (iNewValue > SHRT_MAX)
-                    {
-                        pAudio[t] = SHRT_MAX;
-                    }
-                    else if (iNewValue < SHRT_MIN)
-                    {
-                        pAudio[t] = SHRT_MIN;
-                    }
-                    else
-                    {
-                        pAudio[t] = static_cast <short> (iNewValue);
-                    }
-                }
-
-                vUsersAudio[i] ->vAudioPackets.push_back(pAudio);
-
-
-
-                if (
-                        (vUsersAudio[i] ->vAudioPackets .size() > 5)
-                        &&
-                        (vUsersAudio[i] ->bPacketsArePlaying == false)
-                   )
-                {
-                    vUsersAudio[i] ->bPacketsArePlaying = true;
-
-                    std::thread playThread (&AudioService::play, this, vUsersAudio[i]);
-                    playThread .detach();
-                }
-                else if (vUsersAudio[i] ->vAudioPackets .size() == 1)
-                {
-                    vUsersAudio[i] ->bLastPacketCame = false;
-                }
-
-
-                break;
+                pAudio[t] = SHRT_MAX;
+            }
+            else if (iNewValue < SHRT_MIN)
+            {
+                pAudio[t] = SHRT_MIN;
+            }
+            else
+            {
+                pAudio[t] = static_cast <short> (iNewValue);
             }
         }
 
-        mtxUsersAudio .unlock();
+
+
+
+        pUser ->vAudioPackets.push_back(pAudio);
+
+
+
+        if ( (pUser ->vAudioPackets .size() > 5)
+             &&
+             (pUser ->bPacketsArePlaying == false) )
+        {
+            pUser ->bPacketsArePlaying = true;
+
+            std::thread playThread (&AudioService::play, this, pUser);
+            playThread .detach();
+        }
+        else if (pUser ->vAudioPackets .size() == 1)
+        {
+            pUser ->bLastPacketCame = false;
+        }
     }
 }
 
-void AudioService::play(UserAudioStruct* pUser)
+void AudioService::play(User* pUser)
 {
+    pUser ->mtxUser .lock();
+
+
     MMRESULT result;
 
     size_t i = 0;
     size_t iLastPlayingPacketIndex = 0;
 
-    // Let's wait a little more for the remaining packages to come (if there are any). We will wait because if the user has a high ping,
-    // then when we will play sound somewhere on the first cycle, it will break and the function will end because at some point due to the high ping, the package had not yet come.
-    // Therefore, we will wait for another 6 packages to start the function again. Because of this, there will be a "hole" in the sound.
+    // Let's wait a little more for the remaining packages to come (if there are any).
+    // We will wait because if the user has a high ping,
+    // then when we will play sound somewhere on the first cycle, it will break and the function will end
+    // because at some point due to the high ping, the package had not yet come.
+    // Therefore, we will wait for another 6 packages to start the function again. Because of this,
+    // there will be a "hole" in the sound.
     std::this_thread::sleep_for(std::chrono::milliseconds(60));
 
-    pMainWindow->setUserIsTalking(pUser->sUserName, true);
+    pUser       ->bTalking = true;
+    pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
 
     // Add 1st buffer
     pUser->WaveOutHdr1.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
@@ -758,11 +738,6 @@ void AudioService::play(UserAudioStruct* pUser)
     pUser->WaveOutHdr3.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
     if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr3) ) {pUser->bDeletePacketsAtLast = true;}
     i++;
-
-    // So, I want the sound to be louder because with waveOutSetVolume on max it's pretty quiet (there are some mics that record sound very quietly)
-    // and to make sound louder I run 2 identical sounds together so if the phases of these sounds are about the same, we will get an increase in volume.
-    // It’s not really a good idea to launch 2 identical sounds one after another with a slight delay, but let's
-    // just hope that they will not play in antiphase (if their phases are opposite, the sound will disappear).
 
 
     // Play 1.
@@ -933,13 +908,12 @@ void AudioService::play(UserAudioStruct* pUser)
     waitForAllBuffers (pUser, true, &iLastPlayingPacketIndex);
 
 
-    pMainWindow->setUserIsTalking(pUser->sUserName, false);
+    pUser       ->bTalking = false;
+    pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+
 
     if (pUser ->bDeletePacketsAtLast == false)
     {
-        mtxUsersAudio .lock();
-
-
         for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
         {
             if (pUser ->vAudioPackets[i])
@@ -950,16 +924,9 @@ void AudioService::play(UserAudioStruct* pUser)
 
         pUser ->vAudioPackets .clear ();
         pUser ->bPacketsArePlaying = false;
-
-
-
-        mtxUsersAudio .unlock ();
     }
     else if (pUser->bLastPacketCame)
     {
-        mtxUsersAudio .lock ();
-
-
         for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
         {
             if (pUser ->vAudioPackets[i])
@@ -971,28 +938,29 @@ void AudioService::play(UserAudioStruct* pUser)
         pUser ->vAudioPackets .clear ();
         pUser ->bPacketsArePlaying   = false;
         pUser ->bDeletePacketsAtLast = false;
-
-
-        mtxUsersAudio .unlock ();
     }
+
+
+
+    pUser ->mtxUser .unlock();
 }
 
-void AudioService::waitForAllBuffers(UserAudioStruct* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex)
+void AudioService::waitForAllBuffers(User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex)
 {
     // Wait until finished playing
-    while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+    while ( waveOutUnprepareHeader(pUser ->hWaveOut, &pUser ->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
     }
 
     // Wait until finished playing
-    while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+    while ( waveOutUnprepareHeader(pUser ->hWaveOut, &pUser ->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
     }
 
     // Wait until finished playing
-    while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr3, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+    while ( waveOutUnprepareHeader(pUser ->hWaveOut, &pUser ->WaveOutHdr3, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
     }
@@ -1042,7 +1010,10 @@ void AudioService::stop()
     }
 
 
-    deleteAll ();
+    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
+    {
+        deleteUserAudio( pNetworkService ->getOtherUser(i) );
+    }
 }
 
 

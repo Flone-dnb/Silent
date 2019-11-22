@@ -33,10 +33,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->setupUi(this);
 
     // Set CSS classes
-    ui ->label_2         ->setProperty("cssClass", "mainwindowLabel");
-    ui ->label_3         ->setProperty("cssClass", "mainwindowLabel");
-    ui ->plainTextEdit_2 ->setProperty("cssClass", "userInput");
-    ui ->plainTextEdit   ->setProperty("cssClass", "chatOutput");
+    ui ->label_chatRoom       ->setProperty("cssClass", "mainwindowLabel");
+    ui ->label_connectedCount ->setProperty("cssClass", "mainwindowLabel");
+    ui ->plainTextEdit_input  ->setProperty("cssClass", "userInput");
+    ui ->plainTextEdit        ->setProperty("cssClass", "chatOutput");
 
 
 
@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Output HTML
 
+    outputHTMLtimeStart    = "<font style=\"color: ";
     outputHTMLmessageStart = "<font color=\"";
     outputHTMLmessageEnd   = "</font>";
 
@@ -70,8 +71,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Setup context menu for 'connected users' list
 
-    ui->listWidget_users->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->listWidget_users->setViewMode(QListView::ListMode);
+    ui ->listWidget_users ->setContextMenuPolicy (Qt::CustomContextMenu);
+    ui ->listWidget_users ->setViewMode          (QListView::ListMode);
 
     pMenuContextMenu    = new QMenu(this);
 
@@ -103,16 +104,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    // This to this connects.
-    // We use this to send signals to main thread when working with GI.
+    // This to this connects
+
     connect(this, &MainWindow::signalTypeOnScreen,                 this, &MainWindow::typeSomeOnScreen);
     connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
-    connect(this, &MainWindow::signalShowMessage,                  this, &MainWindow::slotShowMessage);
-    connect(this, &MainWindow::signalSetPingToUser,                this, &MainWindow::slotSetPingToUser);
+    connect(this, &MainWindow::signalShowMessageBox,               this, &MainWindow::slotShowMessageBox);
+    connect(this, &MainWindow::signalPingAndTalkingToUser,         this, &MainWindow::slotPingAndTalkingToUser);
     connect(this, &MainWindow::signalShowUserDisconnectNotice,     this, &MainWindow::slotShowUserDisconnectNotice);
     connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
-    connect(this, &MainWindow::signalSetUserIsTalking,             this, &MainWindow::slotSetUserIsTalking);
     connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
+    connect(this, &MainWindow::signalDeleteUserFromList,           this, &MainWindow::slotDeleteUserFromList);
 
 
 
@@ -128,9 +129,9 @@ MainWindow::MainWindow(QWidget *parent) :
         // We use a timer because here (in the constructor) the main (from the main.cpp) event handler is not launched so it won't
         // show our SettingsWindow with opacity change (see 'checkIfSettingsExists() function). We will wait for some time and then show it.
         pTimer = new QTimer();
-        pTimer->setInterval(650);
+        pTimer ->setInterval(650);
         connect(pTimer, &QTimer::timeout, this, &MainWindow::showSettingsWindow);
-        pTimer->start();
+        pTimer ->start();
     }
     else
     {
@@ -143,7 +144,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-void MainWindow::slotShowMessage(bool bWarningBox, std::string message)
+void MainWindow::slotShowMessageBox(bool bWarningBox, std::string message)
 {
     if (bWarningBox)
     {
@@ -155,129 +156,73 @@ void MainWindow::slotShowMessage(bool bWarningBox, std::string message)
     }
 }
 
-void MainWindow::slotSetPingToUser(std::string userName, int ping)
+void MainWindow::slotPingAndTalkingToUser(std::string sUserName, QListWidgetItem* pListWidgetItem, int iPing, bool bTalking)
 {
-    for (int i = 0; i < ui->listWidget_users->model()->rowCount(); i++)
+    mtxList .lock();
+
+
+    QString sUserNameInList = QString::fromStdString( sUserName );
+
+    if (iPing >= pController ->getPingWarningBelow())
     {
-        QString userNameWithPing = ui->listWidget_users->item(i)->text();
-        QString userNameInList = "";
-        for (int j = 0; j < userNameWithPing.size(); j++)
+        sUserNameInList += " [" + QString::number(iPing) + " ms (!!!)]";
+    }
+    else
+    {
+        if (iPing == 0)
         {
-            if (userNameWithPing[j] != " ")
-            {
-                userNameInList += userNameWithPing[j];
-            }
-            else break;
+            sUserNameInList += " [-- ms]";
         }
-
-        if ( userNameInList == QString::fromStdString(userName) )
+        else
         {
-            if (ping >= pController->getPingWarningBelow())
-            {
-                userNameInList += (" [" + QString::number(ping) + " ms (!!!)]");
-            }
-            else
-            {
-                if (ping == 0)
-                {
-                    userNameInList += (" [-- ms]");
-                }
-                else userNameInList += (" [" + QString::number(ping) + " ms]");
-            }
-
-            ui->listWidget_users->item(i)->setText( userNameInList );
-
-
-            for (size_t k = 0; k < users.size(); k++)
-            {
-                if (users[k].sUserName == userName)
-                {
-                    users[k].ping = ping;
-
-
-                    if (users[k].bTalking)
-                    {
-                        if      (users[k].ping <= pController->getPingNormalBelow())
-                        {
-                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
-                        }
-                        else if (users[k].ping <= pController->getPingWarningBelow())
-                        {
-                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING_TALK));
-                        }
-                        else
-                        {
-                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD_TALK));
-                        }
-                    }
-                    else
-                    {
-                        if      (users[k].ping <= pController->getPingNormalBelow())
-                        {
-                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
-                        }
-                        else if (users[k].ping <= pController->getPingWarningBelow())
-                        {
-                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING));
-                        }
-                        else
-                        {
-                            users[k].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD));
-                        }
-                    }
-
-                    break;
-                }
-            }
-
-            break;
+            sUserNameInList += " [" + QString::number(iPing) + " ms]";
         }
     }
-}
 
-void MainWindow::slotSetUserIsTalking(std::string userName, bool bTalking)
-{
-    for (size_t i = 0; i < users.size(); i++)
+
+    pListWidgetItem ->setText( sUserNameInList );
+
+
+
+
+
+    // Set color on ping circle
+
+    if (bTalking)
     {
-        if (users[i].sUserName == userName)
+        if      (iPing <= pController->getPingNormalBelow())
         {
-            users[i].bTalking = bTalking;
-
-            if (bTalking)
-            {
-                if      (users[i].ping <= pController->getPingNormalBelow())
-                {
-                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
-                }
-                else if (users[i].ping <= pController->getPingWarningBelow())
-                {
-                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING_TALK));
-                }
-                else
-                {
-                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD_TALK));
-                }
-            }
-            else
-            {
-                if      (users[i].ping <= pController->getPingNormalBelow())
-                {
-                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
-                }
-                else if (users[i].ping <= pController->getPingWarningBelow())
-                {
-                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_WARNING));
-                }
-                else
-                {
-                    users[i].pItem->setIcon(QIcon(RES_ICONS_USERPING_BAD));
-                }
-            }
-
-            break;
+            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
+        }
+        else if (iPing <= pController->getPingWarningBelow())
+        {
+            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_WARNING_TALK));
+        }
+        else
+        {
+            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_BAD_TALK));
         }
     }
+    else
+    {
+        if      (iPing <= pController->getPingNormalBelow())
+        {
+            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
+        }
+        else if (iPing <= pController->getPingWarningBelow())
+        {
+            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_WARNING));
+        }
+        else
+        {
+            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_BAD));
+        }
+    }
+
+
+    mtxList .unlock();
 }
+
 
 void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage)
 {
@@ -303,38 +248,41 @@ void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
 {
     if (bMenu)
     {
-        ui->actionConnect->setEnabled(true);
-        ui->actionDisconnect->setEnabled(true);
+        ui ->actionConnect       ->setEnabled(true);
+        ui ->actionDisconnect    ->setEnabled(true);
     }
     else
     {
-        ui->actionConnect->setEnabled(false);
-        ui->actionDisconnect->setEnabled(false);
+        ui ->actionConnect       ->setEnabled(false);
+        ui ->actionDisconnect    ->setEnabled(false);
     }
 
     if (bTypeAndSend)
     {
-        ui->pushButton->setEnabled(true);
-        ui->plainTextEdit_2->setEnabled(true);
+        ui ->pushButton          ->setEnabled(true);
+        ui ->plainTextEdit_input ->setEnabled(true);
     }
     else
     {
-        ui->pushButton->setEnabled(false);
-        ui->plainTextEdit_2->setEnabled(false);
+        ui ->pushButton          ->setEnabled(false);
+        ui ->plainTextEdit_input ->setEnabled(false);
     }
 }
 
 void MainWindow::slotTrayIconActivated()
 {
-    pTrayIcon->hide();
-    raise();
-    activateWindow();
-    showNormal();
+    pTrayIcon ->hide();
+
+    raise           ();
+    activateWindow  ();
+    showNormal      ();
 }
 
 void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost)
 {
     mtxPrintOutput .lock   ();
+
+
 
     QString message = "";
 
@@ -350,6 +298,8 @@ void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageCol
     QString color = QString::fromStdString(messageColor.sTime);
 
     ui ->plainTextEdit ->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
+
+
 
     mtxPrintOutput .unlock ();
 }
@@ -431,8 +381,9 @@ void MainWindow::slotApplyTheme()
 
 void MainWindow::connectTo(std::string adress, std::string port, std::string userName)
 {
-    ui->plainTextEdit->clear();
-    pController->connectTo(adress,port,userName);
+    ui ->plainTextEdit ->clear();
+
+    pController ->connectTo(adress, port, userName);
 }
 
 void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, bool bEmitSignal)
@@ -477,48 +428,78 @@ void MainWindow::printOutputW(std::wstring text, SilentMessageColor messageColor
 
 void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, SilentMessageColor messageColor, bool bEmitSignal)
 {
-    QString qtimeRaw = QString::fromStdString(timeInfo);
-    QString qtime = "";
-    int inamepos = 0;
-    for (int i = 0; i < qtimeRaw.size(); i++)
+    // 'timeInfo' example: "18:58. Flone: "
+
+
+    // Get position in string where the name begins.
+
+    QString sTime    = "";
+    size_t  iNameStartPos = 0;
+
+    for (size_t i = 0;   i < timeInfo .size();   i++)
     {
-        if (qtimeRaw[i] == ' ')
+        if (timeInfo[i] == ' ')
         {
-            inamepos = i;
+            iNameStartPos = i;
+
             break;
         }
         else
         {
-            qtime += qtimeRaw[i];
+            sTime += timeInfo[i];
         }
     }
-    QString timeColor = QString::fromStdString(messageColor.sTime);
 
 
-    QString qmessage = "";
 
-    for (int i = inamepos; i < timeInfo.size(); i++)
+
+    // Read userName from 'timeInfo'.
+
+    QString sNameWithMessage = "";
+
+    for (size_t i = iNameStartPos;   i < timeInfo .size();   i++)
     {
-        qmessage += timeInfo[i];
+        sNameWithMessage += timeInfo[i];
     }
 
-    qmessage += QString::fromStdWString(message);
-    qmessage.replace("\n", "<br>");
-    QString color = QString::fromStdString(messageColor.sMessage);
-
-    qmessage += "<br>";
+    sNameWithMessage += QString::fromStdWString(message);
 
 
-    QString out = "<font style=\"color: " + timeColor + "\">" + qtime + outputHTMLmessageEnd;
-    out += outputHTMLmessageStart + color + "\">" + qmessage + outputHTMLmessageEnd;
+    // Replace any '\n' to '<br>' because we will use "appendHtml()" function.
+    sNameWithMessage .replace("\n", "<br>");
+
+
+    // Add <br> in the end of the message.
+    sNameWithMessage += "<br>";
+
+
+
+
+    // Prepare colors.
+
+    QString sMessageColor = QString::fromStdString(messageColor .sMessage);
+    QString sTimeColor    = QString::fromStdString(messageColor .sTime);
+
+
+
+
+    // Create final output string.
+
+    QString sFinalMessage = outputHTMLtimeStart     + sTimeColor    + "\">" + sTime            + outputHTMLmessageEnd;
+    sFinalMessage        += outputHTMLmessageStart  + sMessageColor + "\">" + sNameWithMessage + outputHTMLmessageEnd;
+
+
+
+
+    // Print on screen.
 
     if (bEmitSignal)
     {
-        emit signalTypeOnScreen( out, messageColor, true);
+        emit signalTypeOnScreen( sFinalMessage, messageColor, true);
     }
     else
     {
-        ui ->plainTextEdit ->appendHtml ( out );
+        ui ->plainTextEdit ->appendHtml ( sFinalMessage );
     }
 }
 
@@ -529,68 +510,29 @@ void MainWindow::enableInteractiveElements(bool bMenu, bool bTypeAndSend)
 
 void MainWindow::setOnlineUsersCount(int onlineCount)
 {
-    ui->label_3->setText( "Connected: " + QString::number(onlineCount) );
+    ui ->label_connectedCount ->setText( "Connected: " + QString::number(onlineCount) );
 }
 
-void MainWindow::setPingToUser(std::string userName, int ping)
+void MainWindow::setPingAndTalkingToUser(std::string sUserName, QListWidgetItem* pListWidgetItem, int iPing, bool bTalking)
 {
-    emit signalSetPingToUser(userName, ping);
+    emit signalPingAndTalkingToUser(sUserName, pListWidgetItem, iPing, bTalking);
 }
 
-void MainWindow::setUserIsTalking(std::string userName, bool bTalking)
-{
-    emit signalSetUserIsTalking(userName, bTalking);
-}
 
-void MainWindow::addNewUserToList(std::string name)
+QListWidgetItem* MainWindow::addNewUserToList(std::string name)
 {
     QString qName = QString::fromStdString(name) + " [-- ms]";
+
     QListWidgetItem* pNewItem = new QListWidgetItem(qName);
+
     ui->listWidget_users->addItem( pNewItem );
 
-    users.push_back(User(name, 0, pNewItem));
+    return pNewItem;
 }
 
-void MainWindow::deleteUserFromList(std::string name, bool bDeleteAll)
+void MainWindow::deleteUserFromList(QListWidgetItem* pListWidgetItem, bool bDeleteAll)
 {
-    if (bDeleteAll)
-    {
-        ui->listWidget_users->clear();
-
-        users.clear();
-    }
-    else
-    {
-        for (int i = 0; i < ui->listWidget_users->model()->rowCount(); i++)
-        {
-            QString userNameWithPing = ui->listWidget_users->item(i)->text();
-            QString userName = "";
-            for (int j = 0; j < userNameWithPing.size(); j++)
-            {
-                if (userNameWithPing[j] != " ")
-                {
-                    userName += userNameWithPing[j];
-                }
-                else break;
-            }
-
-            if ( userName == QString::fromStdString(name))
-            {
-                delete ui->listWidget_users->item(i);
-
-                for (size_t j = 0; j < users.size(); j++)
-                {
-                    if (users[j].sUserName == userName.toStdString())
-                    {
-                        users.erase( users.begin() + i );
-                        break;
-                    }
-                }
-
-                break;
-            }
-        }
-    }
+    emit signalDeleteUserFromList(pListWidgetItem, bDeleteAll);
 }
 
 void MainWindow::showUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost)
@@ -605,12 +547,12 @@ void MainWindow::showUserConnectNotice(std::string name, SilentMessageColor mess
 
 void MainWindow::showMessageBox(bool bWarningBox, std::string message)
 {
-    emit signalShowMessage(bWarningBox, message);
+    emit signalShowMessageBox(bWarningBox, message);
 }
 
 void MainWindow::clearTextEdit()
 {
-    ui->plainTextEdit_2->clear();
+    ui ->plainTextEdit_input ->clear();
 }
 
 void MainWindow::applyTheme()
@@ -632,25 +574,27 @@ void MainWindow::on_actionDisconnect_triggered()
 
 void MainWindow::on_pushButton_clicked()
 {
-    if (ui->plainTextEdit_2->toPlainText().size() != 0)
+    if (ui ->plainTextEdit_input ->toPlainText() .size() != 0)
     {
-       pController->sendMessage(ui->plainTextEdit_2->toPlainText().toStdWString());
+       pController ->sendMessage( ui ->plainTextEdit_input ->toPlainText() .toStdWString() );
     }
 }
 
-void MainWindow::on_plainTextEdit_2_textChanged()
+void MainWindow::on_plainTextEdit_input_textChanged()
 {
-    if ( ui->plainTextEdit_2->toPlainText().size() > 0 )
+    if ( ui ->plainTextEdit_input ->toPlainText() .size() > 0 )
     {
-        if (ui->plainTextEdit_2->toPlainText()[0] == "\n")
+        if      (ui ->plainTextEdit_input ->toPlainText()[0] == "\n")
         {
-            ui->plainTextEdit_2->setPlainText("");
+            ui ->plainTextEdit_input ->setPlainText("");
         }
-        else if (ui->plainTextEdit_2->toPlainText()[ui->plainTextEdit_2->toPlainText().size() - 1] == "\n")
+        else if (ui ->plainTextEdit_input ->toPlainText()[ ui ->plainTextEdit_input ->toPlainText() .size() - 1 ] == "\n")
         {
-            std::wstring text = ui->plainTextEdit_2->toPlainText().toStdWString();
-            text = text.substr(0,text.size()-1);
-            pController->sendMessage(text);
+            std::wstring text = ui ->plainTextEdit_input ->toPlainText() .toStdWString();
+
+            text = text .substr( 0, text .size() - 1 );
+
+            pController ->sendMessage(text);
         }
     }
 }
@@ -754,7 +698,7 @@ void MainWindow::slotChangeUserVolume()
             }
         }
 
-        SingleUserSettings* pUserSettings = new SingleUserSettings(nameWithoutPing, pController->getUserCurrentVolume(nameWithoutPing.toStdString()), this);
+        SingleUserSettings* pUserSettings = new SingleUserSettings(nameWithoutPing, pController ->getUserCurrentVolume(nameWithoutPing.toStdString()), this);
         connect(pUserSettings, &SingleUserSettings::signalChangeUserVolume, this, &MainWindow::slotSetNewUserVolume);
         pUserSettings->setWindowModality(Qt::WindowModality::WindowModal);
         pUserSettings->show();
@@ -764,6 +708,22 @@ void MainWindow::slotChangeUserVolume()
 void MainWindow::slotSetNewUserVolume(QString userName, float fVolume)
 {
     pController->setNewUserVolume(userName.toStdString(), fVolume);
+}
+
+void MainWindow::slotDeleteUserFromList(QListWidgetItem* pListWidgetItem, bool bDeleteAll)
+{
+    mtxList .lock();
+
+    if (bDeleteAll)
+    {
+        ui ->listWidget_users ->clear();
+    }
+    else
+    {
+        delete pListWidgetItem;
+    }
+
+    mtxList .unlock();
 }
 
 void MainWindow::on_actionAbout_2_triggered()

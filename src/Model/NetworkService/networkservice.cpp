@@ -1,7 +1,18 @@
 ﻿#include "networkservice.h"
 
-// C++
+// STL
 #include <thread>
+
+
+// ============== Network ==============
+// Sockets and stuff
+#include <winsock2.h>
+
+// Adress translation
+#include <ws2tcpip.h>
+
+// Winsock 2 Library
+#pragma comment(lib,"Ws2_32.lib")
 
 // Custom
 #include "../src/View/MainWindow/mainwindow.h"
@@ -10,6 +21,7 @@
 #include "../src/Model/SettingsManager/SettingsFile.h"
 #include "../src/Model/net_params.h"
 #include "../src/Model/OutputTextType.h"
+#include "../src/Model/User.h"
 
 
 enum CONNECT_ERRORS  {
@@ -25,6 +37,7 @@ enum SERVER_MESSAGE  {
     SM_KEEPALIVE = 9,
     SM_USERMESSAGE = 10};
 
+
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
@@ -35,10 +48,10 @@ NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioServ
     this ->pMainWindow      = pMainWindow;
     this ->pAudioService    = pAudioService;
     this ->pSettingsManager = pSettingsManager;
+    pThisUser               = nullptr;
 
 
     clientVersion = CLIENT_VERSION;
-    userName = "";
 
 
     iPingNormalBelow  = PING_NORMAL_BELOW;
@@ -61,7 +74,14 @@ std::string NetworkService::getClientVersion()
 
 std::string NetworkService::getUserName()
 {
-    return userName;
+    if (pThisUser)
+    {
+        return pThisUser ->sUserName;
+    }
+    else
+    {
+        return "";
+    }
 }
 
 unsigned short NetworkService::getPingNormalBelow()
@@ -72,6 +92,76 @@ unsigned short NetworkService::getPingNormalBelow()
 unsigned short NetworkService::getPingWarningBelow()
 {
     return iPingWarningBelow;
+}
+
+size_t NetworkService::getOtherUsersVectorSize()
+{
+    return vOtherUsers .size();
+}
+
+User *NetworkService::getOtherUser(size_t i)
+{
+    return vOtherUsers[i];
+}
+
+std::mutex *NetworkService::getOtherUsersMutex()
+{
+    return &mtxOtherUsers;
+}
+
+void NetworkService::eraseDisconnectedUser(std::string sUserName, bool bDisconnectType)
+{
+    // Find this user in the vOtherUsers vector.
+
+    User*  pDisconnectedUser = nullptr;
+    size_t iUserPosInVector  = 0;
+
+    mtxOtherUsers .lock();
+
+
+    for (size_t i = 0;   i < vOtherUsers .size();   i++)
+    {
+        if ( vOtherUsers[i] ->sUserName == sUserName )
+        {
+            pDisconnectedUser = vOtherUsers[i];
+            iUserPosInVector  = i;
+
+            break;
+        }
+    }
+
+
+    mtxOtherUsers. unlock();
+
+
+
+
+    // Delete user from screen & AudioService & play audio sound.
+
+    if (pDisconnectedUser)
+    {
+        QListWidgetItem* pItem = pDisconnectedUser ->pListWidgetItem;
+
+        pAudioService ->deleteUserAudio     (pDisconnectedUser);
+
+        delete pDisconnectedUser;
+        vOtherUsers .erase( vOtherUsers .begin() + iUserPosInVector );
+
+        pMainWindow   ->deleteUserFromList  (pItem);
+        pAudioService ->playConnectDisconnectSound(false);
+
+        pMainWindow   ->showUserDisconnectNotice(sUserName, SilentMessageColor(true), bDisconnectType);
+    }
+}
+
+void NetworkService::clearWinsockAndThisUser()
+{
+    WSACleanup();
+
+    delete pThisUser;
+    pThisUser        = nullptr;
+
+    bWinSockLaunched = false;
 }
 
 void NetworkService::start(std::string adress, std::string port, std::string userName)
@@ -108,18 +198,19 @@ void NetworkService::start(std::string adress, std::string port, std::string use
 
 
 
+        pThisUser = new User("", 0, nullptr);
+
         // Create the IPv4 TCP socket
 
-        userTCPSocket = socket(AF_INET, SOCK_STREAM, 0);
+        pThisUser ->sockUserTCP = socket(AF_INET, SOCK_STREAM, 0);
 
-        if (userTCPSocket == INVALID_SOCKET)
+        if (pThisUser ->sockUserTCP == INVALID_SOCKET)
         {
             pMainWindow->printOutput("NetworkService::start()::socket() function failed and returned: "
                                      + std::to_string(WSAGetLastError())
                                      + ".\nTry again.\n", SilentMessageColor(false));
 
-            WSACleanup();
-            bWinSockLaunched = false;
+            clearWinsockAndThisUser();
         }
         else
         {
@@ -148,10 +239,10 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
     // Port
     sockaddrToConnect.sin_port = htons( static_cast <USHORT >(stoi(port)) );
 
-    memset( serverAddr .sin_zero, 0, sizeof(serverAddr.sin_zero) );
-    serverAddr .sin_family = AF_INET;
-    serverAddr .sin_port = htons( static_cast <USHORT> (stoi(port)) );
-    inet_pton( AF_INET, adress .c_str(), &serverAddr .sin_addr );
+    memset( pThisUser ->addrServer .sin_zero, 0, sizeof(pThisUser ->addrServer.sin_zero) );
+    pThisUser ->addrServer .sin_family = AF_INET;
+    pThisUser ->addrServer .sin_port = htons( static_cast <USHORT> (stoi(port)) );
+    inet_pton( AF_INET, adress .c_str(), &pThisUser ->addrServer .sin_addr );
 
 
 
@@ -161,7 +252,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
     // Connect
 
-    returnCode = connect(userTCPSocket, reinterpret_cast <sockaddr*> (&sockaddrToConnect), sizeof(sockaddrToConnect));
+    returnCode = connect(pThisUser ->sockUserTCP, reinterpret_cast <sockaddr*> (&sockaddrToConnect), sizeof(sockaddrToConnect));
 
     if (returnCode == SOCKET_ERROR)
     {
@@ -193,8 +284,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
             pMainWindow->enableInteractiveElements(true, false);
         }
 
-        WSACleanup();
-        bWinSockLaunched = false;
+        clearWinsockAndThisUser();
     }
     else
     {
@@ -203,7 +293,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
         BOOL bOptVal = true;
         int bOptLen  = sizeof(BOOL);
 
-        returnCode = setsockopt(userTCPSocket, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast <char*> (&bOptVal), bOptLen);
+        returnCode = setsockopt(pThisUser ->sockUserTCP, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast <char*> (&bOptVal), bOptLen);
 
         if (returnCode == SOCKET_ERROR)
         {
@@ -213,9 +303,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                                      SilentMessageColor(false),
                                      true);
 
-            closesocket(userTCPSocket);
-            WSACleanup();
-            bWinSockLaunched = false;
+            closesocket(pThisUser ->sockUserTCP);
+            clearWinsockAndThisUser();
             pMainWindow ->enableInteractiveElements(true, false);
         }
         else
@@ -231,7 +320,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
             std::memcpy(versionAndNameBuffer + 1,                     clientVersion .c_str(), static_cast <unsigned long long> (versionStringSize));
             std::memcpy(versionAndNameBuffer + 1 + versionStringSize, userName .c_str(),      userName .size());
 
-            send(userTCPSocket, versionAndNameBuffer, 1 + versionStringSize + static_cast <int> (userName .size()), 0);
+            send(pThisUser ->sockUserTCP, versionAndNameBuffer, 1 + versionStringSize + static_cast <int> (userName .size()), 0);
 
 
 
@@ -241,15 +330,15 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
             char readBuffer[MAX_BUFFER_SIZE];
             memset(readBuffer, 0, MAX_BUFFER_SIZE);
 
-            int iReceivedSize = recv(userTCPSocket, readBuffer, 1, 0);
+            int iReceivedSize = recv(pThisUser ->sockUserTCP, readBuffer, 1, 0);
 
             if (readBuffer[0] == CE_USERNAME_INUSE)
             {
                 // This user name is already in use. Disconnect.
 
-                if ( recv(userTCPSocket, readBuffer, 1, 0) == 0 )
+                if ( recv(pThisUser ->sockUserTCP, readBuffer, 1, 0) == 0 )
                 {
-                    shutdown(userTCPSocket, SD_SEND);
+                    shutdown(pThisUser ->sockUserTCP, SD_SEND);
                 }
 
                 pMainWindow ->printOutput("\nA user with this name is already present on the server. Select another name.",
@@ -257,17 +346,16 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                                          true);
 
                 pMainWindow ->enableInteractiveElements(true, false);
-                closesocket(userTCPSocket);
-                WSACleanup();
-                bWinSockLaunched = false;
+                closesocket(pThisUser ->sockUserTCP);
+                clearWinsockAndThisUser();
             }
             else if (readBuffer[0] == CE_SERVER_FULL)
             {
                 // Server is full
 
-                if ( recv(userTCPSocket, readBuffer, 1, 0) == 0 )
+                if ( recv(pThisUser ->sockUserTCP, readBuffer, 1, 0) == 0 )
                 {
-                    shutdown(userTCPSocket, SD_SEND);
+                    shutdown(pThisUser ->sockUserTCP, SD_SEND);
                 }
 
                 pMainWindow ->printOutput("\nServer is full.",
@@ -275,25 +363,24 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                                           true);
 
                 pMainWindow ->enableInteractiveElements(true, false);
-                closesocket(userTCPSocket);
-                WSACleanup();
-                bWinSockLaunched = false;
+                closesocket(pThisUser ->sockUserTCP);
+                clearWinsockAndThisUser();
             }
             else if (readBuffer[0] == CE_WRONG_CLIENT)
             {
                 // Wrong client version
 
                 char serverVersionSize = 0;
-                recv(userTCPSocket, &serverVersionSize, 1, 0);
+                recv(pThisUser ->sockUserTCP, &serverVersionSize, 1, 0);
 
                 char versionBuffer[MAX_VERSION_STRING_LENGTH + 1];
                 memset(versionBuffer, 0, MAX_VERSION_STRING_LENGTH + 1);
 
-                recv(userTCPSocket, versionBuffer, MAX_VERSION_STRING_LENGTH, 0);
+                recv(pThisUser ->sockUserTCP, versionBuffer, MAX_VERSION_STRING_LENGTH, 0);
 
-                if (recv(userTCPSocket, readBuffer, 1, 0) == 0)
+                if (recv(pThisUser ->sockUserTCP, readBuffer, 1, 0) == 0)
                 {
-                    shutdown(userTCPSocket,SD_SEND);
+                    shutdown(pThisUser ->sockUserTCP,SD_SEND);
                 }
 
                 pMainWindow ->printOutput("\nYour Silent version (" + clientVersion + ") does not match the server's "
@@ -303,23 +390,48 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                                          SilentMessageColor(false), true);
 
                 pMainWindow ->enableInteractiveElements(true, false);
-                closesocket(userTCPSocket);
-                WSACleanup();
-                bWinSockLaunched = false;
+                closesocket(pThisUser ->sockUserTCP);
+                clearWinsockAndThisUser();
             }
             else
             {
                 // Receive packet size
 
-                iReceivedSize = recv(userTCPSocket, readBuffer, 2, 0);
+                iReceivedSize = recv(pThisUser ->sockUserTCP, readBuffer, 2, 0);
 
                 unsigned short int iPacketSize = 0;
                 std::memcpy(&iPacketSize, readBuffer, 2);
 
+
+
+
                 // Receive data
-                iReceivedSize = recv(userTCPSocket, readBuffer, iPacketSize, 0);
+
+                iReceivedSize = recv(pThisUser ->sockUserTCP, readBuffer, iPacketSize, 0);
                 pMainWindow   ->printOutput("Received " + std::to_string(iReceivedSize + 3) + " bytes of data from the server.\n",
                                          SilentMessageColor(false), true);
+
+
+
+
+                // Translate socket to non-blocking mode
+
+                u_long arg = true;
+
+                if ( ioctlsocket(pThisUser ->sockUserTCP, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
+                {
+                    pMainWindow ->printOutput("NetworkService::connectTo()::ioctsocket() (non-blocking mode) failed and returned: "
+                                              + std::to_string(WSAGetLastError()) + ".\n",
+                                              SilentMessageColor(false), true);
+
+                    closesocket(pThisUser ->sockUserTCP);
+                    clearWinsockAndThisUser();
+                    pMainWindow ->enableInteractiveElements(true, false);
+                }
+
+
+
+                // Prepare AudioService
 
                 pAudioService ->prepareForStart();
 
@@ -348,37 +460,30 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     std::memcpy(rowText, readBuffer + iReadBytes, currentItemSize);
                     iReadBytes += currentItemSize;
 
-                    pMainWindow->addNewUserToList(std::string(rowText));
-                    pAudioService->addNewUser(std::string(rowText));
+
+
+                    // Add new user.
+
+                    std::string sNewUserName = std::string(rowText);
+
+                    User* pNewUser = new User( sNewUserName, 0, pMainWindow ->addNewUserToList(sNewUserName) );
+
+                    vOtherUsers .push_back( pNewUser );
+
+                    pAudioService ->setupUserAudio( pNewUser );
                 }
 
-                pMainWindow->addNewUserToList(userName);
+                // Save this user
+
+                pThisUser ->sUserName = userName;
+                pThisUser ->pListWidgetItem = pMainWindow ->addNewUserToList(userName);
+
+                pAudioService ->setupUserAudio( pThisUser );
 
 
 
 
-                // Translate socket to non-blocking mode
-
-                u_long arg = true;
-
-                if ( ioctlsocket(userTCPSocket, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
-                {
-                    pMainWindow ->printOutput("NetworkService::connectTo()::ioctsocket() (non-blocking mode) failed and returned: "
-                                              + std::to_string(WSAGetLastError()) + ".\n",
-                                              SilentMessageColor(false), true);
-
-                    closesocket(userTCPSocket);
-                    WSACleanup();
-
-                    bWinSockLaunched = false;
-                    pMainWindow ->enableInteractiveElements(true, false);
-                }
-
-
-
-
-                // Save user name & start listen thread
-                this ->userName = userName;
+                // Start listen thread
 
                 pMainWindow ->printOutput("WARNING:\nThe data transmitted over the network is not encrypted.\n\nConnected to text chat.",
                                          SilentMessageColor(false),
@@ -404,7 +509,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 // Save user name to settings
 
                 SettingsFile* pUpdatedSettings = new SettingsFile();
-                pUpdatedSettings ->sUsername         = userName;
+                pUpdatedSettings ->sUsername   = userName;
                 pSettingsManager ->saveSettings( pUpdatedSettings, true );
 
 
@@ -424,9 +529,9 @@ void NetworkService::setupVoiceConnection()
 {
     // Create UDP socket
 
-    userUDPSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    pThisUser ->sockUserUDP = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-    if (userUDPSocket == INVALID_SOCKET)
+    if (pThisUser ->sockUserUDP == INVALID_SOCKET)
     {
         pMainWindow ->printOutput( "Cannot start voice connection.\n"
                                   "NetworkService::setupVoiceConnection::socket() error: "
@@ -442,7 +547,7 @@ void NetworkService::setupVoiceConnection()
         // establish a default destination address that can be used on subsequent send/ WSASend and recv/ WSARecv calls.
         // Any datagrams received from an address other than the destination address specified will be discarded.
 
-        if ( connect( userUDPSocket, reinterpret_cast <sockaddr*> (&serverAddr), sizeof(serverAddr) ) == SOCKET_ERROR )
+        if ( connect( pThisUser ->sockUserUDP, reinterpret_cast <sockaddr*> (&pThisUser ->addrServer), sizeof(pThisUser ->addrServer) ) == SOCKET_ERROR )
         {
             pMainWindow ->printOutput( "Cannot start voice connection.\n"
                                       "NetworkService::setupVoiceConnection::connect() error: "
@@ -450,7 +555,7 @@ void NetworkService::setupVoiceConnection()
                                       SilentMessageColor(false),
                                       true );
 
-            closesocket(userUDPSocket);
+            closesocket(pThisUser ->sockUserUDP);
 
             return;
         }
@@ -460,14 +565,14 @@ void NetworkService::setupVoiceConnection()
 
             char firstMessage[MAX_NAME_LENGTH + 3];
             firstMessage[0] = -1;
-            firstMessage[1] = static_cast <char> ( userName .size() );
-            std::memcpy( firstMessage + 2, userName .c_str(), userName .size() );
+            firstMessage[1] = static_cast <char> ( pThisUser ->sUserName .size() );
+            std::memcpy( firstMessage + 2, pThisUser ->sUserName .c_str(), pThisUser ->sUserName .size() );
 
 
-            int iSentSize = sendto(userUDPSocket, firstMessage, 2 + static_cast<int>(userName .size()), 0,
-                                   reinterpret_cast <sockaddr*> (&serverAddr), sizeof(serverAddr));
+            int iSentSize = sendto(pThisUser ->sockUserUDP, firstMessage, 2 + static_cast<int>(pThisUser ->sUserName .size()), 0,
+                                   reinterpret_cast <sockaddr*> (&pThisUser ->addrServer), sizeof(pThisUser ->addrServer));
 
-            if ( iSentSize != ( 2 + static_cast <int> (userName .size()) ) )
+            if ( iSentSize != ( 2 + static_cast <int> (pThisUser ->sUserName .size()) ) )
             {
                 if (iSentSize == SOCKET_ERROR)
                 {
@@ -477,7 +582,7 @@ void NetworkService::setupVoiceConnection()
                                               SilentMessageColor(false),
                                               true );
 
-                    closesocket(userUDPSocket);
+                    closesocket(pThisUser ->sockUserUDP);
 
                     return;
                 }
@@ -486,10 +591,10 @@ void NetworkService::setupVoiceConnection()
                     pMainWindow ->printOutput( "Cannot start voice connection.\n"
                                               "NetworkService::setupVoiceConnection::sendto() sent only: "
                                               + std::to_string(iSentSize) + " out of "
-                                              + std::to_string(2 + userName .size()),
+                                              + std::to_string(2 + pThisUser ->sUserName .size()),
                                               SilentMessageColor(false), true );
 
-                    closesocket(userUDPSocket);
+                    closesocket(pThisUser ->sockUserUDP);
 
                     return;
                 }
@@ -499,7 +604,7 @@ void NetworkService::setupVoiceConnection()
 
             u_long arg = true;
 
-            if ( ioctlsocket(userUDPSocket, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
+            if ( ioctlsocket(pThisUser ->sockUserUDP, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
             {
                 pMainWindow->printOutput( "Cannot start voice connection.\n"
                                           "NetworkService::setupVoiceConnection::ioctlsocket() error: "
@@ -507,7 +612,7 @@ void NetworkService::setupVoiceConnection()
                                           SilentMessageColor(false),
                                           true );
 
-                closesocket(userUDPSocket);
+                closesocket(pThisUser ->sockUserUDP);
 
                 return;
             }
@@ -542,12 +647,12 @@ void NetworkService::listenTCPFromServer()
 
     while(bTextListen)
     {
-        while ( recv(userTCPSocket, readBuffer, 0, 0) == 0 )
+        while ( recv(pThisUser ->sockUserTCP, readBuffer, 0, 0) == 0 )
         {
             // There are some data to read
 
             // There are some data to receive
-            int receivedAmount = recv(userTCPSocket, readBuffer, 1, 0);
+            int receivedAmount = recv(pThisUser ->sockUserTCP, readBuffer, 1, 0);
             if (receivedAmount == 0)
             {
                 // Server sent FIN
@@ -571,7 +676,7 @@ void NetworkService::listenTCPFromServer()
                 else if (readBuffer[0] == SM_CAN_START_UDP)
                 {
                     std::thread listenVoiceThread (&NetworkService::listenUDPFromServer, this);
-                    listenVoiceThread.detach();
+                    listenVoiceThread .detach();
                 }
                 else if (readBuffer[0] == SM_PING)
                 {
@@ -585,7 +690,7 @@ void NetworkService::listenTCPFromServer()
                     // We should answer in 10 seconds or will be disconnected
 
                     char keepAliveChar = 9;
-                    send(userTCPSocket, &keepAliveChar, 1, 0);
+                    send(pThisUser ->sockUserTCP, &keepAliveChar, 1, 0);
 
                     lastTimeServerKeepAliveCame = clock();
                 }
@@ -630,14 +735,14 @@ void NetworkService::listenUDPFromServer()
 
     while (bVoiceListen)
     {
-        int iSize = recv(userUDPSocket, readBuffer, MAX_BUFFER_SIZE, 0);
+        int iSize = recv(pThisUser ->sockUserUDP, readBuffer, MAX_BUFFER_SIZE, 0);
 
         while (iSize > 0)
         {
             if (readBuffer[0] == 0)
             {
                 // it's ping check
-                iSize = send(userUDPSocket, readBuffer, 5, 0);
+                iSize = send(pThisUser ->sockUserUDP, readBuffer, 5, 0);
                 if (iSize != 5)
                 {
                     if (iSize == SOCKET_ERROR)
@@ -680,7 +785,7 @@ void NetworkService::listenUDPFromServer()
             }
 
 
-            iSize = recv(userUDPSocket, readBuffer, MAX_BUFFER_SIZE, 0);
+            iSize = recv(pThisUser ->sockUserUDP, readBuffer, MAX_BUFFER_SIZE, 0);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS));
@@ -700,15 +805,15 @@ void NetworkService::receiveInfoAboutNewUser()
     // Read packet size.
 
     unsigned char iPacketSize = 0;
-    recv(userTCPSocket, readBuffer, 1, 0);
+    recv(pThisUser ->sockUserTCP, readBuffer, 1, 0);
     std::memcpy(&iPacketSize, readBuffer, 1);
 
 
 
 
-    // Read other stuff.
+    // Read new online count.
 
-    recv(userTCPSocket, readBuffer, iPacketSize, 0);
+    recv(pThisUser ->sockUserTCP, readBuffer, iPacketSize, 0);
     int iOnline = 0;
     std::memcpy(&iOnline, readBuffer, 4);
 
@@ -718,16 +823,29 @@ void NetworkService::receiveInfoAboutNewUser()
     // Show on screen.
 
     pMainWindow   ->setOnlineUsersCount (iOnline);
-    pMainWindow   ->addNewUserToList    (std::string(readBuffer + 5));
 
 
 
 
-    // Add new user to AudioService.
 
-    pAudioService ->addNewUser (std::string(readBuffer + 5));
-    pAudioService ->playSound  (true);
+    // Add new user.
 
+    mtxOtherUsers .lock();
+
+
+
+    std::string sNewUserName = std::string(readBuffer + 5);
+
+    User* pNewUser = new User( sNewUserName, 0, pMainWindow ->addNewUserToList(sNewUserName) );
+
+    pAudioService ->setupUserAudio( pNewUser );
+    pAudioService ->playConnectDisconnectSound(true);
+
+    vOtherUsers .push_back( pNewUser );
+
+
+
+    mtxOtherUsers .unlock();
 
 
 
@@ -741,7 +859,7 @@ void NetworkService::receiveMessage()
     // Read packet size
 
     unsigned short int iPacketSize = 0;
-    recv(userTCPSocket, reinterpret_cast<char*>(&iPacketSize), 2, 0);
+    recv(pThisUser ->sockUserTCP, reinterpret_cast<char*>(&iPacketSize), 2, 0);
 
     char* pReadBuffer = new char[iPacketSize + 2];
     memset(pReadBuffer, 0, iPacketSize + 2);
@@ -751,7 +869,7 @@ void NetworkService::receiveMessage()
 
     // Receive message
 
-    int receivedAmount = recv(userTCPSocket, pReadBuffer, iPacketSize, 0);
+    int receivedAmount = recv(pThisUser ->sockUserTCP, pReadBuffer, iPacketSize, 0);
 
     // Message structure: "Hour:Minute. UserName: Message (message in wchar_t)".
 
@@ -812,38 +930,37 @@ void NetworkService::deleteDisconnectedUserFromList()
     // Read disconnect type (lost or closed connection).
 
     char iDisconnectType = 0;
-    recv(userTCPSocket, &iDisconnectType, 1, 0);
+    recv(pThisUser ->sockUserTCP, &iDisconnectType, 1, 0);
+    bool bDiscannectedType = iDisconnectType;
 
 
 
 
     // Read packet size
 
-    recv(userTCPSocket, readBuffer, 1, 0);
+    recv(pThisUser ->sockUserTCP, readBuffer, 1, 0);
     unsigned char iPacketSize = 0;
     std::memcpy(&iPacketSize, readBuffer, 1);
 
 
 
 
-    // Read other stuff
+    // Read new online count
 
-    recv(userTCPSocket, readBuffer, iPacketSize, 0);
+    recv(pThisUser ->sockUserTCP, readBuffer, iPacketSize, 0);
     int iOnline = 0;
 
     std::memcpy(&iOnline, readBuffer, 4);
 
-
-
-
-    // Delete user from screen & AudioService & play audio sound.
-
     pMainWindow   ->setOnlineUsersCount (iOnline);
-    pMainWindow   ->deleteUserFromList  (std::string(readBuffer + 4));
-    pAudioService ->deleteUser          (std::string(readBuffer + 4));
-    pAudioService ->playSound(false);
 
-    pMainWindow   ->showUserDisconnectNotice(std::string(readBuffer + 4), SilentMessageColor(true), iDisconnectType);
+
+
+
+    std::string sDisconnectedUserName = std::string(readBuffer + 4);
+
+    std::thread tEraseDisconnectedUser (&NetworkService::eraseDisconnectedUser, this, sDisconnectedUserName, bDiscannectedType);
+    tEraseDisconnectedUser .detach();
 }
 
 void NetworkService::receivePing()
@@ -853,14 +970,14 @@ void NetworkService::receivePing()
     unsigned short iPacketSize = 0;
     unsigned short iCurrentPos = 0;
 
-    recv(userTCPSocket, reinterpret_cast<char*>(&iPacketSize), sizeof(unsigned short), 0);
+    recv(pThisUser ->sockUserTCP, reinterpret_cast<char*>(&iPacketSize), sizeof(unsigned short), 0);
 
     do
     {
         // Read username size.
 
         char nameSize = 0;
-        recv(userTCPSocket, &nameSize, 1, 0);
+        recv(pThisUser ->sockUserTCP, &nameSize, 1, 0);
         iCurrentPos++;
 
 
@@ -871,7 +988,7 @@ void NetworkService::receivePing()
         char nameBuffer[MAX_NAME_LENGTH + 1];
         memset(nameBuffer, 0, MAX_NAME_LENGTH + 1);
 
-        recv(userTCPSocket, nameBuffer, nameSize, 0);
+        recv(pThisUser ->sockUserTCP, nameBuffer, nameSize, 0);
         iCurrentPos += nameSize;
 
 
@@ -880,13 +997,46 @@ void NetworkService::receivePing()
         // Read ping.
 
         unsigned short ping = 0;
-        recv(userTCPSocket, reinterpret_cast<char*>(&ping), sizeof(unsigned short), 0);
+        recv(pThisUser ->sockUserTCP, reinterpret_cast<char*>(&ping), sizeof(unsigned short), 0);
         iCurrentPos += sizeof(unsigned short);
 
 
 
-        // Show on screen.
-        pMainWindow ->setPingToUser(std::string(nameBuffer), ping);
+
+        // Show on UI.
+
+        std::string sUserName = std::string(nameBuffer);
+        User* pUser           = nullptr;
+
+        mtxOtherUsers .lock();
+
+        if (sUserName == pThisUser ->sUserName)
+        {
+            pUser = pThisUser;
+        }
+        else
+        {
+            for (size_t i = 0;   i < vOtherUsers .size();   i++)
+            {
+                if (vOtherUsers[i] ->sUserName == sUserName)
+                {
+                    pUser = vOtherUsers[i];
+
+                    break;
+                }
+            }
+        }
+
+
+        mtxOtherUsers .unlock();
+
+
+        if (pUser)
+        {
+            // Show on screen.
+            pUser       ->iPing = ping;
+            pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+        }
 
     }while(iCurrentPos < iPacketSize);
 }
@@ -924,7 +1074,7 @@ void NetworkService::sendMessage(std::wstring message)
 
         int iSendBufferSize = static_cast <int> ( sizeof(commandType) + sizeof(iPacketSize) + message.size() * 2 );
 
-        int sendSize = send(  userTCPSocket, pSendBuffer, iSendBufferSize, 0  );
+        int sendSize = send(  pThisUser ->sockUserTCP, pSendBuffer, iSendBufferSize, 0  );
 
         if ( sendSize != iSendBufferSize )
         {
@@ -976,8 +1126,8 @@ void NetworkService::sendVoiceMessage(char *pVoiceMessage, int iMessageSize, boo
         if (bLast)
         {
             char lastVoice = 1;
-            iSize = sendto( userUDPSocket, &lastVoice, iMessageSize, 0,
-                            reinterpret_cast <sockaddr*> (&serverAddr), sizeof(serverAddr) );
+            iSize = sendto( pThisUser ->sockUserUDP, &lastVoice, iMessageSize, 0,
+                            reinterpret_cast <sockaddr*> (&pThisUser ->addrServer), sizeof(pThisUser ->addrServer) );
         }
         else
         {
@@ -987,7 +1137,8 @@ void NetworkService::sendVoiceMessage(char *pVoiceMessage, int iMessageSize, boo
 
             std::memcpy(pSend + 1, pVoiceMessage, static_cast<size_t>(iMessageSize));
 
-            iSize = sendto(userUDPSocket, pSend, iMessageSize + 1, 0, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr));
+            iSize = sendto(pThisUser ->sockUserUDP, pSend, iMessageSize + 1, 0,
+                           reinterpret_cast<sockaddr*>(&pThisUser ->addrServer), sizeof(pThisUser ->addrServer));
 
             iMessageSize += 1;
 
@@ -1028,7 +1179,7 @@ void NetworkService::disconnect()
         if (bVoiceListen)
         {
             bVoiceListen = false;
-            closesocket(userUDPSocket);
+            closesocket(pThisUser ->sockUserUDP);
             pAudioService ->stop();
         }
 
@@ -1039,14 +1190,14 @@ void NetworkService::disconnect()
 
         char readBuffer[5];
 
-        int returnCode = shutdown(userTCPSocket, SD_SEND);
+        int returnCode = shutdown(pThisUser ->sockUserTCP, SD_SEND);
 
         if (returnCode == SOCKET_ERROR)
         {
             pMainWindow ->printOutput("NetworkService::disconnect()::shutdown() function failed and returned: "
                                      + std::to_string(WSAGetLastError()) + ".\n",
                                      SilentMessageColor(false));
-            closesocket(userTCPSocket);
+            closesocket(pThisUser ->sockUserTCP);
             WSACleanup();
             bWinSockLaunched = false;
         }
@@ -1055,19 +1206,19 @@ void NetworkService::disconnect()
             // Translate socket to blocking mode
 
             u_long arg = false;
-            if ( ioctlsocket(userTCPSocket, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
+            if ( ioctlsocket(pThisUser ->sockUserTCP, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
             {
                 pMainWindow ->printOutput("NetworkService::disconnect()::ioctsocket() (blocking mode) failed and returned: "
                                          + std::to_string(WSAGetLastError()) + ".\n",
                                          SilentMessageColor(false));
-                closesocket(userTCPSocket);
+                closesocket(pThisUser ->sockUserTCP);
                 WSACleanup();
                 bWinSockLaunched = false;
             }
 
-            if ( recv(userTCPSocket, readBuffer, 5, 0) == 0 )
+            if ( recv(pThisUser ->sockUserTCP, readBuffer, 5, 0) == 0 )
             {
-                returnCode = closesocket(userTCPSocket);
+                returnCode = closesocket(pThisUser ->sockUserTCP);
                 if (returnCode == SOCKET_ERROR)
                 {
                     pMainWindow ->printOutput("NetworkService::disconnect()::closesocket() function failed and returned: "
@@ -1091,7 +1242,7 @@ void NetworkService::disconnect()
                     {
                         // Delete user from UI.
 
-                        pMainWindow ->deleteUserFromList        ("", true);
+                        pMainWindow ->deleteUserFromList        (nullptr, true);
                         pMainWindow ->setOnlineUsersCount       (0);
                         pMainWindow ->enableInteractiveElements (true, false);
 
@@ -1104,7 +1255,7 @@ void NetworkService::disconnect()
             {
                 pMainWindow ->printOutput("Server has not responded.\n", SilentMessageColor(false));
 
-                closesocket(userTCPSocket);
+                closesocket(pThisUser ->sockUserTCP);
                 WSACleanup();
                 bWinSockLaunched = false;
 
@@ -1112,11 +1263,15 @@ void NetworkService::disconnect()
 
                 // Delete user from UI.
 
-                pMainWindow ->deleteUserFromList        ("",true);
+                pMainWindow ->deleteUserFromList        (nullptr,true);
                 pMainWindow ->setOnlineUsersCount       (0);
                 pMainWindow ->enableInteractiveElements (true,false);
             }
         }
+
+
+        cleanUp();
+
 
         // Wait for serverMonitor() to end
         std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
@@ -1129,30 +1284,32 @@ void NetworkService::disconnect()
 
 void NetworkService::lostConnection()
 {
-    pMainWindow->printOutput( "\nThe server is not responding. Disconnecting...\n", SilentMessageColor(false), true );
+    pMainWindow->printOutput( "\nThe server is not responding...\n", SilentMessageColor(false), true );
 
     bTextListen  = false;
 
     if (bVoiceListen)
     {
         bVoiceListen = false;
-        closesocket(userUDPSocket);
+        closesocket(pThisUser ->sockUserUDP);
         pAudioService ->playLostConnectionSound();
         pAudioService ->stop();
     }
 
-    closesocket(userTCPSocket);
+    closesocket(pThisUser ->sockUserTCP);
     WSACleanup();
     bWinSockLaunched = false;
 
+
+    cleanUp();
 
 
 
     // Delete user from UI.
 
-    pMainWindow ->deleteUserFromList("",true);
+    pMainWindow ->deleteUserFromList(nullptr, true);
     pMainWindow ->setOnlineUsersCount(0);
-    pMainWindow ->enableInteractiveElements(true,false);
+    pMainWindow ->enableInteractiveElements(true, false);
 }
 
 void NetworkService::answerToFIN()
@@ -1162,13 +1319,13 @@ void NetworkService::answerToFIN()
     if (bVoiceListen)
     {
         bVoiceListen = false;
-        closesocket(userUDPSocket);
+        closesocket(pThisUser ->sockUserUDP);
         pAudioService ->stop();
     }
 
     pMainWindow->printOutput("Server is closing connection.\n", SilentMessageColor(false), true);
 
-    int returnCode = shutdown(userTCPSocket, SD_SEND);
+    int returnCode = shutdown(pThisUser ->sockUserTCP, SD_SEND);
 
     if (returnCode == SOCKET_ERROR)
     {
@@ -1177,13 +1334,13 @@ void NetworkService::answerToFIN()
                                   SilentMessageColor(false),
                                   true);
 
-         closesocket(userTCPSocket);
+         closesocket(pThisUser ->sockUserTCP);
          WSACleanup();
          bWinSockLaunched = false;
     }
     else
     {
-        returnCode = closesocket(userTCPSocket);
+        returnCode = closesocket(pThisUser ->sockUserTCP);
         if (returnCode == SOCKET_ERROR)
         {
             pMainWindow->printOutput("NetworkService::listenForServer()::closesocket() function failed and returned: "
@@ -1213,10 +1370,14 @@ void NetworkService::answerToFIN()
                 pMainWindow->printOutput("Connection closed successfully.\n",
                                          SilentMessageColor(false), true);
 
-                pMainWindow->deleteUserFromList("", true);
+                pMainWindow->deleteUserFromList(nullptr, true);
             }
         }
     }
+
+
+    cleanUp();
+
 
     // Wait for serverMonitor() to end
     std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
@@ -1232,4 +1393,31 @@ void NetworkService::stop()
     {
         disconnect();
     }
+}
+
+void NetworkService::cleanUp()
+{
+    mtxOtherUsers .lock();
+
+
+    for (size_t i = 0;   i < vOtherUsers .size();   i++)
+    {
+        vOtherUsers[i] ->mtxUser .lock();
+        vOtherUsers[i] ->mtxUser .unlock();
+
+        delete vOtherUsers[i];
+        vOtherUsers[i] = nullptr;
+    }
+
+    vOtherUsers .clear();
+
+
+    if (pThisUser)
+    {
+        delete pThisUser;
+        pThisUser = nullptr;
+    }
+
+
+    mtxOtherUsers .unlock();
 }

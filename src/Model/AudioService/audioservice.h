@@ -23,6 +23,8 @@ class MainWindow;
 class NetworkService;
 class SettingsManager;
 
+class User;
+
 
 
 #define  BUFFER_UPDATE_CHECK_MS      2
@@ -33,38 +35,6 @@ class SettingsManager;
 #define  AUDIO_NEW_MESSAGE_PATH      L"sounds/newmessage.wav"
 #define  AUDIO_PRESS_PATH            L"sounds/press.wav"
 #define  AUDIO_UNPRESS_PATH          L"sounds/unpress.wav"
-
-
-
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-
-
-struct UserAudioStruct
-{
-    // Audio packets
-    std::vector<short*> vAudioPackets;
-    bool                bPacketsArePlaying;
-    bool                bDeletePacketsAtLast;
-    bool                bLastPacketCame;
-
-
-    // Waveform-audio output device
-    HWAVEOUT            hWaveOut;
-
-
-    // Audio buffers
-    WAVEHDR             WaveOutHdr1;
-    WAVEHDR             WaveOutHdr2;
-    WAVEHDR             WaveOutHdr3;
-
-
-    std::string         sUserName;
-
-
-    float               fUserDefinedVolume;
-};
 
 
 
@@ -91,22 +61,21 @@ public:
 
     // Play sound
 
-        void   playSound                     (bool bConnectSound);
+        void   playConnectDisconnectSound    (bool bConnectSound);
         void   playNewMessageSound           ();
         void   playLostConnectionSound       ();
 
 
     // User add/delete
 
-        void   addNewUser                    (std::string sUserName);
-        void   deleteUser                    (std::string sUserName);
-        void   deleteAll                     ();
+        void   setupUserAudio                (User* pUser);
+        void   deleteUserAudio               (User* pUser);
 
 
     // Audio data record/play
 
         void   playAudioData                 (short int* pAudio,    std::string sUserName, bool bLast);
-        void   play                          (UserAudioStruct* pUser);
+        void   play                          (User* pUser);
         void   sendAudioData                 (short* pAudio);
         void   recordOnPress                 ();
 
@@ -125,7 +94,7 @@ public:
 
     // GET functions
 
-        float  getUserCurrentVolume          (std::string sUserName);
+        float  getUserCurrentVolume          (const std::string& sUserName);
 
 
 
@@ -143,16 +112,21 @@ private:
 
     // Used in play()
 
-        void  waitForPlayToEnd  (UserAudioStruct* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
-        void  waitForAllBuffers (UserAudioStruct* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
+        void  waitForPlayToEnd  (User* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
+        void  waitForAllBuffers (User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
 
 
     // -------------------------------------------------------------
 
 
+    MainWindow*      pMainWindow;
+    NetworkService*  pNetworkService;
+    SettingsManager* pSettingsManager;
+
 
     // Waveform-audio input device
     HWAVEIN          hWaveIn;
+
 
     // Audio format
     WAVEFORMATEX     Format;
@@ -172,11 +146,6 @@ private:
     short int*       pWaveIn4;
 
 
-    MainWindow*      pMainWindow;
-    NetworkService*  pNetworkService;
-    SettingsManager* pSettingsManager;
-
-
     // Record quality
     // Do not set 'sampleCout' to more than ~700 (700 * 2 = 1400) (~MTU)
     // we '*2" because audio data in PCM16, 1 sample = 16 bits.
@@ -188,9 +157,4 @@ private:
     // Push-to-talk
     float            fMasterVolumeMult;
     bool             bInputReady;
-
-
-    // Users
-    std::vector<UserAudioStruct*> vUsersAudio;
-    std::mutex                    mtxUsersAudio;
 };

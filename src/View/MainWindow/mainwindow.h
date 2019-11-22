@@ -30,34 +30,10 @@ namespace Ui
 }
 
 
-
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 
-
-class User
-{
-public:
-
-    User(std::string sUserName, int ping, QListWidgetItem* pItem)
-    {
-        this->sUserName = sUserName;
-        this->ping      = ping;
-        this->pItem     = pItem;
-        bTalking        = false;
-    }
-
-    QListWidgetItem* pItem;
-    std::string sUserName;
-    int ping;
-    bool bTalking;
-};
-
-
-// --------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
 
 class MainWindow : public QMainWindow
 {
@@ -67,74 +43,128 @@ public:
 
     explicit MainWindow(QWidget *parent = nullptr);
 
-    void connectTo                      (std::string adress, std::string port, std::string userName);
 
-        void  printOutput               (std::string text, SilentMessageColor messageColor, bool bEmitSignal = false);
-        void  printOutputW              (std::wstring text, SilentMessageColor messageColor, bool bEmitSignal = false);
-        void  printUserMessage          (std::string timeInfo, std::wstring message, SilentMessageColor messageColor, bool bEmitSignal = false);
-        void  enableInteractiveElements (bool bMenu, bool bTypeAndSend);
-        void  setOnlineUsersCount       (int onlineCount);
-        void  setPingToUser             (std::string userName, int ping);
-        void  setUserIsTalking          (std::string userName, bool bTalking);
-        void  addNewUserToList          (std::string name);
-        void  deleteUserFromList        (std::string name, bool bDeleteAll = false);
-        void  showUserDisconnectNotice  (std::string name, SilentMessageColor messageColor, bool bUserLost);
-        void  showUserConnectNotice     (std::string name, SilentMessageColor messageColor);
-        void  showMessageBox            (bool bWarningBox, std::string message);
-        void  clearTextEdit             ();
-        void  applyTheme                ();
+    // Called from ConnectWindow
+
+        void connectTo                               (std::string adress, std::string port, std::string userName);
+
+
+    // Print on Chat Room QPlainTextEdit
+
+        void              printUserMessage           (std::string timeInfo,  std::wstring message,             SilentMessageColor messageColor, bool bEmitSignal = false);
+        void              printOutput                (std::string text,      SilentMessageColor messageColor,  bool bEmitSignal = false);
+        void              printOutputW               (std::wstring text,     SilentMessageColor messageColor,  bool bEmitSignal = false);
+        void              showUserDisconnectNotice   (std::string name,      SilentMessageColor messageColor,  bool bUserLost);
+        void              showUserConnectNotice      (std::string name,      SilentMessageColor messageColor);
+
+
+    // Update UI elements
+
+        void              setPingAndTalkingToUser    (std::string sUserName,             QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
+        void              deleteUserFromList         (QListWidgetItem* pListWidgetItem,  bool bDeleteAll = false);
+        void              enableInteractiveElements  (bool bMenu,                        bool bTypeAndSend);
+        void              setOnlineUsersCount        (int onlineCount);
+        QListWidgetItem*  addNewUserToList           (std::string name);
+
+
+    // Input message QPlainTextEdit
+
+        void              clearTextEdit              ();
+
+
+    // Other
+
+        void              showMessageBox             (bool bWarningBox, std::string message);
+        void              applyTheme                 ();
 
     ~MainWindow();
 
+
 signals:
 
-    void signalShowUserConnectNotice(std::string name, SilentMessageColor messageColor);
-    void signalShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost);
-    void signalTypeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
-    void signalShowMessage(bool bWarningBox, std::string message);
-    void signalSetPingToUser(std::string userName, int ping);
-    void signalSetUserIsTalking(std::string userName, bool bTalking);
-    void signalEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
-    void signalApplyTheme();
+    // Print on Chat Room QPlainTextEdit
+
+        void signalTypeOnScreen                      (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
+        void signalShowUserDisconnectNotice          (std::string name, SilentMessageColor messageColor, bool bUserLost);
+        void signalShowUserConnectNotice             (std::string name, SilentMessageColor messageColor);
+
+
+    // Update UI elements
+
+        void signalPingAndTalkingToUser              (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
+        void signalEnableInteractiveElements         (bool bMenu,                       bool bTypeAndSend);
+        void signalDeleteUserFromList                (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
+
+
+    // Other
+
+        void signalShowMessageBox                    (bool bWarningBox, std::string message);
+        void signalApplyTheme                        ();
+
 
 protected:
 
-    void hideEvent(QHideEvent* event);
-    void closeEvent(QCloseEvent *event);
+    void hideEvent   (QHideEvent* event);
+    void closeEvent  (QCloseEvent *event);
 
 
 private slots:
 
-    // Context menu in list
-    void slotChangeUserVolume();
+    // Context menu in QListWidget
 
-    void slotSaveSettings(SettingsFile* pSettingsFile);
+        void  on_listWidget_users_customContextMenuRequested (const QPoint &pos);
+        void  slotSetNewUserVolume                           (QString userName, float fVolume);
+        void  slotChangeUserVolume                           ();
 
-    void slotSetNewUserVolume(QString userName, float fVolume);
 
-    void slotShowMessage(bool bWarningBox, std::string message);
-    void slotSetPingToUser(std::string userName, int ping);
-    void slotSetUserIsTalking(std::string userName, bool bTalking);
-    void typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage = false);
-    void slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend);
-    void slotTrayIconActivated();
-    void slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost);
-    void slotShowUserConnectNotice(std::string name, SilentMessageColor messageColor);
-    void slotApplyTheme();
+    // Called from SettingsWindow
 
-    void on_actionAbout_2_triggered();
-    void on_actionConnect_triggered();
-    void on_actionDisconnect_triggered();
-    void on_actionSettings_triggered();
+        void  slotSaveSettings                  (SettingsFile* pSettingsFile);
 
-    void on_pushButton_clicked();
-    void on_plainTextEdit_2_textChanged();
-    void on_listWidget_users_customContextMenuRequested(const QPoint &pos);
+
+    // Update UI elements
+
+        void  slotPingAndTalkingToUser          (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
+        void  slotDeleteUserFromList            (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
+        void  slotEnableInteractiveElements     (bool bMenu,                       bool bTypeAndSend);
+
+
+    // Print on Chat Room QPlainTextEdit
+
+        void  typeSomeOnScreen                  (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
+        void  slotShowUserDisconnectNotice      (std::string name, SilentMessageColor messageColor, bool bUserLost);
+        void  slotShowUserConnectNotice         (std::string name, SilentMessageColor messageColor);
+
+
+    // Tray Icon
+
+        void  slotTrayIconActivated             ();
+
+
+    // QMenu
+
+        void  on_actionAbout_2_triggered        ();
+        void  on_actionConnect_triggered        ();
+        void  on_actionDisconnect_triggered     ();
+        void  on_actionSettings_triggered       ();
+
+
+    // Other
+
+        void  slotShowMessageBox                (bool bWarningBox, std::string message);
+        void  slotApplyTheme                    ();
+
+
+    // UI
+
+        void  on_pushButton_clicked             ();
+        void  on_plainTextEdit_input_textChanged();
+
 
 private:
 
-    void showSettingsWindow();
-    void closeApp();
+    void showSettingsWindow ();
+    void closeApp           ();
 
 
 
@@ -158,11 +188,10 @@ private:
 
 
     std::mutex       mtxPrintOutput;
+    std::mutex       mtxList;
 
 
+    QString          outputHTMLtimeStart;
     QString          outputHTMLmessageStart;
     QString          outputHTMLmessageEnd;
-
-
-    std::vector<User> users;
 };

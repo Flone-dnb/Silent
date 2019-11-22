@@ -39,6 +39,7 @@ HEADERS += \
     ../src/Model/OutputTextType.h \
     ../src/Model/SettingsManager/SettingsFile.h \
     ../src/Model/SettingsManager/settingsmanager.h \
+    ../src/Model/User.h \
     ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
     ../src/View/MainWindow/mainwindow.h \
