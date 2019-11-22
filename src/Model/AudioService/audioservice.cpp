@@ -302,7 +302,7 @@ void AudioService::recordOnPress()
         while ( GetAsyncKeyState(pSettingsManager ->getCurrentSettings() ->iPushToTalkButton) & 0x8000 )
         {
             // Button pressed
-            if (bButtonPressed == false)
+            if ( (bButtonPressed == false) && (pSettingsManager ->getCurrentSettings() ->bPlayPushToTalkSound) )
             {
                 PlaySoundW( AUDIO_PRESS_PATH, nullptr, SND_FILENAME | SND_ASYNC );
             }
@@ -479,9 +479,12 @@ void AudioService::recordOnPress()
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 
-            pNetworkService->sendVoiceMessage(nullptr, 1, true);
+            pNetworkService ->sendVoiceMessage(nullptr, 1, true);
 
-            PlaySoundW( AUDIO_UNPRESS_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+            if (pSettingsManager ->getCurrentSettings() ->bPlayPushToTalkSound)
+            {
+                PlaySoundW( AUDIO_UNPRESS_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+            }
         }
 
         std::this_thread::sleep_for( std::chrono::milliseconds(15) );

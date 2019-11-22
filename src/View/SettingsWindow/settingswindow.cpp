@@ -167,6 +167,8 @@ void SettingsWindow::on_pushButton_2_clicked()
 
     pNewSettingsFile ->sThemeName = ui ->comboBox_themes ->currentText() .toStdString();
 
+    pNewSettingsFile ->bPlayPushToTalkSound = ui ->checkBox_pushToTalkSound ->isChecked();
+
     emit signalSaveSettings( pNewSettingsFile );
     close();
 }
@@ -179,6 +181,8 @@ void SettingsWindow::updateUIToSettings(SettingsFile* pSettingsFile)
     showThemes();
 
     ui ->comboBox_themes ->setCurrentText( QString::fromStdString(pSettingsFile ->sThemeName) );
+
+    ui ->checkBox_pushToTalkSound ->setChecked( pSettingsFile ->bPlayPushToTalkSound );
 }
 
 void SettingsWindow::showThemes()

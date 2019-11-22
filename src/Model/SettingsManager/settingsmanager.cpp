@@ -74,9 +74,10 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
 
     if ( bSetOnlyNewUserName )
     {
-        pSettingsFile ->iPushToTalkButton = pCurrentSettingsFile ->iPushToTalkButton;
-        pSettingsFile ->iMasterVolume     = pCurrentSettingsFile ->iMasterVolume;
-        pSettingsFile ->sThemeName        = pCurrentSettingsFile ->sThemeName;
+        pSettingsFile ->iPushToTalkButton    = pCurrentSettingsFile ->iPushToTalkButton;
+        pSettingsFile ->iMasterVolume        = pCurrentSettingsFile ->iMasterVolume;
+        pSettingsFile ->sThemeName           = pCurrentSettingsFile ->sThemeName;
+        pSettingsFile ->bPlayPushToTalkSound = pCurrentSettingsFile ->bPlayPushToTalkSound;
     }
 
 
@@ -166,8 +167,17 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
     newSettingsFile .write
             ( const_cast <char*>       (pSettingsFile ->sThemeName .c_str()), cThemeLength );
 
+
+
+    // Push-to-Talk press/unpress sound
+    char cPlayPushToTalkSound = pSettingsFile ->bPlayPushToTalkSound;
+
+    newSettingsFile .write
+            ( &cPlayPushToTalkSound, sizeof(cPlayPushToTalkSound) );
+
     // NEW SETTINGS GO HERE
-    // + don't forget to update "if ( bSetOnlyNewUserName )" above!
+    // + don't forget to update "if ( bSetOnlyNewUserName )" above, where code is:
+    // "pSettingsFile ->iPushToTalkButton    = pCurrentSettingsFile ->iPushToTalkButton;"
     // + don't forget to update "readSettings()"
 
 
@@ -299,6 +309,16 @@ SettingsFile *SettingsManager::readSettings()
 
 
 
+        // Old version settings may end somewhere here
+        if (settingsFile .eof())
+        {
+            settingsFile .close();
+
+            saveSettings(pSettingsFile);
+        }
+
+
+
         // Read user name length
         unsigned char cUserNameLength = 0;
         settingsFile .read( reinterpret_cast <char*> (&cUserNameLength), sizeof(cUserNameLength) );
@@ -323,6 +343,25 @@ SettingsFile *SettingsManager::readSettings()
         settingsFile .read( vBuffer, cThemeLength );
 
         pSettingsFile ->sThemeName = vBuffer;
+
+
+
+
+        // Old version settings may end somewhere here
+        if (settingsFile .eof())
+        {
+            settingsFile .close();
+
+            saveSettings(pSettingsFile);
+        }
+
+
+
+        // Read push-to-talk sound enabled
+        char cPushToTalkSoundEnabled = 0;
+        settingsFile .read( &cPushToTalkSoundEnabled, sizeof(cPushToTalkSoundEnabled) );
+
+        pSettingsFile ->bPlayPushToTalkSound = cPushToTalkSoundEnabled;
 
 
 

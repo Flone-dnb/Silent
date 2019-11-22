@@ -10,15 +10,17 @@ class SettingsFile
 
 public:
 
-    SettingsFile(int iPushToTalkButton = 0x54              /* T button */,
+    SettingsFile(int iPushToTalkButton            = 0x54              /* T button */,
                  unsigned short int iMasterVolume = 52428  /* ~80% */,
-                 const std::string& sThemeName = "Default",
-                 const std::string& sUserName = "")
+                 const std::string& sThemeName    = "Default",
+                 const std::string& sUserName     = "",
+                 bool bPlayPushToTalkSound        = true)
     {
-        this ->iPushToTalkButton = iPushToTalkButton;
-        this ->iMasterVolume     = iMasterVolume;
-        this ->sThemeName        = sThemeName;
-        this ->sUsername         = sUserName;
+        this ->iPushToTalkButton    = iPushToTalkButton;
+        this ->iMasterVolume        = iMasterVolume;
+        this ->sThemeName           = sThemeName;
+        this ->sUsername            = sUserName;
+        this ->bPlayPushToTalkSound = bPlayPushToTalkSound;
     }
 
 
@@ -64,4 +66,7 @@ public:
 
     int                iPushToTalkButton;
     unsigned short int iMasterVolume;
+
+
+    bool               bPlayPushToTalkSound;
 };
