@@ -13,6 +13,7 @@
 #define  INTERVAL_UDP_MESSAGE_MS        3
 #define  INTERVAL_KEEPALIVE_SEC         15
 #define  CHECK_IF_SERVER_DIED_EVERY_MS  800  // note: also used in disconnect() and answerToFIN(): "Wait for serverMonitor() to end".
+#define  ANTI_SPAM_MINIMUM_TIME_SEC         1.0f
 
 // Ping
 #define  PING_NORMAL_BELOW              190

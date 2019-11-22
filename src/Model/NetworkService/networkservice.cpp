@@ -480,6 +480,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
                 pAudioService ->setupUserAudio( pThisUser );
 
+                lastTimeSentTextMessage = clock();
+
 
 
 
@@ -1046,75 +1048,96 @@ void NetworkService::sendMessage(std::wstring message)
     if (message.size() > MAX_MESSAGE_LENGTH)
     {
         pMainWindow ->showMessageBox(true, "Your message is too big!");
+
+        return;
     }
-    else
+
+
+
+    // Check when last time message was sent.
+
+    clock_t timePassed        = clock() - lastTimeSentTextMessage;
+    float timePassedInSeconds = static_cast <float> (timePassed)/CLOCKS_PER_SEC;
+
+    if ( timePassedInSeconds < ANTI_SPAM_MINIMUM_TIME_SEC )
     {
-        // Prepare send buffer.
+        pMainWindow ->showMessageBox(true, "You can't send messages one after another that quick!");
 
-        char* pSendBuffer = new char[ 3 + (message.size() * 2) + 2 ];
-        memset(pSendBuffer, 0, 3 + (message .size() * 2) + 2);
+        pMainWindow ->clearTextEdit();
 
-        unsigned short int iPacketSize = static_cast <unsigned short> ( message .size() * 2 );
-
-
-
-
-        // Copy data to buffer.
-
-        unsigned char commandType = SM_USERMESSAGE;
-
-        std::memcpy( pSendBuffer,      &commandType,      1                  );
-        std::memcpy( pSendBuffer + 1,  &iPacketSize,      2                  );
-        std::memcpy( pSendBuffer + 3,  message .c_str(),  message.size() * 2 );
+        return;
+    }
 
 
 
 
-        // Send buffer.
+    // Prepare send buffer.
 
-        int iSendBufferSize = static_cast <int> ( sizeof(commandType) + sizeof(iPacketSize) + message.size() * 2 );
+    char* pSendBuffer = new char[ 3 + (message.size() * 2) + 2 ];
+    memset(pSendBuffer, 0, 3 + (message .size() * 2) + 2);
 
-        int sendSize = send(  pThisUser ->sockUserTCP, pSendBuffer, iSendBufferSize, 0  );
+    unsigned short int iPacketSize = static_cast <unsigned short> ( message .size() * 2 );
 
-        if ( sendSize != iSendBufferSize )
+
+
+
+    // Copy data to buffer.
+
+    unsigned char commandType = SM_USERMESSAGE;
+
+    std::memcpy( pSendBuffer,      &commandType,      1                  );
+    std::memcpy( pSendBuffer + 1,  &iPacketSize,      2                  );
+    std::memcpy( pSendBuffer + 3,  message .c_str(),  message.size() * 2 );
+
+
+
+
+    // Send buffer.
+
+    int iSendBufferSize = static_cast <int> ( sizeof(commandType) + sizeof(iPacketSize) + message.size() * 2 );
+
+    int sendSize = send(  pThisUser ->sockUserTCP, pSendBuffer, iSendBufferSize, 0  );
+
+    if ( sendSize != iSendBufferSize )
+    {
+        if (sendSize == SOCKET_ERROR)
         {
-            if (sendSize == SOCKET_ERROR)
-            {
-                int error = WSAGetLastError();
+            int error = WSAGetLastError();
 
-                if (error == 10054)
-                {
-                    pMainWindow ->printOutput("\nWARNING:\nYour message has not been sent!\n"
-                                             "NetworkService::sendMessage()::send() failed and returned: "
-                                             + std::to_string(error) + ".",
-                                             SilentMessageColor(false));
-                    lostConnection();
-                    pMainWindow ->clearTextEdit();
-                }
-                else
-                {
-                    pMainWindow ->printOutput("\nWARNING:\nYour message has not been sent!\n"
-                                             "NetworkService::sendMessage()::send() failed and returned: "
-                                             + std::to_string(error) + ".\n",
-                                             SilentMessageColor(false));
-                }
+            if (error == 10054)
+            {
+                pMainWindow ->printOutput("\nWARNING:\nYour message has not been sent!\n"
+                                         "NetworkService::sendMessage()::send() failed and returned: "
+                                         + std::to_string(error) + ".",
+                                         SilentMessageColor(false));
+                lostConnection();
+                pMainWindow ->clearTextEdit();
             }
             else
             {
-                pMainWindow ->printOutput("\nWARNING:\nWe could not send the whole message, because not enough "
-                                         "space in the outgoing socket buffer.\n",
+                pMainWindow ->printOutput("\nWARNING:\nYour message has not been sent!\n"
+                                         "NetworkService::sendMessage()::send() failed and returned: "
+                                         + std::to_string(error) + ".\n",
                                          SilentMessageColor(false));
-
-                pMainWindow ->clearTextEdit();
             }
         }
         else
         {
+            pMainWindow ->printOutput("\nWARNING:\nWe could not send the whole message, because not enough "
+                                     "space in the outgoing socket buffer.\n",
+                                     SilentMessageColor(false));
+
             pMainWindow ->clearTextEdit();
         }
-
-        delete[] pSendBuffer;
     }
+    else
+    {
+        pMainWindow ->clearTextEdit();
+
+        lastTimeSentTextMessage = clock();
+    }
+
+    delete[] pSendBuffer;
 }
 
 void NetworkService::sendVoiceMessage(char *pVoiceMessage, int iMessageSize, bool bLast)
