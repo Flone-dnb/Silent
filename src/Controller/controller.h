@@ -28,7 +28,7 @@ public:
 
     // Start/stop
 
-        void           connectTo                  (std::string sAdress,    std::string sPort,  std::string sUserName);
+        void           connectTo                  (std::string sAdress,    std::string sPort,  std::string sUserName,  std::wstring sPass = L"");
         void           disconnect                 ();
         void           stop                       ();
 

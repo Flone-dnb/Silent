@@ -36,8 +36,8 @@ public:
 
     // Start
 
-        void  start                            (std::string adress,   std::string port,   std::string userName);
-        void  connectTo                        (std::string adress,   std::string port,   std::string userName);
+        void  start                            (std::string adress,   std::string port,   std::string userName,  std::wstring sPass = L"");
+        void  connectTo                        (std::string adress,   std::string port,   std::string userName,  std::wstring sPass = L"");
         void  setupVoiceConnection             ();
 
 
@@ -72,13 +72,13 @@ public:
 
     // GET functions
 
-        std::string    getClientVersion        ();
-        std::string    getUserName             ();
-        unsigned short getPingNormalBelow      ();
-        unsigned short getPingWarningBelow     ();
+        std::string    getClientVersion        () const;
+        std::string    getUserName             () const;
+        unsigned short getPingNormalBelow      () const;
+        unsigned short getPingWarningBelow     () const;
 
-        size_t         getOtherUsersVectorSize ();
-        User*          getOtherUser            (size_t i);
+        size_t         getOtherUsersVectorSize () const;
+        User*          getOtherUser            (size_t i) const;
 
         std::mutex*    getOtherUsersMutex      ();
 

@@ -39,7 +39,7 @@ public:
 
 signals:
 
-    void  connectTo             (std::string adress, std::string port, std::string userName);
+    void  connectTo             (std::string adress, std::string port, std::string userName, std::wstring sPass);
     void  showMainWindow        ();
 
 protected:

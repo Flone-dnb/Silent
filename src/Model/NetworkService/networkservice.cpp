@@ -24,10 +24,13 @@
 #include "../src/Model/User.h"
 
 
-enum CONNECT_ERRORS  {
-    CE_USERNAME_INUSE       = 0,
-    CE_SERVER_FULL          = 2,
-    CE_WRONG_CLIENT         = 3};
+enum CONNECT_MESSAGE  {
+    CM_USERNAME_INUSE       = 0,
+    CM_SERVER_FULL          = 2,
+    CM_WRONG_CLIENT         = 3,
+    CM_SERVER_INFO          = 4,
+    CM_NEED_PASSWORD        = 5
+};
 
 enum SERVER_MESSAGE  {
     SM_NEW_USER             = 0,
@@ -36,7 +39,8 @@ enum SERVER_MESSAGE  {
     SM_SPAM_NOTICE          = 3,
     SM_PING                 = 8,
     SM_KEEPALIVE            = 9,
-    SM_USERMESSAGE          = 10};
+    SM_USERMESSAGE          = 10
+};
 
 
 // ------------------------------------------------------------------------------------------------
@@ -68,12 +72,12 @@ NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioServ
 
 
 
-std::string NetworkService::getClientVersion()
+std::string NetworkService::getClientVersion() const
 {
     return clientVersion;
 }
 
-std::string NetworkService::getUserName()
+std::string NetworkService::getUserName() const
 {
     if (pThisUser)
     {
@@ -85,22 +89,22 @@ std::string NetworkService::getUserName()
     }
 }
 
-unsigned short NetworkService::getPingNormalBelow()
+unsigned short NetworkService::getPingNormalBelow() const
 {
     return iPingNormalBelow;
 }
 
-unsigned short NetworkService::getPingWarningBelow()
+unsigned short NetworkService::getPingWarningBelow() const
 {
     return iPingWarningBelow;
 }
 
-size_t NetworkService::getOtherUsersVectorSize()
+size_t NetworkService::getOtherUsersVectorSize() const
 {
     return vOtherUsers .size();
 }
 
-User *NetworkService::getOtherUser(size_t i)
+User *NetworkService::getOtherUser(size_t i) const
 {
     return vOtherUsers[i];
 }
@@ -165,7 +169,7 @@ void NetworkService::clearWinsockAndThisUser()
     bWinSockLaunched = false;
 }
 
-void NetworkService::start(std::string adress, std::string port, std::string userName)
+void NetworkService::start(std::string adress, std::string port, std::string userName, std::wstring sPass)
 {
     if (bTextListen)
     {
@@ -215,13 +219,13 @@ void NetworkService::start(std::string adress, std::string port, std::string use
         }
         else
         {
-            std::thread connectThread(&NetworkService::connectTo, this, adress, port, userName);
+            std::thread connectThread(&NetworkService::connectTo, this, adress, port, userName, sPass);
             connectThread .detach();
         }
     }
 }
 
-void NetworkService::connectTo(std::string adress, std::string port, std::string userName)
+void NetworkService::connectTo(std::string adress, std::string port, std::string userName,  std::wstring sPass)
 {
     int returnCode = 0;
 
@@ -312,16 +316,40 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
         {
             // Send version & user name
 
-            char versionAndNameBuffer[MAX_NAME_LENGTH + MAX_VERSION_STRING_LENGTH + 1];
-            memset(versionAndNameBuffer, 0, MAX_NAME_LENGTH + MAX_VERSION_STRING_LENGTH + 1);
+            char versionAndNameBuffer[MAX_NAME_LENGTH + MAX_VERSION_STRING_LENGTH + (UCHAR_MAX * 2) + 2];
+            memset(versionAndNameBuffer, 0, MAX_NAME_LENGTH + MAX_VERSION_STRING_LENGTH + (UCHAR_MAX * 2) + 2);
 
+            int iPos = 0;
+
+			// Version
             char versionStringSize  = static_cast <char> (clientVersion .size());
-            versionAndNameBuffer[0] = versionStringSize;
+            versionAndNameBuffer[iPos] = versionStringSize;
+            iPos += sizeof(versionStringSize);
 
-            std::memcpy(versionAndNameBuffer + 1,                     clientVersion .c_str(), static_cast <unsigned long long> (versionStringSize));
-            std::memcpy(versionAndNameBuffer + 1 + versionStringSize, userName .c_str(),      userName .size());
+            std::memcpy(versionAndNameBuffer + iPos, clientVersion .c_str(), static_cast <unsigned long long> (versionStringSize));
+            iPos += clientVersion .size();
+			
 
-            send(pThisUser ->sockUserTCP, versionAndNameBuffer, 1 + versionStringSize + static_cast <int> (userName .size()), 0);
+
+			// Client name
+			char nameStringSize = static_cast <char> (userName .size());
+            versionAndNameBuffer[iPos] = nameStringSize;
+            iPos += sizeof(nameStringSize);
+
+            std::memcpy(versionAndNameBuffer + iPos, userName .c_str(),      userName .size());
+            iPos += userName .size();
+			
+
+
+			// Password (optional)
+            char passwordStringSize = static_cast <char> (sPass .size());
+            versionAndNameBuffer[iPos] = passwordStringSize;
+            iPos += sizeof(passwordStringSize);
+
+            std::memcpy(versionAndNameBuffer + iPos, sPass .c_str(), passwordStringSize * 2);
+            iPos += sPass .size() * 2;
+
+            send(pThisUser ->sockUserTCP, versionAndNameBuffer, iPos, 0);
 
 
 
@@ -333,7 +361,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
             int iReceivedSize = recv(pThisUser ->sockUserTCP, readBuffer, 1, 0);
 
-            if (readBuffer[0] == CE_USERNAME_INUSE)
+            if (readBuffer[0] == CM_USERNAME_INUSE)
             {
                 // This user name is already in use. Disconnect.
 
@@ -350,7 +378,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 closesocket(pThisUser ->sockUserTCP);
                 clearWinsockAndThisUser();
             }
-            else if (readBuffer[0] == CE_SERVER_FULL)
+            else if (readBuffer[0] == CM_SERVER_FULL)
             {
                 // Server is full
 
@@ -367,7 +395,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 closesocket(pThisUser ->sockUserTCP);
                 clearWinsockAndThisUser();
             }
-            else if (readBuffer[0] == CE_WRONG_CLIENT)
+            else if (readBuffer[0] == CM_WRONG_CLIENT)
             {
                 // Wrong client version
 
@@ -394,7 +422,25 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 closesocket(pThisUser ->sockUserTCP);
                 clearWinsockAndThisUser();
             }
-            else
+            else if (readBuffer[0] == CM_NEED_PASSWORD)
+            {
+                // Server has password and our password is wrong
+
+                if ( recv(pThisUser ->sockUserTCP, readBuffer, 1, 0) == 0 )
+                {
+                    shutdown(pThisUser ->sockUserTCP, SD_SEND);
+                }
+
+                pMainWindow ->printOutput("\nThe Server has a password.\n"
+                                          "You either not entered a password or it was wrong.",
+                                          SilentMessageColor(false),
+                                          true);
+
+                pMainWindow ->enableInteractiveElements(true, false);
+                closesocket(pThisUser ->sockUserTCP);
+                clearWinsockAndThisUser();
+            }
+            else if (readBuffer[0] == CM_SERVER_INFO)
             {
                 // Receive packet size
 

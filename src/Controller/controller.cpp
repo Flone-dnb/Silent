@@ -75,9 +75,9 @@ float Controller::getUserCurrentVolume(std::string sUserName)
     return pAudioService ->getUserCurrentVolume(sUserName);
 }
 
-void Controller::connectTo(std::string sAdress, std::string sPort, std::string sUserName)
+void Controller::connectTo(std::string sAdress, std::string sPort, std::string sUserName,  std::wstring sPass)
 {
-    pNetworkService ->start(sAdress, sPort, sUserName);
+    pNetworkService ->start(sAdress, sPort, sUserName, sPass);
 }
 
 void Controller::saveSettings (SettingsFile* pSettingsFile)

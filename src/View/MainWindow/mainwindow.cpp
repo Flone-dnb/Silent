@@ -379,11 +379,11 @@ void MainWindow::slotApplyTheme()
     }
 }
 
-void MainWindow::connectTo(std::string adress, std::string port, std::string userName)
+void MainWindow::connectTo(std::string adress, std::string port, std::string userName, std::wstring sPass)
 {
     ui ->plainTextEdit ->clear();
 
-    pController ->connectTo(adress, port, userName);
+    pController ->connectTo(adress, port, userName, sPass);
 }
 
 void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, bool bEmitSignal)

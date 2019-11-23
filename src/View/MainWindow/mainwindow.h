@@ -44,11 +44,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
 
-    // Called from ConnectWindow
-
-        void connectTo                               (std::string adress, std::string port, std::string userName);
-
-
     // Print on Chat Room QPlainTextEdit
 
         void              printUserMessage           (std::string timeInfo,  std::wstring message,             SilentMessageColor messageColor, bool bEmitSignal = false);
@@ -109,6 +104,11 @@ protected:
 
 
 private slots:
+
+    // Called from ConnectWindow
+
+        void connectTo                          (std::string adress, std::string port, std::string userName, std::wstring sPass);
+
 
     // Context menu in QListWidget
 

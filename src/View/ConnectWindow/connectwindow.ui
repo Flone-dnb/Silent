@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>326</width>
-    <height>388</height>
+    <width>321</width>
+    <height>464</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
      <number>5</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="10,20,10,20,10,20,10">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="10,11,10,11,10,11,10,11,16">
       <item>
        <widget class="QLabel" name="label_3">
         <property name="font">
@@ -56,6 +56,12 @@
       </item>
       <item>
        <widget class="QLineEdit" name="lineEdit_username">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -103,6 +109,12 @@
       </item>
       <item>
        <widget class="QLineEdit" name="lineEdit_ip">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -141,6 +153,12 @@
       </item>
       <item>
        <widget class="QLineEdit" name="lineEdit_port">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -155,6 +173,44 @@
         </property>
         <property name="text">
          <string>51337</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Password (optional):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit_pass">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -192,7 +248,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>326</width>
+     <width>321</width>
      <height>30</height>
     </rect>
    </property>

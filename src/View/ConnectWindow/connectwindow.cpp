@@ -149,7 +149,8 @@ void connectWindow::on_pushButton_clicked()
     hide();
     emit connectTo( ui ->lineEdit_ip       -> text() .toStdString(),
                     ui ->lineEdit_port     -> text() .toStdString(),
-                    ui ->lineEdit_username -> text() .toStdString() );
+                    ui ->lineEdit_username -> text() .toStdString(),
+                    ui ->lineEdit_pass     -> text() .toStdWString() );
 }
 
 
