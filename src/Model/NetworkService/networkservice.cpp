@@ -718,6 +718,8 @@ void NetworkService::listenTCPFromServer()
                 {
                     // It's a message
 
+                    lastTimeServerKeepAliveCame = clock();
+
                     receiveMessage();
                 }
                 }
