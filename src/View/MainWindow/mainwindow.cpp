@@ -24,6 +24,7 @@
 #include "../src/View/AboutWindow/aboutwindow.h"
 #include "../src/View/StyleAndInfoPaths.h"
 #include "../src/Model/SettingsManager/SettingsFile.h"
+#include "../src/View/CustomQPlainTextEdit/customqplaintextedit.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -115,6 +116,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
     connect(this, &MainWindow::signalDeleteUserFromList,           this, &MainWindow::slotDeleteUserFromList);
 
+
+
+    connect(ui ->plainTextEdit_input, &CustomQPlainTextEdit::signalReturnPressed, this, &MainWindow::customqplaintextedit_return_pressed);
 
 
 
@@ -580,21 +584,21 @@ void MainWindow::on_pushButton_clicked()
     }
 }
 
-void MainWindow::on_plainTextEdit_input_textChanged()
+void MainWindow::customqplaintextedit_return_pressed()
 {
-    if ( ui ->plainTextEdit_input ->toPlainText() .size() > 0 )
+    if ( (ui ->pushButton ->isEnabled()) && (ui ->plainTextEdit_input ->toPlainText() != "") )
     {
-        if      (ui ->plainTextEdit_input ->toPlainText()[0] == "\n")
-        {
-            ui ->plainTextEdit_input ->setPlainText("");
-        }
-        else if (ui ->plainTextEdit_input ->toPlainText()[ ui ->plainTextEdit_input ->toPlainText() .size() - 1 ] == "\n")
+        if (ui ->plainTextEdit_input ->toPlainText()[ ui ->plainTextEdit_input ->toPlainText() .size() - 1 ] == "\n")
         {
             std::wstring text = ui ->plainTextEdit_input ->toPlainText() .toStdWString();
 
             text = text .substr( 0, text .size() - 1 );
 
             pController ->sendMessage(text);
+        }
+        else
+        {
+            pController ->sendMessage( ui ->plainTextEdit_input ->toPlainText() .toStdWString() );
         }
     }
 }

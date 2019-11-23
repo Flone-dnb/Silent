@@ -119,7 +119,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout" stretch="85,15">
         <item>
-         <widget class="QPlainTextEdit" name="plainTextEdit_input">
+         <widget class="CustomQPlainTextEdit" name="plainTextEdit_input">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -281,6 +281,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>CustomQPlainTextEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>../src/View/CustomQPlainTextEdit/customqplaintextedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

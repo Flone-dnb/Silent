@@ -99,8 +99,8 @@ signals:
 
 protected:
 
-    void hideEvent   (QHideEvent* event);
-    void closeEvent  (QCloseEvent *event);
+    void hideEvent     (QHideEvent* event);
+    void closeEvent    (QCloseEvent *event);
 
 
 private slots:
@@ -158,7 +158,7 @@ private slots:
     // UI
 
         void  on_pushButton_clicked             ();
-        void  on_plainTextEdit_input_textChanged();
+        void  customqplaintextedit_return_pressed();
 
 
 private:

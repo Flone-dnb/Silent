@@ -1346,6 +1346,9 @@ void NetworkService::disconnect()
         cleanUp();
 
 
+        pMainWindow ->clearTextEdit();
+
+
         // Wait for serverMonitor() to end
         std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
     }
@@ -1453,6 +1456,9 @@ void NetworkService::answerToFIN()
 
 
     cleanUp();
+
+
+    pMainWindow ->clearTextEdit();
 
 
     // Wait for serverMonitor() to end

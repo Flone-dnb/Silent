@@ -42,6 +42,7 @@ HEADERS += \
     ../src/Model/User.h \
     ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
+    ../src/View/CustomQPlainTextEdit/customqplaintextedit.h \
     ../src/View/MainWindow/mainwindow.h \
     ../src/View/SettingsWindow/settingswindow.h \
     ../src/View/SingleUserSettings/singleusersettings.h \
@@ -55,6 +56,7 @@ SOURCES += \
     ../src/Model/SettingsManager/settingsmanager.cpp \
     ../src/View/AboutWindow/aboutwindow.cpp \
     ../src/View/ConnectWindow/connectwindow.cpp \
+    ../src/View/CustomQPlainTextEdit/customqplaintextedit.cpp \
     ../src/View/MainWindow/mainwindow.cpp \
     ../src/View/SingleUserSettings/singleusersettings.cpp \
     ../src/main.cpp \
