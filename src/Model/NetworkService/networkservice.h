@@ -123,7 +123,6 @@ private:
 
 
     clock_t            lastTimeServerKeepAliveCame;
-    clock_t            lastTimeSentTextMessage;
 
 
     std::string        clientVersion;

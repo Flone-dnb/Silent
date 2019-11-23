@@ -25,17 +25,17 @@
 
 
 enum CONNECT_ERRORS  {
-    CE_USERNAME_INUSE = 0,
-    CE_SERVER_FULL = 2,
-    CE_WRONG_CLIENT = 3};
+    CE_USERNAME_INUSE       = 0,
+    CE_SERVER_FULL          = 2,
+    CE_WRONG_CLIENT         = 3};
 
 enum SERVER_MESSAGE  {
-    SM_NEW_USER = 0,
+    SM_NEW_USER             = 0,
     SM_SOMEONE_DISCONNECTED = 1,
-    SM_CAN_START_UDP = 2,
-    SM_PING = 8,
-    SM_KEEPALIVE = 9,
-    SM_USERMESSAGE = 10};
+    SM_CAN_START_UDP        = 2,
+    SM_PING                 = 8,
+    SM_KEEPALIVE            = 9,
+    SM_USERMESSAGE          = 10};
 
 
 // ------------------------------------------------------------------------------------------------
@@ -479,8 +479,6 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 pThisUser ->pListWidgetItem = pMainWindow ->addNewUserToList(userName);
 
                 pAudioService ->setupUserAudio( pThisUser );
-
-                lastTimeSentTextMessage = clock();
 
 
 
@@ -1054,22 +1052,6 @@ void NetworkService::sendMessage(std::wstring message)
 
 
 
-    // Check when last time message was sent.
-
-    clock_t timePassed        = clock() - lastTimeSentTextMessage;
-    float timePassedInSeconds = static_cast <float> (timePassed)/CLOCKS_PER_SEC;
-
-    if ( timePassedInSeconds < ANTI_SPAM_MINIMUM_TIME_SEC )
-    {
-        pMainWindow ->showMessageBox(true, "You can't send messages one after another that quick!");
-
-        pMainWindow ->clearTextEdit();
-
-        return;
-    }
-
-
-
 
     // Prepare send buffer.
 
@@ -1133,8 +1115,6 @@ void NetworkService::sendMessage(std::wstring message)
     else
     {
         pMainWindow ->clearTextEdit();
-
-        lastTimeSentTextMessage = clock();
     }
 
     delete[] pSendBuffer;
