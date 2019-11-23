@@ -648,7 +648,7 @@ void NetworkService::listenTCPFromServer()
 
     while(bTextListen)
     {
-        while ( recv(pThisUser ->sockUserTCP, readBuffer, 0, 0) == 0 )
+        while ( bTextListen && ( recv(pThisUser ->sockUserTCP, readBuffer, 0, 0) == 0 ) )
         {
             // There are some data to read
 
@@ -726,6 +726,7 @@ void NetworkService::listenTCPFromServer()
             }
         }
 
+        if (bTextListen == false) break;
         std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_TCP_MESSAGE_MS));
     }
 }
@@ -1345,6 +1346,9 @@ void NetworkService::answerToFIN()
     if (bVoiceListen)
     {
         bVoiceListen = false;
+
+        std::this_thread::sleep_for( std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS) );
+
         closesocket(pThisUser ->sockUserUDP);
         pAudioService ->stop();
     }
