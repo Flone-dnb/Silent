@@ -33,6 +33,7 @@ enum SERVER_MESSAGE  {
     SM_NEW_USER             = 0,
     SM_SOMEONE_DISCONNECTED = 1,
     SM_CAN_START_UDP        = 2,
+    SM_SPAM_NOTICE          = 3,
     SM_PING                 = 8,
     SM_KEEPALIVE            = 9,
     SM_USERMESSAGE          = 10};
@@ -661,29 +662,46 @@ void NetworkService::listenTCPFromServer()
             }
             else
             {
-                if (readBuffer[0] == SM_NEW_USER)
+                switch(readBuffer[0])
+                {
+                case(SM_NEW_USER):
                 {
                     // We received info about the new user
 
                     receiveInfoAboutNewUser();
+
+                    break;
                 }
-                else if (readBuffer[0] == SM_SOMEONE_DISCONNECTED)
+                case(SM_SOMEONE_DISCONNECTED):
                 {
                     // Someone disconnected
 
                     deleteDisconnectedUserFromList();
+
+                    break;
                 }
-                else if (readBuffer[0] == SM_CAN_START_UDP)
+                case(SM_CAN_START_UDP):
                 {
+
                     std::thread listenVoiceThread (&NetworkService::listenUDPFromServer, this);
                     listenVoiceThread .detach();
+
+                    break;
                 }
-                else if (readBuffer[0] == SM_PING)
+                case(SM_SPAM_NOTICE):
+                {
+                    pMainWindow ->showMessageBox(true, "You can't send messages that quick.");
+
+                    break;
+                }
+                case(SM_PING):
                 {
                     // It's ping
                     receivePing();
+
+                    break;
                 }
-                else if (readBuffer[0] == SM_KEEPALIVE)
+                case(SM_KEEPALIVE):
                 {
                     // This is keep-alive message
                     // We've been idle for INTERVAL_KEEPALIVE_SEC seconds
@@ -693,12 +711,15 @@ void NetworkService::listenTCPFromServer()
                     send(pThisUser ->sockUserTCP, &keepAliveChar, 1, 0);
 
                     lastTimeServerKeepAliveCame = clock();
+
+                    break;
                 }
-                else if (readBuffer[0] == SM_USERMESSAGE)
+                case(SM_USERMESSAGE):
                 {
                     // It's a message
 
                     receiveMessage();
+                }
                 }
             }
         }
