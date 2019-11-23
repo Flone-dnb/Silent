@@ -3,7 +3,7 @@
   <img width="590" height="400" src="screenshot.png">
 </p>
 <br>
-Silent is a very lightweight text/voice chat client application. Must be used with the Silent Server application. <br>
+Silent is a very lightweight text/voice chat client application. Must be used with the [Silent Server](https://github.com/Flone-dnb/SilentServer) application. <br>
 <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
 
