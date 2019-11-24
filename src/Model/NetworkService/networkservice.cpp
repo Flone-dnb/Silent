@@ -234,20 +234,33 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
     // Fill sockaddr_in
 
-    sockaddr_in sockaddrToConnect;
-    memset( sockaddrToConnect .sin_zero, 0, sizeof(sockaddrToConnect.sin_zero) );
-    sockaddrToConnect .sin_family = AF_INET;
+    addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family   = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
 
-    // IP
-    inet_pton(AF_INET, adress .c_str(), &sockaddrToConnect .sin_addr);
+    addrinfo *result = nullptr;
 
-    // Port
-    sockaddrToConnect.sin_port = htons( static_cast <USHORT >(stoi(port)) );
+
+    INT dResult = getaddrinfo(adress .c_str(), port .c_str(), &hints, &result);
+    if ( dResult != 0 )
+    {
+        pMainWindow ->printOutput("NetworkService::connectTo::getaddrinfo() failed. Error code: "
+                                  + std::to_string(WSAGetLastError()) + ".\n", SilentMessageColor(false), true);
+
+        clearWinsockAndThisUser();
+
+        return;
+    }
+
+
+
+    // Copy result to This User
 
     memset( pThisUser ->addrServer .sin_zero, 0, sizeof(pThisUser ->addrServer.sin_zero) );
-    pThisUser ->addrServer .sin_family = AF_INET;
-    pThisUser ->addrServer .sin_port = htons( static_cast <USHORT> (stoi(port)) );
-    inet_pton( AF_INET, adress .c_str(), &pThisUser ->addrServer .sin_addr );
+    std::memcpy(&pThisUser ->addrServer, result ->ai_addr, result ->ai_addrlen);
+
 
 
 
@@ -257,7 +270,9 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
     // Connect
 
-    returnCode = connect(pThisUser ->sockUserTCP, reinterpret_cast <sockaddr*> (&sockaddrToConnect), sizeof(sockaddrToConnect));
+    returnCode = connect(pThisUser ->sockUserTCP, result ->ai_addr, result ->ai_addrlen);
+
+    freeaddrinfo(result);
 
     if (returnCode == SOCKET_ERROR)
     {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>321</width>
-    <height>464</height>
+    <width>362</width>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -100,7 +100,7 @@
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>IPv4 adress:</string>
+         <string>IPv4 adress or Domain name</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -125,7 +125,7 @@
          <string notr="true"/>
         </property>
         <property name="inputMask">
-         <string>000.000.000.000;_</string>
+         <string/>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -248,7 +248,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>321</width>
+     <width>362</width>
      <height>30</height>
     </rect>
    </property>
