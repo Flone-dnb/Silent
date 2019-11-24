@@ -812,8 +812,8 @@ void NetworkService::listenUDPFromServer()
             if (readBuffer[0] == 0)
             {
                 // it's ping check
-                iSize = send(pThisUser ->sockUserUDP, readBuffer, 5, 0);
-                if (iSize != 5)
+                int iSentSize = send(pThisUser ->sockUserUDP, readBuffer, iSize, 0);
+                if (iSentSize != iSize)
                 {
                     if (iSize == SOCKET_ERROR)
                     {
