@@ -615,7 +615,7 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
 {
     if (bInputReady == false)
     {
-        delete pAudio;
+        delete[] pAudio;
         return;
     }
 
