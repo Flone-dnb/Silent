@@ -10,6 +10,7 @@
 #include "../src/Model/SettingsManager/settingsmanager.h"
 #include "../src/Model/SettingsManager/SettingsFile.h"
 #include "../src/Model/User.h"
+#include "../src/Model/net_params.h"
 
 
 // ------------------------------------------------------------------------------------------------
@@ -299,7 +300,9 @@ void AudioService::recordOnPress()
 
     while(bInputReady)
     {
-        while ( GetAsyncKeyState(pSettingsManager ->getCurrentSettings() ->iPushToTalkButton) & 0x8000 )
+        while ( (GetAsyncKeyState(pSettingsManager ->getCurrentSettings() ->iPushToTalkButton) & 0x8000)
+                &&
+                (bInputReady) )
         {
             // Button pressed
             if ( (bButtonPressed == false) && (pSettingsManager ->getCurrentSettings() ->bPlayPushToTalkSound) )
@@ -434,7 +437,7 @@ void AudioService::recordOnPress()
 
 
 
-        if (bButtonPressed)
+        if (bButtonPressed && bInputReady)
         {
             // Button unpressed
             bButtonPressed = false;
@@ -442,22 +445,7 @@ void AudioService::recordOnPress()
 
             if (bError)
             {
-                while (waveInUnprepareHeader(hWaveIn, &WaveInHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-                }
-                while (waveInUnprepareHeader(hWaveIn, &WaveInHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-                }
-                while (waveInUnprepareHeader(hWaveIn, &WaveInHdr3, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-                }
-                while (waveInUnprepareHeader(hWaveIn, &WaveInHdr4, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-                }
+                waitForAllInBuffers();
 
                 bError = false;
             }
@@ -487,7 +475,7 @@ void AudioService::recordOnPress()
             }
         }
 
-        std::this_thread::sleep_for( std::chrono::milliseconds(15) );
+        if (bInputReady) std::this_thread::sleep_for( std::chrono::milliseconds(INTERVAL_AUDIO_RECORD_MS) );
     }
 }
 
@@ -576,6 +564,26 @@ void AudioService::waitAndSendBuffer(WAVEHDR *WaveInHdr, short *pWaveIn)
     compressThread .detach();
 }
 
+void AudioService::waitForAllInBuffers()
+{
+    while (waveInUnprepareHeader(hWaveIn, &WaveInHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+    }
+    while (waveInUnprepareHeader(hWaveIn, &WaveInHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+    }
+    while (waveInUnprepareHeader(hWaveIn, &WaveInHdr3, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+    }
+    while (waveInUnprepareHeader(hWaveIn, &WaveInHdr4, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+    }
+}
+
 void AudioService::waitForPlayToEnd(User *pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex)
 {
     // Wait until finished playing buffer
@@ -605,6 +613,12 @@ void AudioService::sendAudioData(short *pAudio)
 
 void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool bLast)
 {
+    if (bInputReady == false)
+    {
+        delete pAudio;
+        return;
+    }
+
     pNetworkService ->getOtherUsersMutex() ->lock();
 
     User* pUser = nullptr;
@@ -805,7 +819,7 @@ void AudioService::play(User* pUser)
     // Buffer queue: 2-3.
 
 
-    while( i < pUser ->vAudioPackets .size() )
+    while( (i < pUser ->vAudioPackets .size()) && bInputReady )
     {
         // Add 1st buffer
         pUser->WaveOutHdr1.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
@@ -907,28 +921,49 @@ void AudioService::play(User* pUser)
 
 
 
-    // Wait until finished playing
-    waitForAllBuffers (pUser, true, &iLastPlayingPacketIndex);
-
-
-    pUser       ->bTalking = false;
-    pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
-
-
-    if (pUser ->bDeletePacketsAtLast == false)
+    if (bInputReady)
     {
-        for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
-        {
-            if (pUser ->vAudioPackets[i])
-            {
-                delete[] pUser ->vAudioPackets[i];
-            }
-        }
+        // Wait until finished playing
+        waitForAllBuffers (pUser, true, &iLastPlayingPacketIndex);
 
-        pUser ->vAudioPackets .clear ();
-        pUser ->bPacketsArePlaying = false;
+
+        pUser       ->bTalking = false;
+        pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+
+
+        if (pUser ->bDeletePacketsAtLast == false)
+        {
+            // No errors, delete here.
+
+            for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
+            {
+                if (pUser ->vAudioPackets[i])
+                {
+                    delete[] pUser ->vAudioPackets[i];
+                }
+            }
+
+            pUser ->vAudioPackets .clear ();
+            pUser ->bPacketsArePlaying = false;
+        }
+        else if (pUser->bLastPacketCame)
+        {
+            // An error occured but last packet already came -> delete here and not in playAudioData().
+
+            for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
+            {
+                if (pUser ->vAudioPackets[i])
+                {
+                    delete[] pUser ->vAudioPackets[i];
+                }
+            }
+
+            pUser ->vAudioPackets .clear ();
+            pUser ->bPacketsArePlaying   = false;
+            pUser ->bDeletePacketsAtLast = false;
+        }
     }
-    else if (pUser->bLastPacketCame)
+    else
     {
         for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
         {
@@ -982,9 +1017,14 @@ void AudioService::stop()
 {
     if (bInputReady)
     {
-        waveInClose(hWaveIn);
-
         bInputReady = false;
+
+        // Wait for record to stop.
+        std::this_thread::sleep_for( std::chrono::milliseconds(INTERVAL_AUDIO_RECORD_MS) );
+
+        waitForAllInBuffers();
+
+        waveInClose(hWaveIn);
     }
 
 

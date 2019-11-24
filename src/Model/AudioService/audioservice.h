@@ -109,6 +109,7 @@ private:
         bool  addInBuffer       (LPWAVEHDR buffer);
         bool  addOutBuffer      (HWAVEOUT  hWaveOut, LPWAVEHDR buffer);
         void  waitAndSendBuffer (WAVEHDR* WaveInHdr, short int* pWaveIn);
+        void  waitForAllInBuffers();
 
     // Used in play()
 
