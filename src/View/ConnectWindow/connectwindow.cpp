@@ -154,6 +154,15 @@ void connectWindow::on_pushButton_clicked()
 }
 
 
+void connectWindow::keyPressEvent(QKeyEvent *event)
+{
+    if ( event ->key() == Qt::Key_Return )
+    {
+        on_pushButton_clicked();
+    }
+}
+
+
 connectWindow::~connectWindow()
 {
     delete ui;
