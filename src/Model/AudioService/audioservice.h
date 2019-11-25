@@ -151,8 +151,8 @@ private:
     // Do not set 'sampleCout' to more than ~700 (700 * 2 = 1400) (~MTU)
     // we '*2" because audio data in PCM16, 1 sample = 16 bits.
     // Of course, we can send 2 packets, but it's just more headache.
-    const int        sampleCount = 690;   // 46 ms (= 'sampleRate' (15000) * 0.046)
-    unsigned long    sampleRate  = 15000; // 15000 hz (samples per second)
+    const int        sampleCount = 686;   // 35 ms (= 'sampleRate' (19600) * 0.035)
+    unsigned long    sampleRate  = 19600; // 19600 hz (samples per second)
 
 
     // Push-to-talk

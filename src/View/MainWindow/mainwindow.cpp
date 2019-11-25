@@ -34,10 +34,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->setupUi(this);
 
     // Set CSS classes
-    ui ->label_chatRoom       ->setProperty("cssClass", "mainwindowLabel");
-    ui ->label_connectedCount ->setProperty("cssClass", "mainwindowLabel");
-    ui ->plainTextEdit_input  ->setProperty("cssClass", "userInput");
-    ui ->plainTextEdit        ->setProperty("cssClass", "chatOutput");
+    ui ->label_chatRoom          ->setProperty("cssClass", "mainwindowLabel");
+    ui ->label_connectedCount    ->setProperty("cssClass", "mainwindowLabel");
+    ui ->plainTextEdit_input     ->setProperty("cssClass", "userInput");
+    ui ->plainTextEdit           ->setProperty("cssClass", "chatOutput");
 
 
 
