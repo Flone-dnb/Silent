@@ -88,7 +88,6 @@ public:
     // Audio buffers
     WAVEHDR             WaveOutHdr1;
     WAVEHDR             WaveOutHdr2;
-    WAVEHDR             WaveOutHdr3;
 
 
     float               fUserDefinedVolume;

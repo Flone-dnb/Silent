@@ -15,7 +15,7 @@ class SettingsManager;
 class User;
 
 
-#define  CLIENT_VERSION                "2.21.0"
+#define  CLIENT_VERSION                "2.22.4"
 
 
 
