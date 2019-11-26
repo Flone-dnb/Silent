@@ -118,6 +118,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
     connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
     connect(this, &MainWindow::signalDeleteUserFromList,           this, &MainWindow::slotDeleteUserFromList);
+    connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
 
 
 
@@ -326,6 +327,11 @@ void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessageColor 
     ui ->plainTextEdit ->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
 
     mtxPrintOutput .unlock ();
+}
+
+void MainWindow::slotClearTextEdit()
+{
+    ui ->plainTextEdit_input ->clear();
 }
 
 void MainWindow::slotApplyTheme()
@@ -563,7 +569,7 @@ void MainWindow::showMessageBox(bool bWarningBox, std::string message)
 
 void MainWindow::clearTextEdit()
 {
-    ui ->plainTextEdit_input ->clear();
+    emit signalClearTextEdit();
 }
 
 void MainWindow::applyTheme()

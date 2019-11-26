@@ -798,9 +798,7 @@ void NetworkService::listenTCPFromServer()
                     // We were kicked
                     pMainWindow ->printOutput("You were kicked by the server.", SilentMessageColor(false), true);
 
-                    answerToFIN();
-
-                    break;
+                    // Next message will be FIN
                 }
             }
         }
@@ -1288,12 +1286,17 @@ void NetworkService::disconnect()
     {
         bTextListen  = false;
 
+
         if (bVoiceListen)
         {
             bVoiceListen = false;
             closesocket(pThisUser ->sockUserUDP);
             pAudioService ->stop();
         }
+
+
+        // Wait for serverMonitor() to end
+        std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
 
 
 
@@ -1308,7 +1311,7 @@ void NetworkService::disconnect()
         {
             pMainWindow ->printOutput("NetworkService::disconnect()::shutdown() function failed and returned: "
                                      + std::to_string(WSAGetLastError()) + ".\n",
-                                     SilentMessageColor(false));
+                                     SilentMessageColor(false), true);
             closesocket(pThisUser ->sockUserTCP);
             WSACleanup();
             bWinSockLaunched = false;
@@ -1322,7 +1325,7 @@ void NetworkService::disconnect()
             {
                 pMainWindow ->printOutput("NetworkService::disconnect()::ioctsocket() (blocking mode) failed and returned: "
                                          + std::to_string(WSAGetLastError()) + ".\n",
-                                         SilentMessageColor(false));
+                                         SilentMessageColor(false), true);
                 closesocket(pThisUser ->sockUserTCP);
                 WSACleanup();
                 bWinSockLaunched = false;
@@ -1335,20 +1338,20 @@ void NetworkService::disconnect()
                 {
                     pMainWindow ->printOutput("NetworkService::disconnect()::closesocket() function failed and returned: "
                                              + std::to_string(WSAGetLastError()) + ".\n",
-                                             SilentMessageColor(false));
+                                             SilentMessageColor(false), true);
                     WSACleanup();
                     bWinSockLaunched = false;
                 }
                 else
                 {
                     pMainWindow ->printOutput("Connection closed successfully.\n",
-                                             SilentMessageColor(false));
+                                             SilentMessageColor(false), true);
 
                     if (WSACleanup() == SOCKET_ERROR)
                     {
                         pMainWindow ->printOutput("NetworkService::disconnect()::WSACleanup() function failed and returned: "
                                                  + std::to_string(WSAGetLastError()) + ".\n",
-                                                 SilentMessageColor(false));
+                                                 SilentMessageColor(false), true);
                     }
                     else
                     {
@@ -1365,7 +1368,7 @@ void NetworkService::disconnect()
             }
             else
             {
-                pMainWindow ->printOutput("Server has not responded.\n", SilentMessageColor(false));
+                pMainWindow ->printOutput("Server has not responded.\n", SilentMessageColor(false), true);
 
                 closesocket(pThisUser ->sockUserTCP);
                 WSACleanup();
@@ -1386,10 +1389,6 @@ void NetworkService::disconnect()
 
 
         pMainWindow ->clearTextEdit();
-
-
-        // Wait for serverMonitor() to end
-        std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
     }
     else
     {
@@ -1433,13 +1432,18 @@ void NetworkService::answerToFIN()
 
     if (bVoiceListen)
     {
+        pAudioService ->stop();
+
         bVoiceListen = false;
 
         std::this_thread::sleep_for( std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS) );
 
         closesocket(pThisUser ->sockUserUDP);
-        pAudioService ->stop();
     }
+
+    // Wait for serverMonitor() to end
+    std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
+
 
     pMainWindow->printOutput("Server is closing connection.\n", SilentMessageColor(false), true);
 
@@ -1498,10 +1502,6 @@ void NetworkService::answerToFIN()
 
 
     pMainWindow ->clearTextEdit();
-
-
-    // Wait for serverMonitor() to end
-    std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
 }
 
 

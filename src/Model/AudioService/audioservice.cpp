@@ -851,7 +851,7 @@ void AudioService::play(User* pUser)
         waitForPlayToEnd(pUser, &pUser->WaveOutHdr2, iLastPlayingPacketIndex);
 
 
-        if (i == pUser->vAudioPackets.size()) break;
+        if ( (i == pUser->vAudioPackets.size()) || (bInputReady == false) ) break;
 
 
         // Buffer queue: 3-1.
@@ -885,7 +885,7 @@ void AudioService::play(User* pUser)
         waitForPlayToEnd(pUser, &pUser->WaveOutHdr3, iLastPlayingPacketIndex);
 
 
-        if (i == pUser->vAudioPackets.size()) break;
+        if ( (i == pUser->vAudioPackets.size()) || (bInputReady == false) ) break;
 
 
         // Buffer queue: 1-2.
@@ -1020,7 +1020,7 @@ void AudioService::stop()
         bInputReady = false;
 
         // Wait for record to stop.
-        std::this_thread::sleep_for( std::chrono::milliseconds(INTERVAL_AUDIO_RECORD_MS) );
+        std::this_thread::sleep_for( std::chrono::milliseconds(INTERVAL_AUDIO_RECORD_MS * 2) );
 
         waitForAllInBuffers();
 

@@ -82,6 +82,7 @@ signals:
         void signalTypeOnScreen                      (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
         void signalShowUserDisconnectNotice          (std::string name, SilentMessageColor messageColor, char cUserLost);
         void signalShowUserConnectNotice             (std::string name, SilentMessageColor messageColor);
+        void signalClearTextEdit                     ();
 
 
     // Update UI elements
@@ -134,6 +135,7 @@ private slots:
         void  typeSomeOnScreen                  (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
         void  slotShowUserDisconnectNotice      (std::string name, SilentMessageColor messageColor, char cUserLost);
         void  slotShowUserConnectNotice         (std::string name, SilentMessageColor messageColor);
+        void  slotClearTextEdit                 ();
 
 
     // Tray Icon
