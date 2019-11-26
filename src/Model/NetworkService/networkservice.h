@@ -86,9 +86,9 @@ public:
 private:
 
 
-        // User in "Stop / Delete / Disconnect" functions
+    // User in "Stop / Delete / Disconnect" functions
 
-        void  eraseDisconnectedUser            (std::string sUserName, bool bDisconnectType);
+        void  eraseDisconnectedUser            (std::string sUserName, char cDisconnectType);
         void  clearWinsockAndThisUser          ();
         void  cleanUp                          ();
 

@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QSystemTrayIcon>
 #include <QFile>
+#include <QTextBlock>
 
 // STL
 #include <thread>
@@ -40,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->plainTextEdit           ->setProperty("cssClass", "chatOutput");
 
 
+
+    qRegisterMetaType<QTextBlock>("QTextBlock");
 
 
     // Setup tray icon
@@ -282,7 +285,7 @@ void MainWindow::slotTrayIconActivated()
     showNormal      ();
 }
 
-void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost)
+void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, char cUserLost)
 {
     mtxPrintOutput .lock   ();
 
@@ -290,11 +293,15 @@ void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageCol
 
     QString message = "";
 
-    if (bUserLost)
+    if (cUserLost == 2)
+    {
+        message = "The server has kicked user " + QString::fromStdString(name) + ".<br>";
+    }
+    else if (cUserLost == 1)
     {
         message = "The server has lost connection with " + QString::fromStdString(name) + ".<br>";
     }
-    else
+    else if (cUserLost == 0)
     {
         message = QString::fromStdString(name) + " disconnected.<br>";
     }
@@ -539,9 +546,9 @@ void MainWindow::deleteUserFromList(QListWidgetItem* pListWidgetItem, bool bDele
     emit signalDeleteUserFromList(pListWidgetItem, bDeleteAll);
 }
 
-void MainWindow::showUserDisconnectNotice(std::string name, SilentMessageColor messageColor, bool bUserLost)
+void MainWindow::showUserDisconnectNotice(std::string name, SilentMessageColor messageColor, char cUserLost)
 {
-    emit signalShowUserDisconnectNotice(name, messageColor, bUserLost);
+    emit signalShowUserDisconnectNotice(name, messageColor, cUserLost);
 }
 
 void MainWindow::showUserConnectNotice(std::string name, SilentMessageColor messageColor)

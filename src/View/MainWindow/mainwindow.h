@@ -49,7 +49,7 @@ public:
         void              printUserMessage           (std::string timeInfo,  std::wstring message,             SilentMessageColor messageColor, bool bEmitSignal = false);
         void              printOutput                (std::string text,      SilentMessageColor messageColor,  bool bEmitSignal = false);
         void              printOutputW               (std::wstring text,     SilentMessageColor messageColor,  bool bEmitSignal = false);
-        void              showUserDisconnectNotice   (std::string name,      SilentMessageColor messageColor,  bool bUserLost);
+        void              showUserDisconnectNotice   (std::string name,      SilentMessageColor messageColor,  char cUserLost);
         void              showUserConnectNotice      (std::string name,      SilentMessageColor messageColor);
 
 
@@ -80,7 +80,7 @@ signals:
     // Print on Chat Room QPlainTextEdit
 
         void signalTypeOnScreen                      (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
-        void signalShowUserDisconnectNotice          (std::string name, SilentMessageColor messageColor, bool bUserLost);
+        void signalShowUserDisconnectNotice          (std::string name, SilentMessageColor messageColor, char cUserLost);
         void signalShowUserConnectNotice             (std::string name, SilentMessageColor messageColor);
 
 
@@ -132,7 +132,7 @@ private slots:
     // Print on Chat Room QPlainTextEdit
 
         void  typeSomeOnScreen                  (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
-        void  slotShowUserDisconnectNotice      (std::string name, SilentMessageColor messageColor, bool bUserLost);
+        void  slotShowUserDisconnectNotice      (std::string name, SilentMessageColor messageColor, char cUserLost);
         void  slotShowUserConnectNotice         (std::string name, SilentMessageColor messageColor);
 
 

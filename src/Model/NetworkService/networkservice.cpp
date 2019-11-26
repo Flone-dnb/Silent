@@ -39,7 +39,15 @@ enum SERVER_MESSAGE  {
     SM_SPAM_NOTICE          = 3,
     SM_PING                 = 8,
     SM_KEEPALIVE            = 9,
-    SM_USERMESSAGE          = 10
+    SM_USERMESSAGE          = 10,
+    SM_KICKED               = 11
+};
+
+enum USER_DISCONNECT_REASON
+{
+    UDR_DISCONNECT          = 0,
+    UDR_LOST                = 1,
+    UDR_KICKED              = 2
 };
 
 
@@ -114,7 +122,7 @@ std::mutex *NetworkService::getOtherUsersMutex()
     return &mtxOtherUsers;
 }
 
-void NetworkService::eraseDisconnectedUser(std::string sUserName, bool bDisconnectType)
+void NetworkService::eraseDisconnectedUser(std::string sUserName, char cDisconnectType)
 {
     // Find this user in the vOtherUsers vector.
 
@@ -155,7 +163,7 @@ void NetworkService::eraseDisconnectedUser(std::string sUserName, bool bDisconne
         pMainWindow   ->deleteUserFromList  (pItem);
         pAudioService ->playConnectDisconnectSound(false);
 
-        pMainWindow   ->showUserDisconnectNotice(sUserName, SilentMessageColor(true), bDisconnectType);
+        pMainWindow   ->showUserDisconnectNotice(sUserName, SilentMessageColor(true), cDisconnectType);
     }
 }
 
@@ -782,7 +790,17 @@ void NetworkService::listenTCPFromServer()
                     lastTimeServerKeepAliveCame = clock();
 
                     receiveMessage();
+
+                    break;
                 }
+                case(SM_KICKED):
+
+                    // We were kicked
+                    pMainWindow ->printOutput("You were kicked by the server.", SilentMessageColor(false), true);
+
+                    answerToFIN();
+
+                    break;
                 }
             }
         }
@@ -870,7 +888,14 @@ void NetworkService::listenUDPFromServer()
             }
 
 
-            iSize = recv(pThisUser ->sockUserUDP, readBuffer, MAX_BUFFER_SIZE, 0);
+            if (bVoiceListen)
+            {
+                iSize = recv(pThisUser ->sockUserUDP, readBuffer, MAX_BUFFER_SIZE, 0);
+            }
+            else
+            {
+                return;
+            }
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS));
@@ -1016,7 +1041,6 @@ void NetworkService::deleteDisconnectedUserFromList()
 
     char iDisconnectType = 0;
     recv(pThisUser ->sockUserTCP, &iDisconnectType, 1, 0);
-    bool bDiscannectedType = iDisconnectType;
 
 
 
@@ -1044,7 +1068,7 @@ void NetworkService::deleteDisconnectedUserFromList()
 
     std::string sDisconnectedUserName = std::string(readBuffer + 4);
 
-    std::thread tEraseDisconnectedUser (&NetworkService::eraseDisconnectedUser, this, sDisconnectedUserName, bDiscannectedType);
+    std::thread tEraseDisconnectedUser (&NetworkService::eraseDisconnectedUser, this, sDisconnectedUserName, iDisconnectType);
     tEraseDisconnectedUser .detach();
 }
 
