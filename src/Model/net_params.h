@@ -10,7 +10,7 @@
 
 // TCP / UDP
 #define  INTERVAL_TCP_MESSAGE_MS        120
-#define  INTERVAL_UDP_MESSAGE_MS        3
+#define  INTERVAL_UDP_MESSAGE_MS        2
 #define  INTERVAL_KEEPALIVE_SEC         20   // note: also change in server
 #define  CHECK_IF_SERVER_DIED_EVERY_MS  800  // note: also used in disconnect() and answerToFIN(): "Wait for serverMonitor() to end".
 #define  INTERVAL_AUDIO_RECORD_MS       15

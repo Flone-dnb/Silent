@@ -799,7 +799,7 @@ void AudioService::play(User* pUser)
                     &&
                     !(i < pUser ->vAudioPackets .size()) )
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+                std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
             }
         }
         else
@@ -809,7 +809,7 @@ void AudioService::play(User* pUser)
                     &&
                     !(i < pUser ->vAudioPackets .size()) )
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+                std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
             }
         }
 
