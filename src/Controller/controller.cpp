@@ -16,7 +16,13 @@
 
 Controller::Controller(MainWindow* pMainWindow)
 {
+    pAudioService    = nullptr;
+    pNetworkService  = nullptr;
+    pSettingsManager = nullptr;
+
+
     pSettingsManager = new SettingsManager (pMainWindow);
+
     if (pSettingsManager ->getCurrentSettings())
     {
         pAudioService    = new AudioService    (pMainWindow, pSettingsManager);
@@ -116,6 +122,15 @@ void Controller::stop()
 
 Controller::~Controller()
 {
-    delete pNetworkService;
-    delete pAudioService;
+    if (pAudioService)
+    {
+       delete pAudioService;
+    }
+
+    if (pNetworkService)
+    {
+       delete pNetworkService;
+    }
+
+    delete pSettingsManager;
 }

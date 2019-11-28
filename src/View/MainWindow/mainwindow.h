@@ -51,6 +51,7 @@ public:
         void              printOutputW               (std::wstring text,     SilentMessageColor messageColor,  bool bEmitSignal = false);
         void              showUserDisconnectNotice   (std::string name,      SilentMessageColor messageColor,  char cUserLost);
         void              showUserConnectNotice      (std::string name,      SilentMessageColor messageColor);
+        void              showOldText                (wchar_t* pText);
 
 
     // Update UI elements
@@ -82,6 +83,7 @@ signals:
         void signalTypeOnScreen                      (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
         void signalShowUserDisconnectNotice          (std::string name, SilentMessageColor messageColor, char cUserLost);
         void signalShowUserConnectNotice             (std::string name, SilentMessageColor messageColor);
+        void signalShowOldText                       (wchar_t* pText);
         void signalClearTextEdit                     ();
 
 
@@ -135,6 +137,7 @@ private slots:
         void  typeSomeOnScreen                  (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
         void  slotShowUserDisconnectNotice      (std::string name, SilentMessageColor messageColor, char cUserLost);
         void  slotShowUserConnectNotice         (std::string name, SilentMessageColor messageColor);
+        void  slotShowOldText                   (wchar_t* pText);
         void  slotClearTextEdit                 ();
 
 

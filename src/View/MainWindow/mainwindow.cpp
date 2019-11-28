@@ -12,6 +12,8 @@
 #include <QSystemTrayIcon>
 #include <QFile>
 #include <QTextBlock>
+#include <QScrollBar>
+#include <QTextDocument>
 
 // STL
 #include <thread>
@@ -41,8 +43,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->plainTextEdit           ->setProperty("cssClass", "chatOutput");
 
 
-
-    qRegisterMetaType<QTextBlock>("QTextBlock");
 
 
     // Setup tray icon
@@ -93,6 +93,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qRegisterMetaType <SilentMessageColor> ("SilentMessageColor");
     qRegisterMetaType <std::string>        ("std::string");
+    qRegisterMetaType <QTextBlock>         ("QTextBlock");
 
 
 
@@ -119,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
     connect(this, &MainWindow::signalDeleteUserFromList,           this, &MainWindow::slotDeleteUserFromList);
     connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
+    connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
 
 
 
@@ -327,6 +329,30 @@ void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessageColor 
     ui ->plainTextEdit ->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
 
     mtxPrintOutput .unlock ();
+}
+
+void MainWindow::slotShowOldText(wchar_t *pText)
+{
+    mtxPrintOutput .lock();
+
+
+    std::wstring sText(pText);
+
+    delete[] pText;
+
+
+    QString sNewText = "";
+    sNewText += QString::fromStdWString(sText);
+
+    sNewText += ui ->plainTextEdit ->toPlainText() .right( ui ->plainTextEdit ->toPlainText() .size() - 10 ); // 10: ".........."
+
+
+    ui ->plainTextEdit ->clear();
+
+    ui ->plainTextEdit ->appendHtml(sNewText);
+
+
+    mtxPrintOutput .unlock();
 }
 
 void MainWindow::slotClearTextEdit()
@@ -562,6 +588,11 @@ void MainWindow::showUserConnectNotice(std::string name, SilentMessageColor mess
     emit signalShowUserConnectNotice(name, messageColor);
 }
 
+void MainWindow::showOldText(wchar_t *pText)
+{
+    emit signalShowOldText(pText);
+}
+
 void MainWindow::showMessageBox(bool bWarningBox, std::string message)
 {
     emit signalShowMessageBox(bWarningBox, message);
@@ -615,6 +646,7 @@ void MainWindow::customqplaintextedit_return_pressed()
         }
     }
 }
+
 
 void MainWindow::showSettingsWindow()
 {

@@ -14,9 +14,6 @@ To add your own theme you must go to the folder in which the Silent is installed
 <br>
 If you want to see your theme in the official Silent build then you can make a pull request.
 
-# Source Code
-If you would like to contribute to the project or you just want to get how this project works then I recommend you to use [this](https://github.com/CoatiSoftware/Sourcetrail) to understand how the code works.
-
 # Build
 Silent is built with the MSVC 2017 64 bit compiler and Qt Framework (through Qt Creator).<br>
 <br>
