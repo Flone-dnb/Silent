@@ -14,6 +14,7 @@
 #define  INTERVAL_KEEPALIVE_SEC         20   // note: also change in server
 #define  CHECK_IF_SERVER_DIED_EVERY_MS  800  // note: also used in disconnect() and answerToFIN(): "Wait for serverMonitor() to end".
 #define  INTERVAL_AUDIO_RECORD_MS       15
+#define  ATTEMPTS_TO_DISCONNECT_COUNT   5
 
 // Ping
 #define  PING_NORMAL_BELOW              300

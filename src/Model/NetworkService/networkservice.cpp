@@ -1368,9 +1368,20 @@ void NetworkService::disconnect()
         std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_TCP_MESSAGE_MS));
 
 
+        // Translate socket to blocking mode
+
+        u_long arg = false;
+        if ( ioctlsocket(pThisUser ->sockUserTCP, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
+        {
+            pMainWindow ->printOutput("NetworkService::disconnect()::ioctsocket() (blocking mode) failed and returned: "
+                                     + std::to_string(WSAGetLastError()) + ".\n",
+                                     SilentMessageColor(false), true);
+        }
+
+
         // Send FIN packet.
 
-        char readBuffer[5];
+        char readBuffer[MAX_BUFFER_SIZE];
 
         int returnCode = shutdown(pThisUser ->sockUserTCP, SD_SEND);
 
@@ -1385,20 +1396,17 @@ void NetworkService::disconnect()
         }
         else
         {
-            // Translate socket to blocking mode
+            size_t iAttemptCount = 0;
 
-            u_long arg = false;
-            if ( ioctlsocket(pThisUser ->sockUserTCP, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
+            for ( ; (recv(pThisUser ->sockUserTCP, readBuffer, MAX_BUFFER_SIZE, 0) != 0)
+                    &&
+                    (iAttemptCount < ATTEMPTS_TO_DISCONNECT_COUNT);
+                    iAttemptCount++ )
             {
-                pMainWindow ->printOutput("NetworkService::disconnect()::ioctsocket() (blocking mode) failed and returned: "
-                                         + std::to_string(WSAGetLastError()) + ".\n",
-                                         SilentMessageColor(false), true);
-                closesocket(pThisUser ->sockUserTCP);
-                WSACleanup();
-                bWinSockLaunched = false;
+                std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_TCP_MESSAGE_MS));
             }
 
-            if ( recv(pThisUser ->sockUserTCP, readBuffer, 5, 0) == 0 )
+            if (iAttemptCount != ATTEMPTS_TO_DISCONNECT_COUNT)
             {
                 returnCode = closesocket(pThisUser ->sockUserTCP);
                 if (returnCode == SOCKET_ERROR)
@@ -1420,17 +1428,14 @@ void NetworkService::disconnect()
                                                  + std::to_string(WSAGetLastError()) + ".\n",
                                                  SilentMessageColor(false), true);
                     }
-                    else
-                    {
-                        // Delete user from UI.
 
-                        pMainWindow ->deleteUserFromList        (nullptr, true);
-                        pMainWindow ->setOnlineUsersCount       (0);
-                        pMainWindow ->enableInteractiveElements (true, false);
+                    // Delete user from UI.
 
+                    pMainWindow ->deleteUserFromList        (nullptr, true);
+                    pMainWindow ->setOnlineUsersCount       (0);
+                    pMainWindow ->enableInteractiveElements (true, false);
 
-                        bWinSockLaunched = false;
-                    }
+                    bWinSockLaunched = false;
                 }
             }
             else
