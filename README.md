@@ -3,7 +3,8 @@
   <img width="590" height="400" src="screenshot.png">
 </p>
 <br>
-Silent is a very lightweight text/voice chat client application. Must be used with the Silent Server application. <br>
+Silent is an extremely lightweight, high quality - low latency voice chat made for gaming.<br>
+Must be used with the Silent Server application. <br>
 <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
 
