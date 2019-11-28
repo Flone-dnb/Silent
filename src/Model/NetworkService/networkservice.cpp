@@ -763,6 +763,8 @@ void NetworkService::listenTCPFromServer()
         {
             // There are some data to read
 
+            mtxTCPRead .lock();
+
             // There are some data to receive
             int receivedAmount = recv(pThisUser ->sockUserTCP, readBuffer, 1, 0);
             if (receivedAmount == 0)
@@ -843,6 +845,8 @@ void NetworkService::listenTCPFromServer()
                     // Next message will be FIN
                 }
             }
+
+            mtxTCPRead .unlock();
         }
 
         if (bTextListen == false) break;
@@ -882,7 +886,9 @@ void NetworkService::listenUDPFromServer()
 
         while (iSize > 0)
         {
-            if (readBuffer[0] == 0)
+            mtxUDPRead .lock();
+
+            if ( (readBuffer[0] == 0) && (bVoiceListen) )
             {
                 // it's ping check
                 int iSentSize = send(pThisUser ->sockUserUDP, readBuffer, iSize, 0);
@@ -903,7 +909,7 @@ void NetworkService::listenUDPFromServer()
                     }
                 }
             }
-            else
+            else if (bVoiceListen)
             {
                 char userNameBuffer[MAX_NAME_LENGTH + 1];
                 memset(userNameBuffer, 0, MAX_NAME_LENGTH + 1);
@@ -927,6 +933,7 @@ void NetworkService::listenUDPFromServer()
                 }
             }
 
+            mtxUDPRead .unlock();
 
             if (bVoiceListen)
             {
@@ -938,7 +945,15 @@ void NetworkService::listenUDPFromServer()
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS));
+
+        if (bVoiceListen)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS));
+        }
+        else
+        {
+            return;
+        }
     }
 }
 
@@ -1332,15 +1347,25 @@ void NetworkService::disconnect()
         if (bVoiceListen)
         {
             bVoiceListen = false;
+
+            // Wait for listenUDPFromServer() to end.
+            mtxUDPRead .lock();
+            mtxUDPRead .unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS));
+
             closesocket(pThisUser ->sockUserUDP);
             pAudioService ->stop();
         }
 
 
-        // Wait for serverMonitor() to end
+        // Wait for serverMonitor() to end.
         std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS));
 
 
+        // Wait for listenTCPFromServer() to end.
+        mtxTCPRead .lock();
+        mtxTCPRead .unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_TCP_MESSAGE_MS));
 
 
         // Send FIN packet.

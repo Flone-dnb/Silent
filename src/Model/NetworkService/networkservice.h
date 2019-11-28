@@ -124,6 +124,8 @@ private:
 
 
     std::mutex         mtxOtherUsers;
+    std::mutex         mtxTCPRead;
+    std::mutex         mtxUDPRead;
 
 
     clock_t            lastTimeServerKeepAliveCame;
