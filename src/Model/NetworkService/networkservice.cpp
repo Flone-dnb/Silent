@@ -224,6 +224,8 @@ void NetworkService::start(std::string adress, std::string port, std::string use
                                      + ".\nTry again.\n", SilentMessageColor(false));
 
             clearWinsockAndThisUser();
+
+            pMainWindow->enableInteractiveElements(true, false);
         }
         else
         {
@@ -259,6 +261,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
         clearWinsockAndThisUser();
 
+        pMainWindow->enableInteractiveElements(true, false);
+
         return;
     }
 
@@ -290,8 +294,6 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
         {
             pMainWindow->printOutput("Time out.\nTry again.\n",
                                      SilentMessageColor(false), true);
-
-            pMainWindow->enableInteractiveElements(true, false);
         }
         else if (returnCode == 10051)
         {
@@ -299,8 +301,6 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                                      + std::to_string(returnCode)
                                      + ".\nPossible cause: no internet.\nTry again.\n",
                                      SilentMessageColor(false), true);
-
-            pMainWindow->enableInteractiveElements(true, false);
         }
         else
         {
@@ -308,9 +308,9 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                                      + std::to_string(returnCode)
                                      + ".\nTry again.\n",
                                      SilentMessageColor(false), true);
-
-            pMainWindow->enableInteractiveElements(true, false);
         }
+
+        pMainWindow->enableInteractiveElements(true, false);
 
         clearWinsockAndThisUser();
     }
