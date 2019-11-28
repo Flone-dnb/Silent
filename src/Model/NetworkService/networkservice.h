@@ -86,17 +86,21 @@ public:
 private:
 
 
-    // User in "Stop / Delete / Disconnect" functions
+    // User in "Stop / Delete / Disconnect" functions.
 
         void  eraseDisconnectedUser            (std::string sUserName, char cDisconnectType);
         void  clearWinsockAndThisUser          ();
         void  cleanUp                          ();
 
 
-    // Checks if the server is dead
+    // Checks if the server is dead.
 
-    void serverMonitor();
+        void serverMonitor();
 
+
+    // Erases spaces at the borders of the address string.
+
+        std::string formatAdressString(const std::string& sAdress);
 
 
     // ------------------------------------

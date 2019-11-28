@@ -229,7 +229,9 @@ void NetworkService::start(std::string adress, std::string port, std::string use
         }
         else
         {
-            std::thread connectThread(&NetworkService::connectTo, this, adress, port, userName, sPass);
+            std::string sFormattedAdress = formatAdressString(adress);
+
+            std::thread connectThread(&NetworkService::connectTo, this, sFormattedAdress, port, userName, sPass);
             connectThread .detach();
         }
     }
@@ -709,6 +711,46 @@ void NetworkService::serverMonitor()
         std::this_thread::sleep_for( std::chrono::milliseconds(CHECK_IF_SERVER_DIED_EVERY_MS) );
 
     } while (bTextListen);
+}
+
+std::string NetworkService::formatAdressString(const std::string &sAdress)
+{
+    size_t iStartAdressStartPos = 0;
+
+    for (size_t i = 0;   i < sAdress .size();   i++)
+    {
+        if ( sAdress[i] != ' ' )
+        {
+            iStartAdressStartPos = i;
+            break;
+        }
+    }
+
+
+
+    size_t iEndAdressStartPos = 0;
+
+    for (size_t i = sAdress .size() - 1;   i > 0;   i--)
+    {
+        if ( sAdress[i] != ' ' )
+        {
+            iEndAdressStartPos = i;
+
+            break;
+        }
+    }
+
+
+    std::string sFormattedAdress = "";
+
+    for (size_t i = iStartAdressStartPos;   i <= iEndAdressStartPos;   i++)
+    {
+        sFormattedAdress += sAdress[i];
+    }
+
+
+
+    return sFormattedAdress;
 }
 
 void NetworkService::listenTCPFromServer()
