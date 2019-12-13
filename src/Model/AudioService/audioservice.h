@@ -27,7 +27,7 @@ class User;
 
 
 
-#define  BUFFER_UPDATE_CHECK_MS      2
+#define  BUFFER_UPDATE_CHECK_MS      1
 
 #define  AUDIO_CONNECT_PATH          L"sounds/connect.wav"
 #define  AUDIO_DISCONNECT_PATH       L"sounds/disconnect.wav"
@@ -35,6 +35,7 @@ class User;
 #define  AUDIO_NEW_MESSAGE_PATH      L"sounds/newmessage.wav"
 #define  AUDIO_PRESS_PATH            L"sounds/press.wav"
 #define  AUDIO_UNPRESS_PATH          L"sounds/unpress.wav"
+
 
 
 

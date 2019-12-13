@@ -9,12 +9,10 @@ Must be used with the Silent Server application. <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
 
 # Latency
-In accordance with the Silent version 2.23.0 the current latency is 60 ms (I think):<br>
-<br>
-Silent is sending audio packets which are 30 ms long each while the user holds his push-to-talk button. First, Silent will record one audio packet (30 ms) and then send it to the server (and will record more audio if the user is still holding his push-to-talk button). The user who received audio packets from the server will play them after he received the second audio packet. So, considering that the ping of all users is 0 we need 60 ms to record and send 2 audio packets, after that the user who received those packets will play them while still accepting the next audio packets.<br>
+In accordance with the Silent version 2.23.1 the current latency is 85 ms (I think):<br>
 <br>
 You can calculate your latency by this formula:<br>
-Latency = 60 ms + (your ping + ping of the user-receiver) / 2.
+Latency = 85 ms + (your ping + ping of the user-receiver) / 2.
 
 # Add your style theme
 The Silent has different style themes that you can change.<br>

@@ -243,8 +243,11 @@ void AudioService::setupUserAudio(User *pUser)
     pUser ->WaveOutHdr1 .dwFlags         = 0L;
     pUser ->WaveOutHdr1 .dwLoops         = 0L;
 
-    // Audio buffer2
-    pUser ->WaveOutHdr2 = pUser ->WaveOutHdr1;
+    // Audio other buffers
+    for (size_t i = 1;   i < pUser ->vWaveOutHdrs .size();   i++)
+    {
+        *pUser ->vWaveOutHdrs[i] = pUser ->WaveOutHdr1;
+    }
 
 
 
@@ -701,7 +704,7 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
 
 
 
-        if ( (pUser ->vAudioPackets .size() > 1)
+        if ( (pUser ->vAudioPackets .size() > 2)
              &&
              (pUser ->bPacketsArePlaying == false) )
         {
@@ -727,172 +730,105 @@ void AudioService::play(User* pUser)
     size_t i = 0;
     size_t iLastPlayingPacketIndex = 0;
 
+
+    // Wait a little so when we finished playing the first buffer
+    // we will almost 100% have a new audio packet came.
+    std::this_thread::sleep_for(std::chrono::milliseconds(25));
+
+
     pUser       ->bTalking = true;
     pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
 
 
 
-    // Add 1st buffer
-    pUser->WaveOutHdr1.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
-    if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr1) ) {pUser->bDeletePacketsAtLast = true;}
-    i++;
-
-    // Add 2nd buffer
-    pUser->WaveOutHdr2.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
-    if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr2) ) {pUser->bDeletePacketsAtLast = true;}
-    i++;
-
-
-
-
-    // Play 1.
-    result = waveOutWrite(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
-    if (result)
+    for (size_t k = 0;   k < pUser ->vWaveOutHdrs .size();   k++)
     {
-        char fault[256];
-        memset(fault, 0, 256);
-
-        waveInGetErrorTextA(result, fault, 256);
-        pMainWindow->printOutput(std::string("AudioService::uncompressAndPlay::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                 SilentMessageColor(false),
-                                 true);
-
-        waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
-
-        pUser->bDeletePacketsAtLast = true;
-    }
-
-
-    // Play 2.
-    result = waveOutWrite(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
-    if (result)
-    {
-        char fault[256];
-        memset(fault, 0, 256);
-
-        waveInGetErrorTextA(result, fault, 256);
-        pMainWindow->printOutput(std::string("AudioService::uncompressAndPlay::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                 SilentMessageColor(false),
-                                 true);
-
-        waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
-
-        pUser->bDeletePacketsAtLast = true;
+        // Add buffer
+        pUser ->vWaveOutHdrs[k] ->lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
+        if ( addOutBuffer(pUser->hWaveOut, &(*pUser ->vWaveOutHdrs[k])) ) {pUser->bDeletePacketsAtLast = true;}
+        i++;
     }
 
 
 
+    for (size_t k = 0;   k < pUser ->vWaveOutHdrs .size();   k++)
+    {
+        // Play buffer
+        result = waveOutWrite(pUser->hWaveOut, &(*pUser ->vWaveOutHdrs[k]), sizeof(WAVEHDR));
+        if (result)
+        {
+            char fault[256];
+            memset(fault, 0, 256);
 
-    // Wait until finished playing 1st buffer
-    waitForPlayToEnd(pUser, &pUser->WaveOutHdr1, iLastPlayingPacketIndex);
+            waveInGetErrorTextA(result, fault, 256);
+            pMainWindow->printOutput(std::string("AudioService::play::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
+                                     SilentMessageColor(false),
+                                     true);
 
+            waveOutUnprepareHeader(pUser->hWaveOut, &(*pUser ->vWaveOutHdrs[k]), sizeof(WAVEHDR));
 
-    bool bWaitForSecondBuffer = true;
+            pUser->bDeletePacketsAtLast = true;
+        }
+    }
 
+    size_t iCurrentIndexToWait          = 0;
+    size_t iCurrentIndexToPlay          = 0;
+    size_t iLeftPlayingBuffers          = pUser ->vWaveOutHdrs .size();
 
     do
     {
-        if (bWaitForSecondBuffer)
+        // Wait until finished playing buffer
+        waitForPlayToEnd(pUser, &(*pUser ->vWaveOutHdrs[iCurrentIndexToWait]), iLastPlayingPacketIndex);
+        iLeftPlayingBuffers--;
+
+        if ( (iCurrentIndexToWait + 1) == pUser ->vWaveOutHdrs .size() )
         {
-            // Wait until finished playing 2st buffer
-            while ( (waveOutUnprepareHeader(pUser ->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-                    &&
-                    !(i < pUser ->vAudioPackets .size()) )
-            {
-                std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
-            }
+            iCurrentIndexToWait = 0;
         }
         else
         {
-            // Wait until finished playing 1st buffer
-            while ( (waveOutUnprepareHeader(pUser ->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
-                    &&
-                    !(i < pUser ->vAudioPackets .size()) )
-            {
-                std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
-            }
+            iCurrentIndexToWait++;
         }
+
 
 
         if ( i < pUser ->vAudioPackets .size() )
         {
-            if (bWaitForSecondBuffer)
+            // Add buffer
+            pUser ->vWaveOutHdrs[iCurrentIndexToPlay] ->lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
+            if ( addOutBuffer(pUser->hWaveOut, &(*pUser ->vWaveOutHdrs[iCurrentIndexToPlay])) ) {pUser->bDeletePacketsAtLast = true;}
+            i++;
+
+            // Play buffer
+            result = waveOutWrite(pUser->hWaveOut, &(*pUser ->vWaveOutHdrs[iCurrentIndexToPlay]), sizeof(WAVEHDR));
+            if (result)
             {
-                // Add 1st buffer
-                pUser->WaveOutHdr1.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
-                if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr1) ) {pUser->bDeletePacketsAtLast = true;}
-                i++;
+                char fault[256];
+                memset(fault, 0, 256);
 
+                waveInGetErrorTextA(result, fault, 256);
+                pMainWindow->printOutput(std::string("AudioService::play::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
+                                         SilentMessageColor(false),
+                                         true);
 
-                // Play 1.
-                result = waveOutWrite(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
-                if (result)
-                {
-                    char fault[256];
-                    memset(fault, 0, 256);
+                waveOutUnprepareHeader(pUser->hWaveOut, &(*pUser ->vWaveOutHdrs[iCurrentIndexToPlay]), sizeof(WAVEHDR));
 
-                    waveInGetErrorTextA(result, fault, 256);
-                    pMainWindow->printOutput(std::string("AudioService::uncompressAndPlay::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                             SilentMessageColor(false),
-                                             true);
+                pUser->bDeletePacketsAtLast = true;
+            }
 
-                    waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
+            iLeftPlayingBuffers++;
 
-                    pUser->bDeletePacketsAtLast = true;
-
-                    break;
-                }
-
-
-                // Wait until finished playing 2st buffer
-                waitForPlayToEnd(pUser, &pUser->WaveOutHdr2, iLastPlayingPacketIndex);
+            if ( (iCurrentIndexToPlay + 1) == pUser ->vWaveOutHdrs .size() )
+            {
+                iCurrentIndexToPlay = 0;
             }
             else
             {
-                // Add 2st buffer
-                pUser->WaveOutHdr2.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
-                if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr2) ) {pUser->bDeletePacketsAtLast = true;}
-                i++;
-
-
-                // Play 2.
-                result = waveOutWrite(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
-                if (result)
-                {
-                    char fault[256];
-                    memset(fault, 0, 256);
-
-                    waveInGetErrorTextA(result, fault, 256);
-                    pMainWindow->printOutput(std::string("AudioService::uncompressAndPlay::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                             SilentMessageColor(false),
-                                             true);
-
-                    waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
-
-                    pUser->bDeletePacketsAtLast = true;
-
-                    break;
-                }
-
-
-                // Wait until finished playing 1st buffer
-                waitForPlayToEnd(pUser, &pUser->WaveOutHdr1, iLastPlayingPacketIndex);
+                iCurrentIndexToPlay++;
             }
-
-
-            bWaitForSecondBuffer = !bWaitForSecondBuffer;
-        }
-        else
-        {
-            delete[] pUser ->vAudioPackets[iLastPlayingPacketIndex];
-            pUser ->vAudioPackets[iLastPlayingPacketIndex] = nullptr;
-
-            iLastPlayingPacketIndex++;
-
-            break;
         }
 
-    }while ( bInputReady );
+    }while ( (iLeftPlayingBuffers != 0) && (bInputReady) );
 
 
     if (bInputReady)
@@ -959,16 +895,13 @@ void AudioService::play(User* pUser)
 
 void AudioService::waitForAllBuffers(User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex)
 {
-    // Wait until finished playing
-    while ( waveOutUnprepareHeader(pUser ->hWaveOut, &pUser ->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+    for (size_t i = 0;   i < pUser ->vWaveOutHdrs .size();   i++)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
-    }
-
-    // Wait until finished playing
-    while ( waveOutUnprepareHeader(pUser ->hWaveOut, &pUser ->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+        // Wait until finished playing
+        while ( waveOutUnprepareHeader(pUser ->hWaveOut, &(*pUser ->vWaveOutHdrs[i]), sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
+        }
     }
 
     if (bClearPackets)
