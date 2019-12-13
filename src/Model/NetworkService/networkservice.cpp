@@ -633,44 +633,7 @@ void NetworkService::setupVoiceConnection()
         }
         else
         {
-            // Send "I'm ready for VOIP" message to the server
-
-            char firstMessage[MAX_NAME_LENGTH + 3];
-            firstMessage[0] = -1;
-            firstMessage[1] = static_cast <char> ( pThisUser ->sUserName .size() );
-            std::memcpy( firstMessage + 2, pThisUser ->sUserName .c_str(), pThisUser ->sUserName .size() );
-
-
-            int iSentSize = sendto(pThisUser ->sockUserUDP, firstMessage, 2 + static_cast<int>(pThisUser ->sUserName .size()), 0,
-                                   reinterpret_cast <sockaddr*> (&pThisUser ->addrServer), sizeof(pThisUser ->addrServer));
-
-            if ( iSentSize != ( 2 + static_cast <int> (pThisUser ->sUserName .size()) ) )
-            {
-                if (iSentSize == SOCKET_ERROR)
-                {
-                    pMainWindow ->printOutput( "Cannot start voice connection.\n"
-                                              "NetworkService::setupVoiceConnection::sendto() error: "
-                                              + std::to_string(WSAGetLastError()),
-                                              SilentMessageColor(false),
-                                              true );
-
-                    closesocket(pThisUser ->sockUserUDP);
-
-                    return;
-                }
-                else
-                {
-                    pMainWindow ->printOutput( "Cannot start voice connection.\n"
-                                              "NetworkService::setupVoiceConnection::sendto() sent only: "
-                                              + std::to_string(iSentSize) + " out of "
-                                              + std::to_string(2 + pThisUser ->sUserName .size()),
-                                              SilentMessageColor(false), true );
-
-                    closesocket(pThisUser ->sockUserUDP);
-
-                    return;
-                }
-            }
+            if ( sendVOIPReadyPacket() ) return;
 
             // Translate socket to non-blocking mode
 
@@ -688,6 +651,10 @@ void NetworkService::setupVoiceConnection()
 
                 return;
             }
+
+
+            std::thread tWait (&NetworkService::checkIfVOIPConnected, this);
+            tWait .detach();
         }
     }
 }
@@ -751,6 +718,66 @@ std::string NetworkService::formatAdressString(const std::string &sAdress)
 
 
     return sFormattedAdress;
+}
+
+bool NetworkService::sendVOIPReadyPacket()
+{
+    // Send "I'm ready for VOIP" message to the server
+
+    char firstMessage[MAX_NAME_LENGTH + 3];
+    firstMessage[0] = -1;
+    firstMessage[1] = static_cast <char> ( pThisUser ->sUserName .size() );
+    std::memcpy( firstMessage + sizeof(firstMessage[0]) * 2, pThisUser ->sUserName .c_str(), pThisUser ->sUserName .size() );
+
+
+    int iSentSize = sendto(pThisUser ->sockUserUDP, firstMessage, 2 + static_cast<int>(pThisUser ->sUserName .size()), 0,
+                           reinterpret_cast <sockaddr*> (&pThisUser ->addrServer), sizeof(pThisUser ->addrServer));
+
+    if ( iSentSize != static_cast <int> ( sizeof(firstMessage[0]) * 2 + pThisUser ->sUserName .size() ) )
+    {
+        if (iSentSize == SOCKET_ERROR)
+        {
+            pMainWindow ->printOutput( "Cannot start voice connection.\n"
+                                      "NetworkService::setupVoiceConnection::sendto() error: "
+                                      + std::to_string(WSAGetLastError()),
+                                      SilentMessageColor(false),
+                                      true );
+
+            closesocket(pThisUser ->sockUserUDP);
+
+            return true;
+        }
+        else
+        {
+            pMainWindow ->printOutput( "Cannot start voice connection.\n"
+                                      "NetworkService::setupVoiceConnection::sendto() sent only: "
+                                      + std::to_string(iSentSize) + " out of "
+                                      + std::to_string(sizeof(firstMessage[0]) * 2 + pThisUser ->sUserName .size()),
+                                      SilentMessageColor(false), true );
+
+            closesocket(pThisUser ->sockUserUDP);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void NetworkService::checkIfVOIPConnected()
+{
+    do
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(PING_CHECK_INTERVAL_SEC * 3));
+
+        if (pThisUser ->iPing == 0)
+        {
+            pMainWindow ->printOutput("Attempting to connect to the voice chat again.\n", SilentMessageColor(false), true);
+
+            if ( sendVOIPReadyPacket() ) return;
+        }
+
+    }while (pThisUser ->iPing == 0);
 }
 
 void NetworkService::listenTCPFromServer()
@@ -984,6 +1011,8 @@ void NetworkService::receiveInfoAboutNewUser()
 
 
 
+    mtxOtherUsers .lock();
+
 
     // Show on screen.
 
@@ -994,10 +1023,6 @@ void NetworkService::receiveInfoAboutNewUser()
 
 
     // Add new user.
-
-    mtxOtherUsers .lock();
-
-
 
     std::string sNewUserName = std::string(readBuffer + 5);
 

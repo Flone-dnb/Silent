@@ -103,6 +103,12 @@ private:
         std::string formatAdressString(const std::string& sAdress);
 
 
+    // Sends another VOIP request to the server.
+
+        bool sendVOIPReadyPacket();
+        void checkIfVOIPConnected();
+
+
     // ------------------------------------
 
 

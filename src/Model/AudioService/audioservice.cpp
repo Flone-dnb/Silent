@@ -704,7 +704,7 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
 
 
 
-        if ( (pUser ->vAudioPackets .size() > 2)
+        if ( (pUser ->vAudioPackets .size() >= pUser ->vWaveOutHdrs .size())
              &&
              (pUser ->bPacketsArePlaying == false) )
         {
