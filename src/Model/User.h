@@ -47,11 +47,6 @@ public:
         this ->iPing           = iPing;
         this ->pListWidgetItem = pListWidgetItem;
         bTalking               = false;
-
-
-        vWaveOutHdrs .push_back(&WaveOutHdr1);
-        vWaveOutHdrs .push_back(&WaveOutHdr2);
-        vWaveOutHdrs .push_back(&WaveOutHdr3);
     }
 
 
@@ -93,12 +88,6 @@ public:
     // Audio buffers
     WAVEHDR             WaveOutHdr1;
     WAVEHDR             WaveOutHdr2;
-    WAVEHDR             WaveOutHdr3;
-    // don't forget to add new line in the constructor
-    // in vWaveOutHdrs .push_back(&WaveOutHdr2);
-
-
-    std::vector<WAVEHDR*> vWaveOutHdrs;
 
 
     float               fUserDefinedVolume;
