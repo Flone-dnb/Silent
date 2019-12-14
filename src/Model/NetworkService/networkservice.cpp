@@ -144,11 +144,6 @@ void NetworkService::eraseDisconnectedUser(std::string sUserName, char cDisconne
     }
 
 
-    mtxOtherUsers. unlock();
-
-
-
-
     // Delete user from screen & AudioService & play audio sound.
 
     if (pDisconnectedUser)
@@ -165,6 +160,8 @@ void NetworkService::eraseDisconnectedUser(std::string sUserName, char cDisconne
 
         pMainWindow   ->showUserDisconnectNotice(sUserName, SilentMessageColor(true), cDisconnectType);
     }
+
+    mtxOtherUsers. unlock();
 }
 
 void NetworkService::clearWinsockAndThisUser()
@@ -901,8 +898,6 @@ void NetworkService::listenUDPFromServer()
     }
 
 
-
-
     // Listen to the server.
 
     char readBuffer[MAX_BUFFER_SIZE];
@@ -1378,7 +1373,6 @@ void NetworkService::disconnect()
             mtxUDPRead .unlock();
             std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_UDP_MESSAGE_MS));
 
-            closesocket(pThisUser ->sockUserUDP);
             pAudioService ->stop();
         }
 
@@ -1416,6 +1410,7 @@ void NetworkService::disconnect()
                                      + std::to_string(WSAGetLastError()) + ".\n",
                                      SilentMessageColor(false), true);
             closesocket(pThisUser ->sockUserTCP);
+            closesocket(pThisUser ->sockUserUDP);
             WSACleanup();
             bWinSockLaunched = false;
         }
@@ -1468,6 +1463,7 @@ void NetworkService::disconnect()
                 pMainWindow ->printOutput("Server has not responded.\n", SilentMessageColor(false), true);
 
                 closesocket(pThisUser ->sockUserTCP);
+                closesocket(pThisUser ->sockUserUDP);
                 WSACleanup();
                 bWinSockLaunched = false;
 
