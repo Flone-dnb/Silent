@@ -121,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalDeleteUserFromList,           this, &MainWindow::slotDeleteUserFromList);
     connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
     connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
+    connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
 
 
 
@@ -259,12 +260,10 @@ void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
     if (bMenu)
     {
         ui ->actionConnect       ->setEnabled(true);
-        ui ->actionDisconnect    ->setEnabled(true);
     }
     else
     {
         ui ->actionConnect       ->setEnabled(false);
-        ui ->actionDisconnect    ->setEnabled(false);
     }
 
     if (bTypeAndSend)
@@ -276,6 +275,18 @@ void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
     {
         ui ->pushButton          ->setEnabled(false);
         ui ->plainTextEdit_input ->setEnabled(false);
+    }
+}
+
+void MainWindow::slotSetConnectDisconnectButton(bool bConnect)
+{
+    if (bConnect)
+    {
+        ui ->actionConnect ->setText("Connect");
+    }
+    else
+    {
+        ui ->actionConnect ->setText("Disconnect");
     }
 }
 
@@ -556,6 +567,11 @@ void MainWindow::setOnlineUsersCount(int onlineCount)
     ui ->label_connectedCount ->setText( "Connected: " + QString::number(onlineCount) );
 }
 
+void MainWindow::setConnectDisconnectButton(bool bConnect)
+{
+    emit signalSetConnectDisconnectButton(bConnect);
+}
+
 void MainWindow::setPingAndTalkingToUser(std::string sUserName, QListWidgetItem* pListWidgetItem, int iPing, bool bTalking)
 {
     emit signalPingAndTalkingToUser(sUserName, pListWidgetItem, iPing, bTalking);
@@ -610,14 +626,16 @@ void MainWindow::applyTheme()
 
 void MainWindow::on_actionConnect_triggered()
 {
-    pConnectWindow ->setUserName( pController ->getCurrentSettingsFile() ->sUsername );
+    if ( ui ->actionConnect ->text() == "Connect" )
+    {
+        pConnectWindow ->setUserName( pController ->getCurrentSettingsFile() ->sUsername );
 
-    pConnectWindow->show();
-}
-
-void MainWindow::on_actionDisconnect_triggered()
-{
-    pController->disconnect();
+        pConnectWindow->show();
+    }
+    else
+    {
+        pController->disconnect();
+    }
 }
 
 void MainWindow::on_pushButton_clicked()

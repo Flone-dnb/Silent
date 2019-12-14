@@ -559,6 +559,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                                          true);
 
                 pMainWindow ->enableInteractiveElements(true, true);
+                pMainWindow ->setConnectDisconnectButton(false);
 
                 bTextListen = true;
 
@@ -1454,6 +1455,7 @@ void NetworkService::disconnect()
                     pMainWindow ->deleteUserFromList        (nullptr, true);
                     pMainWindow ->setOnlineUsersCount       (0);
                     pMainWindow ->enableInteractiveElements (true, false);
+                    pMainWindow ->setConnectDisconnectButton(true);
 
                     bWinSockLaunched = false;
                 }
@@ -1474,6 +1476,7 @@ void NetworkService::disconnect()
                 pMainWindow ->deleteUserFromList        (nullptr,true);
                 pMainWindow ->setOnlineUsersCount       (0);
                 pMainWindow ->enableInteractiveElements (true,false);
+                pMainWindow ->setConnectDisconnectButton(true);
             }
         }
 
@@ -1517,6 +1520,7 @@ void NetworkService::lostConnection()
     pMainWindow ->deleteUserFromList(nullptr, true);
     pMainWindow ->setOnlineUsersCount(0);
     pMainWindow ->enableInteractiveElements(true, false);
+    pMainWindow ->setConnectDisconnectButton(true);
 }
 
 void NetworkService::answerToFIN()
@@ -1579,6 +1583,7 @@ void NetworkService::answerToFIN()
             {
                 pMainWindow->setOnlineUsersCount(0);
                 pMainWindow->enableInteractiveElements(true, false);
+                pMainWindow ->setConnectDisconnectButton(true);
 
                 bWinSockLaunched = false;
 

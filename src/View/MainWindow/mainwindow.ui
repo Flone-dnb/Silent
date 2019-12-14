@@ -198,7 +198,6 @@
      <string>Chat</string>
     </property>
     <addaction name="actionConnect"/>
-    <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
    </widget>
@@ -232,16 +231,6 @@
   <action name="actionConnect">
    <property name="text">
     <string>Connect</string>
-   </property>
-   <property name="font">
-    <font>
-     <family>Segoe UI</family>
-    </font>
-   </property>
-  </action>
-  <action name="actionDisconnect">
-   <property name="text">
-    <string>Disconnect</string>
    </property>
    <property name="font">
     <font>

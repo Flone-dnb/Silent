@@ -60,6 +60,7 @@ public:
         void              deleteUserFromList         (QListWidgetItem* pListWidgetItem,  bool bDeleteAll = false);
         void              enableInteractiveElements  (bool bMenu,                        bool bTypeAndSend);
         void              setOnlineUsersCount        (int onlineCount);
+        void              setConnectDisconnectButton (bool bConnect);
         QListWidgetItem*  addNewUserToList           (std::string name);
 
 
@@ -92,6 +93,7 @@ signals:
         void signalPingAndTalkingToUser              (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
         void signalEnableInteractiveElements         (bool bMenu,                       bool bTypeAndSend);
         void signalDeleteUserFromList                (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
+        void signalSetConnectDisconnectButton        (bool bConnect);
 
 
     // Other
@@ -130,6 +132,7 @@ private slots:
         void  slotPingAndTalkingToUser          (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
         void  slotDeleteUserFromList            (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
         void  slotEnableInteractiveElements     (bool bMenu,                       bool bTypeAndSend);
+        void  slotSetConnectDisconnectButton    (bool bConnect);
 
 
     // Print on Chat Room QPlainTextEdit
@@ -150,7 +153,6 @@ private slots:
 
         void  on_actionAbout_2_triggered        ();
         void  on_actionConnect_triggered        ();
-        void  on_actionDisconnect_triggered     ();
         void  on_actionSettings_triggered       ();
 
 
