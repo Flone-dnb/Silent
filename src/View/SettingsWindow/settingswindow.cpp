@@ -9,8 +9,8 @@
 #include <QDir>
 
 // Custom
-#include "../src/View/StyleAndInfoPaths.h"
-#include "../src/Model/SettingsManager/SettingsFile.h"
+#include "View/StyleAndInfoPaths.h"
+#include "Model/SettingsManager/SettingsFile.h"
 
 
 // --------------------------------------------------------------------------------------------------------------------

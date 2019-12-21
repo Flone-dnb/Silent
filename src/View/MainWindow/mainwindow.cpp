@@ -20,14 +20,14 @@
 
 
 // Custom
-#include "../src/View/ConnectWindow/connectwindow.h"
-#include "../src/Controller/controller.h"
-#include "../src/View/SettingsWindow/settingswindow.h"
-#include "../src/View/SingleUserSettings/singleusersettings.h"
-#include "../src/View/AboutWindow/aboutwindow.h"
-#include "../src/View/StyleAndInfoPaths.h"
-#include "../src/Model/SettingsManager/SettingsFile.h"
-#include "../src/View/CustomQPlainTextEdit/customqplaintextedit.h"
+#include "View/ConnectWindow/connectwindow.h"
+#include "Controller/controller.h"
+#include "View/SettingsWindow/settingswindow.h"
+#include "View/SingleUserSettings/singleusersettings.h"
+#include "View/AboutWindow/aboutwindow.h"
+#include "View/StyleAndInfoPaths.h"
+#include "Model/SettingsManager/SettingsFile.h"
+#include "View/CustomQPlainTextEdit/customqplaintextedit.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :

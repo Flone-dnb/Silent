@@ -66,6 +66,8 @@ RC_ICONS = ../res/icons/appMainIcon.ico
 
 RESOURCES += ../res/qt_rec_file.qrc
 
+INCLUDEPATH += "../src"
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

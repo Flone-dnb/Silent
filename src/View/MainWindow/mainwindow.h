@@ -10,7 +10,7 @@
 #include <mutex>
 
 // Custom
-#include "../src/Model/OutputTextType.h"
+#include "Model/OutputTextType.h"
 
 
 

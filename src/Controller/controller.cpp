@@ -2,11 +2,11 @@
 
 
 // Custom
-#include "../src/View/MainWindow/mainwindow.h"
-#include "../src/Model/NetworkService/networkservice.h"
-#include "../src/Model/AudioService/audioservice.h"
-#include "../src/Model/SettingsManager/settingsmanager.h"
-#include "../src/Model/SettingsManager/SettingsFile.h"
+#include "View/MainWindow/mainwindow.h"
+#include "Model/NetworkService/networkservice.h"
+#include "Model/AudioService/audioservice.h"
+#include "Model/SettingsManager/settingsmanager.h"
+#include "Model/SettingsManager/SettingsFile.h"
 
 
 // ------------------------------------------------------------------------------------------------

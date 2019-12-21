@@ -5,12 +5,12 @@
 #include <thread>
 
 // Custom
-#include "../src/View/MainWindow/mainwindow.h"
-#include "../src/Model/NetworkService/networkservice.h"
-#include "../src/Model/SettingsManager/settingsmanager.h"
-#include "../src/Model/SettingsManager/SettingsFile.h"
-#include "../src/Model/User.h"
-#include "../src/Model/net_params.h"
+#include "View/MainWindow/mainwindow.h"
+#include "Model/NetworkService/networkservice.h"
+#include "Model/SettingsManager/settingsmanager.h"
+#include "Model/SettingsManager/SettingsFile.h"
+#include "Model/User.h"
+#include "Model/net_params.h"
 
 
 // ------------------------------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 #include <QUrl>
 
 // Custom
-#include "../src/View/StyleAndInfoPaths.h"
+#include "View/StyleAndInfoPaths.h"
 
 
 // --------------------------------------------------------------------------------------------------------------------
