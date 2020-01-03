@@ -1,4 +1,9 @@
-﻿#pragma once
+﻿// This file is part of the Silent.
+// Copyright Aleksandr "Flone" Tretyakov (github.com/Flone-dnb).
+// Licensed under the ZLib license.
+// Refer to the LICENSE file included.
+
+#pragma once
 
 // STL
 #include <mutex>
