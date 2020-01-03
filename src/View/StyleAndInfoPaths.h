@@ -30,5 +30,5 @@
 // Info
 
 #define INFO_APP_NAME  "Silent"
-#define INFO_COPYRIGHT "Copyright (c) 2019.\nAleksandr \"Flone\" Tretyakov."
+#define INFO_COPYRIGHT "Copyright (c) 2019-2020.\nAleksandr \"Flone\" Tretyakov."
 #define INFO_REPO_URL  "https://github.com/Flone-dnb/Silent"
