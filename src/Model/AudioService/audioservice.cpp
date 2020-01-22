@@ -735,7 +735,7 @@ void AudioService::play(User* pUser)
 
     // Wait a little so when we finished playing the first buffer
     // we will almost 100% have a new audio packet came.
-    std::this_thread::sleep_for(std::chrono::milliseconds(25));
+    std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
 
     pUser       ->bTalking = true;
