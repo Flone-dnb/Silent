@@ -8,12 +8,6 @@ Must be used with the Silent Server application. <br>
 <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
 
-# Latency
-In accordance with the Silent version 2.23.1 the current audio latency is 85 ms (if I'm not mistaken):<br>
-<br>
-You can calculate your audio latency by this formula:
-Latency = 85 ms + (your ping + ping of the user-receiver) / 2.
-
 # Add your style theme
 The Silent has different style themes that you can change.<br>
 <br>
