@@ -383,8 +383,9 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
             // Receive answer
 
-            char readBuffer[MAX_BUFFER_SIZE];
-            memset(readBuffer, 0, MAX_BUFFER_SIZE);
+            const int iMaxBufferSize = 4000;
+            char readBuffer[iMaxBufferSize];
+            memset(readBuffer, 0, iMaxBufferSize);
 
             int iReceivedSize = recv(pThisUser ->sockUserTCP, readBuffer, 1, 0);
 
