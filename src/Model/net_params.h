@@ -22,6 +22,6 @@
 #define  ATTEMPTS_TO_DISCONNECT_COUNT   5
 
 // Ping
-#define  PING_CHECK_INTERVAL_SEC        3
+#define  PING_CHECK_INTERVAL_SEC        5
 #define  PING_NORMAL_BELOW              300
 #define  PING_WARNING_BELOW             500
