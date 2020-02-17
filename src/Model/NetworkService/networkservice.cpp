@@ -55,6 +55,14 @@ enum USER_DISCONNECT_REASON
     UDR_KICKED              = 2
 };
 
+enum UDP_SERVER_MESSAGE
+{
+    UDP_SM_PREPARE          = -1,
+    UDP_SM_PING             = 0,
+    UDP_SM_FIRST_PING       = -2,
+    UDP_SM_USER_READY       = -3
+};
+
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
@@ -655,10 +663,6 @@ void NetworkService::setupVoiceConnection()
 
                 return;
             }
-
-
-            std::thread tWait (&NetworkService::checkIfVOIPConnected, this);
-            tWait .detach();
         }
     }
 }
@@ -729,7 +733,7 @@ bool NetworkService::sendVOIPReadyPacket()
     // Send "I'm ready for VOIP" message to the server
 
     char firstMessage[MAX_NAME_LENGTH + 3];
-    firstMessage[0] = -1;
+    firstMessage[0] = UDP_SM_PREPARE;
     firstMessage[1] = static_cast <char> ( pThisUser ->sUserName .size() );
     std::memcpy( firstMessage + sizeof(firstMessage[0]) * 2, pThisUser ->sUserName .c_str(), pThisUser ->sUserName .size() );
 
@@ -766,22 +770,6 @@ bool NetworkService::sendVOIPReadyPacket()
     }
 
     return false;
-}
-
-void NetworkService::checkIfVOIPConnected()
-{
-    do
-    {
-        std::this_thread::sleep_for(std::chrono::seconds(PING_CHECK_INTERVAL_SEC * 3));
-
-        if (pThisUser ->iPing == 0)
-        {
-            pMainWindow ->printOutput("Attempting to connect to the voice chat again.\n", SilentMessageColor(false), true);
-
-            if ( sendVOIPReadyPacket() ) return;
-        }
-
-    }while (pThisUser ->iPing == 0);
 }
 
 void NetworkService::listenTCPFromServer()
@@ -905,6 +893,19 @@ void NetworkService::listenUDPFromServer()
     }
 
 
+    // Send "READY" for first ping check packet.
+
+    char cReadyForPing = UDP_SM_USER_READY;
+    int iSendSize = send(pThisUser ->sockUserUDP, &cReadyForPing, sizeof(cReadyForPing), 0);
+    if (iSendSize != sizeof(cReadyForPing))
+    {
+        pMainWindow ->printOutput( "\nWARNING:\nNetworkService::listenUDPFromServer::sendto() (READY packet) failed and returned: "
+                                   + std::to_string(WSAGetLastError()) + ".\n",
+                                   SilentMessageColor(false),
+                                   true);
+    }
+
+
     // Listen to the server.
 
     char readBuffer[MAX_BUFFER_SIZE];
@@ -917,7 +918,7 @@ void NetworkService::listenUDPFromServer()
         {
             mtxUDPRead .lock();
 
-            if ( (readBuffer[0] == 0) && (bVoiceListen) )
+            if ( (readBuffer[0] == UDP_SM_PING || readBuffer[0] == UDP_SM_FIRST_PING) && (bVoiceListen) )
             {
                 // it's ping check
                 int iSentSize = send(pThisUser ->sockUserUDP, readBuffer, iSize, 0);

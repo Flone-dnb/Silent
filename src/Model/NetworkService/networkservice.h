@@ -43,7 +43,6 @@ public:
 
         void  start                            (std::string adress,   std::string port,   std::string userName,  std::wstring sPass = L"");
         void  connectTo                        (std::string adress,   std::string port,   std::string userName,  std::wstring sPass = L"");
-        void  setupVoiceConnection             ();
 
 
     // Listen
@@ -100,18 +99,18 @@ private:
 
     // Checks if the server is dead.
 
-        void serverMonitor();
+        void serverMonitor                     ();
 
 
     // Erases spaces at the borders of the address string.
 
-        std::string formatAdressString(const std::string& sAdress);
+        std::string formatAdressString         (const std::string& sAdress);
 
 
-    // Sends another VOIP request to the server.
+    // VOIP
 
-        bool sendVOIPReadyPacket();
-        void checkIfVOIPConnected();
+        void setupVoiceConnection              ();
+        bool sendVOIPReadyPacket               ();
 
 
     // ------------------------------------
