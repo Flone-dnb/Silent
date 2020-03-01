@@ -84,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->listWidget_users ->setViewMode          (QListView::ListMode);
 
     pMenuContextMenu    = new QMenu(this);
+    connect(pMenuContextMenu, &QMenu::aboutToHide, this, &MainWindow::slotOnMenuClose);
 
     pActionChangeVolume = new QAction("Change Volume");
 
@@ -314,7 +315,7 @@ void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageCol
 
     if (cUserLost == 2)
     {
-        message = "The server has kicked user " + QString::fromStdString(name) + ".<br>";
+        message = "The server has kicked the user " + QString::fromStdString(name) + ".<br>";
     }
     else if (cUserLost == 1)
     {
@@ -722,6 +723,11 @@ void MainWindow::on_actionSettings_triggered()
     pSettingsWindow->show();
 }
 
+void MainWindow::slotOnMenuClose()
+{
+    ui ->listWidget_users ->clearSelection();
+}
+
 void MainWindow::on_listWidget_users_customContextMenuRequested(const QPoint &pos)
 {
     QListWidgetItem* pItem = ui->listWidget_users->itemAt(pos);
@@ -748,10 +754,10 @@ void MainWindow::on_listWidget_users_customContextMenuRequested(const QPoint &po
 
             pMenuContextMenu->exec(globalPos);
         }
-    }
-    else
-    {
-        ui->listWidget_users->clearSelection();
+        else
+        {
+            ui->listWidget_users->clearSelection();
+        }
     }
 }
 
@@ -778,8 +784,6 @@ void MainWindow::slotChangeUserVolume()
         connect(pUserSettings, &SingleUserSettings::signalChangeUserVolume, this, &MainWindow::slotSetNewUserVolume);
         pUserSettings->setWindowModality(Qt::WindowModality::WindowModal);
         pUserSettings->show();
-
-        ui->listWidget_users->clearSelection();
     }
 }
 

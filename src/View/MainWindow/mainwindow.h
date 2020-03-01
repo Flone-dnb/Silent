@@ -160,6 +160,8 @@ private slots:
         void  on_actionConnect_triggered        ();
         void  on_actionSettings_triggered       ();
 
+        void  slotOnMenuClose                   ();
+
 
     // Other
 
