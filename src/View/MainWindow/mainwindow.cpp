@@ -749,6 +749,10 @@ void MainWindow::on_listWidget_users_customContextMenuRequested(const QPoint &po
             pMenuContextMenu->exec(globalPos);
         }
     }
+    else
+    {
+        ui->listWidget_users->clearSelection();
+    }
 }
 
 void MainWindow::slotChangeUserVolume()
@@ -774,6 +778,8 @@ void MainWindow::slotChangeUserVolume()
         connect(pUserSettings, &SingleUserSettings::signalChangeUserVolume, this, &MainWindow::slotSetNewUserVolume);
         pUserSettings->setWindowModality(Qt::WindowModality::WindowModal);
         pUserSettings->show();
+
+        ui->listWidget_users->clearSelection();
     }
 }
 
