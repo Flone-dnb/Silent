@@ -28,7 +28,7 @@ public:
     SettingsManager(MainWindow* pMainWindow);
 
 
-    void           saveSettings (SettingsFile* pSettingsFile, bool bSetOnlyNewUserName = false);
+    void           saveSettings (SettingsFile* pSettingsFile, bool bSetOnlyConnectInfo = false);
 
     SettingsFile*  getCurrentSettings();
     bool           isSettingsCreatedFirstTime();

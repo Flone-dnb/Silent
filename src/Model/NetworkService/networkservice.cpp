@@ -592,8 +592,11 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
                 // Save user name to settings
 
-                SettingsFile* pUpdatedSettings = new SettingsFile();
-                pUpdatedSettings ->sUsername   = userName;
+                SettingsFile* pUpdatedSettings    = new SettingsFile();
+                pUpdatedSettings ->sUsername      = userName;
+                pUpdatedSettings ->sConnectString = adress;
+                pUpdatedSettings ->iPort          = static_cast<unsigned short>(stoi(port));
+                pUpdatedSettings ->sPassword      = sPass;
                 pSettingsManager ->saveSettings( pUpdatedSettings, true );
 
 

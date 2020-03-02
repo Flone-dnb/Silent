@@ -35,6 +35,21 @@ void connectWindow::setUserName(std::string userName)
     ui ->lineEdit_username ->setText( QString::fromStdString(userName) );
 }
 
+void connectWindow::setConnectString(std::string sConnectString)
+{
+    ui ->lineEdit_ip ->setText(QString::fromStdString(sConnectString));
+}
+
+void connectWindow::setPort(std::string sPort)
+{
+    ui ->lineEdit_port ->setText(QString::fromStdString(sPort));
+}
+
+void connectWindow::setPassword(std::wstring sPass)
+{
+    ui ->lineEdit_pass ->setText(QString::fromStdWString(sPass));
+}
+
 void connectWindow::closeEvent(QCloseEvent *event)
 {
     event ->ignore();

@@ -36,7 +36,7 @@ SettingsManager::SettingsManager(MainWindow* pMainWindow)
 
 
 
-void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNewUserName)
+void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyConnectInfo)
 {
     // Get the path to the Documents folder.
 
@@ -77,12 +77,18 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
 
 
 
-    if ( bSetOnlyNewUserName )
+    if ( bSetOnlyConnectInfo )
     {
         pSettingsFile ->iPushToTalkButton    = pCurrentSettingsFile ->iPushToTalkButton;
         pSettingsFile ->iMasterVolume        = pCurrentSettingsFile ->iMasterVolume;
         pSettingsFile ->sThemeName           = pCurrentSettingsFile ->sThemeName;
         pSettingsFile ->bPlayPushToTalkSound = pCurrentSettingsFile ->bPlayPushToTalkSound;
+    }
+    else
+    {
+        pSettingsFile ->sConnectString = pCurrentSettingsFile ->sConnectString;
+        pSettingsFile ->iPort          = pCurrentSettingsFile ->iPort;
+        pSettingsFile ->sPassword      = pCurrentSettingsFile ->sPassword;
     }
 
 
@@ -101,7 +107,7 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
 
 
 
-    if ( bSetOnlyNewUserName )
+    if ( bSetOnlyConnectInfo )
     {
         char cUserNameLength = static_cast <char> ( pSettingsFile ->sUsername .size() );
 
@@ -109,7 +115,7 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
                 ( reinterpret_cast <char*> (&cUserNameLength),          sizeof(cUserNameLength) );
 
         newSettingsFile .write
-                ( const_cast <char*> (pSettingsFile ->sUsername .c_str()), cUserNameLength );
+                ( pSettingsFile ->sUsername .c_str(), cUserNameLength );
     }
     else
     {
@@ -152,7 +158,7 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
                     ( reinterpret_cast <char*> (&cUserNameLength),          sizeof(cUserNameLength) );
 
             newSettingsFile .write
-                    ( const_cast <char*> (pSettingsFile ->sUsername .c_str()), cUserNameLength );
+                    ( pSettingsFile ->sUsername .c_str(), cUserNameLength );
         }
         else
         {
@@ -170,7 +176,7 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
             ( reinterpret_cast <char*> (&cThemeLength),          sizeof(cThemeLength) );
 
     newSettingsFile .write
-            ( const_cast <char*>       (pSettingsFile ->sThemeName .c_str()), cThemeLength );
+            ( pSettingsFile ->sThemeName .c_str(), cThemeLength );
 
 
 
@@ -180,12 +186,35 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyNew
     newSettingsFile .write
             ( &cPlayPushToTalkSound, sizeof(cPlayPushToTalkSound) );
 
+
+    // Connect string
+    unsigned char cConnectStringSize = static_cast <unsigned char>( pSettingsFile ->sConnectString.size() );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&cConnectStringSize), sizeof(cConnectStringSize) );
+
+    newSettingsFile .write
+            ( const_cast <char*>       (pSettingsFile ->sConnectString .c_str()), cConnectStringSize );
+
+
+    // Port
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&pSettingsFile ->iPort), sizeof(pSettingsFile ->iPort) );
+
+
+    // Password
+    unsigned char cPassSize = static_cast <unsigned char>( pSettingsFile ->sPassword.size() );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&cPassSize), sizeof(cPassSize) );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*>( const_cast<wchar_t*>(pSettingsFile ->sPassword .c_str()) ), cPassSize * 2 );
+
     // NEW SETTINGS GO HERE
-    // + don't forget to update "if ( bSetOnlyNewUserName )" above, where code is:
+    // + don't forget to update "if ( bSetOnlyConnectInfo )" above, where code is:
     // "pSettingsFile ->iPushToTalkButton    = pCurrentSettingsFile ->iPushToTalkButton;"
     // + don't forget to update "readSettings()"
-
-
 
 
 
@@ -320,6 +349,8 @@ SettingsFile *SettingsManager::readSettings()
             settingsFile .close();
 
             saveSettings(pSettingsFile);
+
+            return pSettingsFile;
         }
 
 
@@ -358,6 +389,8 @@ SettingsFile *SettingsManager::readSettings()
             settingsFile .close();
 
             saveSettings(pSettingsFile);
+
+            return pSettingsFile;
         }
 
 
@@ -368,6 +401,42 @@ SettingsFile *SettingsManager::readSettings()
 
         pSettingsFile ->bPlayPushToTalkSound = cPushToTalkSoundEnabled;
 
+
+
+        if (settingsFile .eof())
+        {
+            settingsFile .close();
+
+            saveSettings(pSettingsFile);
+
+            return pSettingsFile;
+        }
+
+
+        // Read connect string
+        unsigned char cConnectStringSize = 0;
+        settingsFile .read( reinterpret_cast<char*>(&cConnectStringSize), sizeof(cConnectStringSize) );
+
+        memset(vBuffer, 0, UCHAR_MAX);
+        settingsFile .read(vBuffer, cConnectStringSize);
+
+        pSettingsFile ->sConnectString = vBuffer;
+
+
+        // Read port
+        settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->iPort), sizeof(pSettingsFile ->iPort));
+
+
+        // Read password
+        unsigned char cPasswordSize = 0;
+        settingsFile .read( reinterpret_cast<char*>(&cPasswordSize), sizeof(cPasswordSize) );
+
+        wchar_t vWBuffer[UCHAR_MAX];
+        memset(vWBuffer, 0, UCHAR_MAX * sizeof(wchar_t));
+
+        settingsFile .read(reinterpret_cast<char*>(vWBuffer), cPasswordSize * sizeof(wchar_t));
+
+        pSettingsFile ->sPassword = vWBuffer;
 
 
         settingsFile .close();

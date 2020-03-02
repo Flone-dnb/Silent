@@ -37,6 +37,9 @@ public:
 
 
     void     setUserName        (std::string userName);
+    void     setConnectString   (std::string sConnectString);
+    void     setPort            (std::string sPort);
+    void     setPassword        (std::wstring sPass);
 
 
 

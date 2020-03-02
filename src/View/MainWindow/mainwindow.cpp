@@ -635,6 +635,9 @@ void MainWindow::on_actionConnect_triggered()
     if ( ui ->actionConnect ->text() == "Connect" )
     {
         pConnectWindow ->setUserName( pController ->getCurrentSettingsFile() ->sUsername );
+        pConnectWindow ->setConnectString( pController ->getCurrentSettingsFile() ->sConnectString );
+        pConnectWindow ->setPort( std::to_string(pController ->getCurrentSettingsFile() ->iPort) );
+        pConnectWindow ->setPassword( pController ->getCurrentSettingsFile() ->sPassword );
 
         pConnectWindow->show();
     }
