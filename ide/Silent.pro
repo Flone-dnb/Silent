@@ -42,6 +42,10 @@ HEADERS += \
     ../src/Model/User.h \
     ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
+    ../src/View/CustomList/SListItem/slistitem.h \
+    ../src/View/CustomList/SListItemRoom/slistitemroom.h \
+    ../src/View/CustomList/SListItemUser/slistitemuser.h \
+    ../src/View/CustomList/SListWidget/slistwidget.h \
     ../src/View/CustomQPlainTextEdit/customqplaintextedit.h \
     ../src/View/MainWindow/mainwindow.h \
     ../src/View/SettingsWindow/settingswindow.h \
@@ -56,6 +60,10 @@ SOURCES += \
     ../src/Model/SettingsManager/settingsmanager.cpp \
     ../src/View/AboutWindow/aboutwindow.cpp \
     ../src/View/ConnectWindow/connectwindow.cpp \
+    ../src/View/CustomList/SListItem/slistitem.cpp \
+    ../src/View/CustomList/SListItemRoom/slistitemroom.cpp \
+    ../src/View/CustomList/SListItemUser/slistitemuser.cpp \
+    ../src/View/CustomList/SListWidget/slistwidget.cpp \
     ../src/View/CustomQPlainTextEdit/customqplaintextedit.cpp \
     ../src/View/MainWindow/mainwindow.cpp \
     ../src/View/SingleUserSettings/singleusersettings.cpp \

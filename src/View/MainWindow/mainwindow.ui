@@ -101,7 +101,7 @@
            <number>5</number>
           </property>
           <item>
-           <widget class="QListWidget" name="listWidget_users">
+           <widget class="SListWidget" name="listWidget_users">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -275,6 +275,11 @@
    <class>CustomQPlainTextEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>../src/View/CustomQPlainTextEdit/customqplaintextedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SListWidget</class>
+   <extends>QListWidget</extends>
+   <header>../src/View/CustomList/SListWidget/slistwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
