@@ -391,7 +391,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
             // Receive answer
 
-            const int iMaxBufferSize = 4000;
+            const int iMaxBufferSize = MAX_TCP_BUFFER_SIZE;
             char readBuffer[iMaxBufferSize];
             memset(readBuffer, 0, iMaxBufferSize);
 
@@ -525,6 +525,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
                 int iReadBytes = 0;
                 int iOnline    = 0;
+
+                memset(readBuffer, 0, iMaxBufferSize);
 
                 std::memcpy(&iOnline, readBuffer, 4);
                 iReadBytes += 4;

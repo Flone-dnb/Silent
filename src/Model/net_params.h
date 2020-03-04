@@ -9,6 +9,7 @@
 #define  MAX_NAME_LENGTH                20
 #define  MAX_BUFFER_SIZE                1420
 #define  MAX_VERSION_STRING_LENGTH      20
+#define  MAX_TCP_BUFFER_SIZE            9000 // note: also change in the server
 #define  MAX_MESSAGE_LENGTH             550  // note: actual size is "MAX_MESSAGE_LENGTH * 2" because we use std::wstring.
                                              // please, don't set this value more than 680 (1400 (~MTU) / 2 - MAX_NAME_LENGTH).
 
