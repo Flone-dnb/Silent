@@ -739,7 +739,7 @@ void AudioService::play(User* pUser)
 
 
     pUser       ->bTalking = true;
-    pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+    pMainWindow ->setPingAndTalkingToUser(pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
 
 
 
@@ -912,7 +912,7 @@ void AudioService::play(User* pUser)
 
 
         pUser       ->bTalking = false;
-        pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+        pMainWindow ->setPingAndTalkingToUser(pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
 
 
         if (pUser ->bDeletePacketsAtLast == false)

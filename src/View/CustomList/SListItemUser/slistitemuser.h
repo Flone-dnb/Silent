@@ -19,6 +19,7 @@ public:
 
     void setRoom(SListItemRoom* pRoom);
     void setPing(int iPing);
+    void setUserTalking(bool bTalking);
 
     SListItemRoom* getRoom();
 
@@ -30,4 +31,6 @@ private:
     SListItemRoom* pRoom;
 
     QString sName;
+
+    int iCurrentPing;
 };

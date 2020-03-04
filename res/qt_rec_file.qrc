@@ -8,10 +8,6 @@
 	<file>icons/GitHub-Mark-Light-Hover.png</file>
 	<file>icons/user_normal_ping.png</file>
 	<file>icons/user_normal_ping_talking.png</file>
-	<file>icons/user_warning_ping.png</file>
-	<file>icons/user_warning_ping_talking.png</file>
-	<file>icons/user_bad_ping.png</file>
-	<file>icons/user_bad_ping_talking.png</file>
 	
 </qresource>
 </RCC>

@@ -77,6 +77,11 @@ void SListWidget::deleteUser(SListItemUser *pUser)
     pUser->getRoom()->deleteUser(pUser);
 }
 
+void SListWidget::deleteAll()
+{
+
+}
+
 void SListWidget::renameRoom(SListItemRoom *pRoom, QString sNewName)
 {
     pRoom->setRoomName(sNewName);
@@ -184,6 +189,11 @@ void SListWidget::moveRoomDown(SListItemRoom *pRoom)
     vRooms.erase( vRooms.begin() + iPosInVec);
 
     vRooms.insert( vRooms.begin() + iPosInVec + 1, pRoom );
+}
+
+std::vector<SListItemRoom *> SListWidget::getRooms()
+{
+    return vRooms;
 }
 
 std::vector<QString> SListWidget::getRoomNames()

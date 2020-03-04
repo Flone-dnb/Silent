@@ -33,7 +33,7 @@
 #include "View/StyleAndInfoPaths.h"
 #include "Model/SettingsManager/SettingsFile.h"
 #include "View/CustomQPlainTextEdit/customqplaintextedit.h"
-
+#include "View/CustomList/SListItemUser/slistitemuser.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -120,11 +120,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalTypeOnScreen,                 this, &MainWindow::typeSomeOnScreen);
     connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
     connect(this, &MainWindow::signalShowMessageBox,               this, &MainWindow::slotShowMessageBox);
-    connect(this, &MainWindow::signalPingAndTalkingToUser,         this, &MainWindow::slotPingAndTalkingToUser);
     connect(this, &MainWindow::signalShowUserDisconnectNotice,     this, &MainWindow::slotShowUserDisconnectNotice);
     connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
     connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
-    connect(this, &MainWindow::signalDeleteUserFromList,           this, &MainWindow::slotDeleteUserFromList);
     connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
     connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
     connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
@@ -173,72 +171,6 @@ void MainWindow::slotShowMessageBox(bool bWarningBox, std::string message)
     }
 }
 
-void MainWindow::slotPingAndTalkingToUser(std::string sUserName, QListWidgetItem* pListWidgetItem, int iPing, bool bTalking)
-{
-    mtxList .lock();
-
-
-    QString sUserNameInList = QString::fromStdString( sUserName );
-
-    if (iPing >= pController ->getPingWarningBelow())
-    {
-        sUserNameInList += " [" + QString::number(iPing) + " ms (!!!)]";
-    }
-    else
-    {
-        if (iPing == 0)
-        {
-            sUserNameInList += " [-- ms]";
-        }
-        else
-        {
-            sUserNameInList += " [" + QString::number(iPing) + " ms]";
-        }
-    }
-
-
-    pListWidgetItem ->setText( sUserNameInList );
-
-
-
-
-
-    // Set color on ping circle
-
-    if (bTalking)
-    {
-        if      (iPing <= pController->getPingNormalBelow())
-        {
-            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
-        }
-        else if (iPing <= pController->getPingWarningBelow())
-        {
-            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_WARNING_TALK));
-        }
-        else
-        {
-            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_BAD_TALK));
-        }
-    }
-    else
-    {
-        if      (iPing <= pController->getPingNormalBelow())
-        {
-            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
-        }
-        else if (iPing <= pController->getPingWarningBelow())
-        {
-            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_WARNING));
-        }
-        else
-        {
-            pListWidgetItem ->setIcon(QIcon(RES_ICONS_USERPING_BAD));
-        }
-    }
-
-
-    mtxList .unlock();
-}
 
 
 void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage)
@@ -578,9 +510,10 @@ void MainWindow::setConnectDisconnectButton(bool bConnect)
     emit signalSetConnectDisconnectButton(bConnect);
 }
 
-void MainWindow::setPingAndTalkingToUser(std::string sUserName, QListWidgetItem* pListWidgetItem, int iPing, bool bTalking)
+void MainWindow::setPingAndTalkingToUser(SListItemUser* pListWidgetItem, int iPing, bool bTalking)
 {
-    emit signalPingAndTalkingToUser(sUserName, pListWidgetItem, iPing, bTalking);
+    pListWidgetItem->setPing(iPing);
+    pListWidgetItem->setUserTalking(bTalking);
 }
 
 
@@ -595,9 +528,31 @@ QListWidgetItem* MainWindow::addNewUserToList(std::string name)
     return pNewItem;
 }
 
-void MainWindow::deleteUserFromList(QListWidgetItem* pListWidgetItem, bool bDeleteAll)
+void MainWindow::addRoom(std::string sRoomName, std::wstring sPassword, size_t iMaxUsers)
 {
-    emit signalDeleteUserFromList(pListWidgetItem, bDeleteAll);
+    ui->listWidget_users->addRoom(QString::fromStdString(sRoomName), QString::fromStdWString(sPassword), iMaxUsers);
+}
+
+size_t MainWindow::getRoomCount()
+{
+    return ui->listWidget_users->getRoomCount();
+}
+
+SListItemUser* MainWindow::addUserToRoomIndex(std::string sName, size_t iRoomIndex)
+{
+    return ui->listWidget_users->addUser(QString::fromStdString(sName), ui->listWidget_users->getRooms()[iRoomIndex]);
+}
+
+void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)
+{
+    if (bDeleteAll)
+    {
+        ui->listWidget_users->deleteAll();
+    }
+    else
+    {
+        ui->listWidget_users->deleteUser(pListWidgetItem);
+    }
 }
 
 void MainWindow::showUserDisconnectNotice(std::string name, SilentMessageColor messageColor, char cUserLost)

@@ -31,12 +31,14 @@ public:
     SListItemUser* addUser     (QString sUserName, SListItemRoom* pRoom = nullptr);
     void           deleteRoom  (SListItemRoom* pRoom);
     void           deleteUser  (SListItemUser* pUser);
+    void           deleteAll   ();
 
     void           renameRoom  (SListItemRoom* pRoom, QString sNewName);
 
     void           moveRoomUp  (SListItemRoom* pRoom);
     void           moveRoomDown(SListItemRoom* pRoom);
 
+    std::vector<SListItemRoom*>getRooms();
     std::vector<QString> getRoomNames();
     size_t               getRoomCount();
     bool                 isAbleToCreateRoom();

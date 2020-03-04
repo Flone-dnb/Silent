@@ -28,6 +28,7 @@ class QAction;
 class QSystemTrayIcon;
 class QListWidgetItem;
 class SettingsFile;
+class SListItemUser;
 
 namespace Ui
 {
@@ -61,12 +62,15 @@ public:
 
     // Update UI elements
 
-        void              setPingAndTalkingToUser    (std::string sUserName,             QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
-        void              deleteUserFromList         (QListWidgetItem* pListWidgetItem,  bool bDeleteAll = false);
+        void              setPingAndTalkingToUser    (SListItemUser* pListWidgetItem, int iPing, bool bTalking);
+        void              deleteUserFromList         (SListItemUser* pListWidgetItem,  bool bDeleteAll = false);
         void              enableInteractiveElements  (bool bMenu,                        bool bTypeAndSend);
         void              setOnlineUsersCount        (int onlineCount);
         void              setConnectDisconnectButton (bool bConnect);
         QListWidgetItem*  addNewUserToList           (std::string name);
+        void              addRoom                    (std::string sRoomName, std::wstring sPassword = L"", size_t iMaxUsers = 0);
+        size_t            getRoomCount               ();
+        SListItemUser*    addUserToRoomIndex         (std::string sName, size_t iRoomIndex);
 
 
     // Input message QPlainTextEdit
@@ -97,7 +101,6 @@ signals:
 
         void signalPingAndTalkingToUser              (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
         void signalEnableInteractiveElements         (bool bMenu,                       bool bTypeAndSend);
-        void signalDeleteUserFromList                (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
         void signalSetConnectDisconnectButton        (bool bConnect);
 
 
@@ -134,7 +137,6 @@ private slots:
 
     // Update UI elements
 
-        void  slotPingAndTalkingToUser          (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
         void  slotDeleteUserFromList            (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
         void  slotEnableInteractiveElements     (bool bMenu,                       bool bTypeAndSend);
         void  slotSetConnectDisconnectButton    (bool bConnect);

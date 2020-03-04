@@ -34,7 +34,7 @@
 
 
 
-class QListWidgetItem;
+class SListItemUser;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ class User
 {
 public:
 
-    User(const std::string& sUserName, int iPing, QListWidgetItem* pListWidgetItem)
+    User(const std::string& sUserName, int iPing, SListItemUser* pListWidgetItem)
     {
         this ->sUserName       = sUserName;
         this ->iPing           = iPing;
@@ -105,7 +105,7 @@ public:
 
 
 
-    QListWidgetItem*    pListWidgetItem;
+    SListItemUser*      pListWidgetItem;
     int                 iPing;
     bool                bTalking;
 };

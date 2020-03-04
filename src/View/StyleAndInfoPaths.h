@@ -13,10 +13,6 @@
 
 #define RES_ICONS_USERPING_NORMAL       ":/icons/user_normal_ping.png"
 #define RES_ICONS_USERPING_NORMAL_TALK  ":/icons/user_normal_ping_talking.png"
-#define RES_ICONS_USERPING_WARNING      ":/icons/user_warning_ping.png"
-#define RES_ICONS_USERPING_WARNING_TALK ":/icons/user_warning_ping_talking.png"
-#define RES_ICONS_USERPING_BAD          ":/icons/user_bad_ping.png"
-#define RES_ICONS_USERPING_BAD_TALK     ":/icons/user_bad_ping_talking.png"
 
 
 

@@ -161,7 +161,7 @@ void NetworkService::eraseDisconnectedUser(std::string sUserName, char cDisconne
 
     if (pDisconnectedUser)
     {
-        QListWidgetItem* pItem = pDisconnectedUser ->pListWidgetItem;
+        SListItemUser* pItem = pDisconnectedUser ->pListWidgetItem;
 
         pAudioService ->deleteUserAudio     (pDisconnectedUser);
 
@@ -485,6 +485,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 unsigned short int iPacketSize = 0;
                 std::memcpy(&iPacketSize, readBuffer, 2);
 
+                memset(readBuffer, 0, iMaxBufferSize);
 
 
 
@@ -526,42 +527,95 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 int iReadBytes = 0;
                 int iOnline    = 0;
 
-                memset(readBuffer, 0, iMaxBufferSize);
 
-                std::memcpy(&iOnline, readBuffer, 4);
-                iReadBytes += 4;
+                char roomCount = 0;
+                std::memcpy(&roomCount, readBuffer + iReadBytes, 1);
 
-                pMainWindow ->setOnlineUsersCount(iOnline);
 
-                for (int i = 0;   i < (iOnline - 1);   i++)
+                for (char i = 0;   i < roomCount;   i++)
                 {
-                    unsigned char currentItemSize = 0;
-                    std::memcpy(&currentItemSize, readBuffer + iReadBytes, 1);
+                    std::string  sRoomName   = "";
+                    std::wstring sRoomPass   = L"";
+                    unsigned short iMaxUsers = 0;
+
+
+                    char roomNameSize = 0;
+                    std::memcpy(&roomNameSize, readBuffer + iReadBytes, 1);
                     iReadBytes++;
 
-                    char rowText[MAX_NAME_LENGTH + 1];
-                    memset(rowText, 0, MAX_NAME_LENGTH + 1);
+                    char bufferForNames[MAX_NAME_LENGTH + 1];
+                    memset(bufferForNames, 0, MAX_NAME_LENGTH + 1);
 
-                    std::memcpy(rowText, readBuffer + iReadBytes, currentItemSize);
-                    iReadBytes += currentItemSize;
+                    std::memcpy(bufferForNames, readBuffer + iReadBytes, roomNameSize);
+                    iReadBytes += roomNameSize;
+
+                    sRoomName = bufferForNames;
 
 
 
-                    // Add new user.
 
-                    std::string sNewUserName = std::string(rowText);
+                    wchar_t bufferForWNames[MAX_NAME_LENGTH * 2 + 2];
+                    memset(bufferForWNames, 0, MAX_NAME_LENGTH * 2 + 2);
 
-                    User* pNewUser = new User( sNewUserName, 0, pMainWindow ->addNewUserToList(sNewUserName) );
+                    char roomPassSize = 0;
+                    std::memcpy(&roomPassSize, readBuffer + iReadBytes, 1);
+                    iReadBytes++;
 
-                    vOtherUsers .push_back( pNewUser );
+                    std::memcpy(bufferForWNames, readBuffer + iReadBytes, roomPassSize);
+                    iReadBytes += roomPassSize;
 
-                    pAudioService ->setupUserAudio( pNewUser );
+                    sRoomPass = bufferForWNames;
+
+
+
+                    std::memcpy(&iMaxUsers, readBuffer + iReadBytes, 2);
+                    iReadBytes += 2;
+
+
+                    pMainWindow->addRoom(sRoomName, sRoomPass, iMaxUsers);
+
+
+
+
+                    unsigned short iUsersInRoom = 0;
+                    std::memcpy(&iUsersInRoom, readBuffer + iReadBytes, 2);
+                    iReadBytes += 2;
+
+                    iOnline += iUsersInRoom;
+
+                    for (unsigned short j = 0; j < iUsersInRoom; j++)
+                    {
+                        unsigned char currentItemSize = 0;
+                        std::memcpy(&currentItemSize, readBuffer + iReadBytes, 1);
+                        iReadBytes++;
+
+                        char rowText[MAX_NAME_LENGTH + 1];
+                        memset(rowText, 0, MAX_NAME_LENGTH + 1);
+
+                        std::memcpy(rowText, readBuffer + iReadBytes, currentItemSize);
+                        iReadBytes += currentItemSize;
+
+
+
+                        // Add new user.
+
+                        std::string sNewUserName = std::string(rowText);
+
+                        User* pNewUser = new User( sNewUserName, 0, pMainWindow ->addUserToRoomIndex(sNewUserName, i) );
+
+                        vOtherUsers .push_back( pNewUser );
+
+                        pAudioService ->setupUserAudio( pNewUser );
+                    }
                 }
+
+
+                pMainWindow ->setOnlineUsersCount(iOnline);
 
                 // Save this user
 
                 pThisUser ->sUserName = userName;
-                pThisUser ->pListWidgetItem = pMainWindow ->addNewUserToList(userName);
+                pThisUser ->pListWidgetItem = pMainWindow ->addUserToRoomIndex(userName, 0);
 
                 pAudioService ->setupUserAudio( pThisUser );
 
@@ -1232,7 +1286,7 @@ void NetworkService::receivePing()
         {
             // Show on screen.
             pUser       ->iPing = ping;
-            pMainWindow ->setPingAndTalkingToUser(pUser ->sUserName, pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+            pMainWindow ->setPingAndTalkingToUser(pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
         }
 
     }while(iCurrentPos < iPacketSize);

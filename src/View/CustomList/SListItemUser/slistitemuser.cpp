@@ -5,6 +5,8 @@
 
 #include "slistitemuser.h"
 
+#include "View/StyleAndInfoPaths.h"
+
 SListItemUser::SListItemUser(QString sName)
 {
     QString sFormatedName = "    ";
@@ -29,6 +31,22 @@ void SListItemUser::setPing(int iPing)
     sFormatedName += " [" + QString::number(iPing) + " ms]";
 
     setText(sFormatedName);
+
+    this->iCurrentPing = iPing;
+}
+
+void SListItemUser::setUserTalking(bool bTalking)
+{
+    // Set color on ping circle
+
+    if (bTalking)
+    {
+        setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
+    }
+    else
+    {
+        setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
+    }
 }
 
 SListItemRoom *SListItemUser::getRoom()
