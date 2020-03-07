@@ -16,6 +16,7 @@ class AudioService;
 class MainWindow;
 class SettingsManager;
 class SettingsFile;
+class SListItemRoom;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -41,6 +42,7 @@ public:
     // Chat functions
 
         void           sendMessage                (std::wstring sMessage);
+        void           enterRoom                  (std::string sRoomName);
 
 
     // Settings
@@ -58,6 +60,7 @@ public:
         unsigned short getPingWarningBelow        ();
         SettingsFile*  getCurrentSettingsFile     ();
         bool           isSettingsCreatedFirstTime ();
+        SListItemRoom* getCurrentUserRoom         ();
 
 
 

@@ -34,6 +34,7 @@
 #include "Model/SettingsManager/SettingsFile.h"
 #include "View/CustomQPlainTextEdit/customqplaintextedit.h"
 #include "View/CustomList/SListItemUser/slistitemuser.h"
+#include "View/CustomList/SListItemRoom/slistitemroom.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -87,10 +88,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(pMenuContextMenu, &QMenu::aboutToHide, this, &MainWindow::slotOnMenuClose);
 
     pActionChangeVolume = new QAction("Change Volume");
+    pActionEnterRoom    = new QAction("Enter Room");
 
     pMenuContextMenu ->addAction(pActionChangeVolume);
+    pMenuContextMenu ->addAction(pActionEnterRoom);
 
     connect(pActionChangeVolume, &QAction::triggered, this, &MainWindow::slotChangeUserVolume);
+    connect(pActionEnterRoom, &QAction::triggered, this, &MainWindow::slotEnterRoom);
 
 
 
@@ -518,20 +522,14 @@ void MainWindow::setPingAndTalkingToUser(SListItemUser* pListWidgetItem, int iPi
 }
 
 
-QListWidgetItem* MainWindow::addNewUserToList(std::string name)
+SListItemUser* MainWindow::addNewUserToList(std::string name)
 {
-    QString qName = QString::fromStdString(name) + " [-- ms]";
-
-    QListWidgetItem* pNewItem = new QListWidgetItem(qName);
-
-    ui->listWidget_users->addItem( pNewItem );
-
-    return pNewItem;
+    return ui ->listWidget_users ->addUser(QString::fromStdString(name), nullptr);
 }
 
-void MainWindow::addRoom(std::string sRoomName, std::wstring sPassword, size_t iMaxUsers)
+void MainWindow::addRoom(std::string sRoomName, std::wstring sPassword, size_t iMaxUsers, bool bFirstRoom)
 {
-    ui->listWidget_users->addRoom(QString::fromStdString(sRoomName), QString::fromStdWString(sPassword), iMaxUsers);
+    ui->listWidget_users->addRoom(QString::fromStdString(sRoomName), QString::fromStdWString(sPassword), iMaxUsers, bFirstRoom);
 }
 
 size_t MainWindow::getRoomCount()
@@ -542,6 +540,11 @@ size_t MainWindow::getRoomCount()
 SListItemUser* MainWindow::addUserToRoomIndex(std::string sName, size_t iRoomIndex)
 {
     return ui->listWidget_users->addUser(QString::fromStdString(sName), ui->listWidget_users->getRooms()[iRoomIndex]);
+}
+
+void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
+{
+    ui ->listWidget_users ->moveUser(pUser, QString::fromStdString(sRoomName));
 }
 
 void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)
@@ -687,35 +690,62 @@ void MainWindow::slotOnMenuClose()
     ui ->listWidget_users ->clearSelection();
 }
 
-void MainWindow::on_listWidget_users_customContextMenuRequested(const QPoint &pos)
+void MainWindow::slotEnterRoom()
 {
-    QListWidgetItem* pItem = ui->listWidget_users->itemAt(pos);
-    if (pItem)
+    if (ui->listWidget_users->currentRow() >= 0)
     {
-        QString nameWithPing = pItem->text();
-        QString nameWithoutPing = "";
+        SListItem* pItem = dynamic_cast<SListItem*>(ui->listWidget_users->currentItem());
 
-        for (int i = 0; i < nameWithPing.size(); i++)
+        if (pItem->isRoom())
         {
-            if (nameWithPing[i] == ' ')
+            SListItemRoom* pRoom = dynamic_cast<SListItemRoom*>(pItem);
+
+            if (pRoom == pController->getCurrentUserRoom())
             {
-                break;
+                ui ->listWidget_users ->clearSelection();
             }
             else
             {
-                nameWithoutPing += nameWithPing[i];
+                pController->enterRoom(pRoom->getRoomName().toStdString());
             }
         }
+    }
+}
 
-        if ( nameWithoutPing.toStdString() != pController->getUserName() )
+void MainWindow::on_listWidget_users_customContextMenuRequested(const QPoint &pos)
+{
+    QListWidgetItem* pItem = ui->listWidget_users->itemAt(pos);
+
+    if (pItem)
+    {
+        SListItem* pListItem = dynamic_cast<SListItem*>(pItem);
+
+        if (pListItem->isRoom())
         {
+            pActionChangeVolume->setVisible(false);
+            pActionEnterRoom->setVisible(true);
+
             QPoint globalPos = ui->listWidget_users->mapToGlobal(pos);
 
             pMenuContextMenu->exec(globalPos);
         }
         else
         {
-            ui->listWidget_users->clearSelection();
+            pActionChangeVolume->setVisible(true);
+            pActionEnterRoom->setVisible(false);
+
+            SListItemUser* pUser = dynamic_cast<SListItemUser*>(pListItem);
+
+            if (pUser->getName().toStdString() != pController->getUserName())
+            {
+                QPoint globalPos = ui->listWidget_users->mapToGlobal(pos);
+
+                pMenuContextMenu->exec(globalPos);
+            }
+            else
+            {
+                ui->listWidget_users->clearSelection();
+            }
         }
     }
 }
@@ -783,6 +813,28 @@ void MainWindow::closeEvent(QCloseEvent *event)
     Q_UNUSED(event)
 
     pController->stop();
+}
+
+void MainWindow::on_listWidget_users_itemDoubleClicked(QListWidgetItem *item)
+{
+    if (ui ->listWidget_users ->currentRow() >= 0)
+    {
+        SListItem* pItem = dynamic_cast<SListItem*>(item);
+
+        if (pItem->isRoom())
+        {
+            SListItemRoom* pRoom = dynamic_cast<SListItemRoom*>(pItem);
+
+            if (pRoom == pController->getCurrentUserRoom())
+            {
+                ui ->listWidget_users ->clearSelection();
+            }
+            else
+            {
+                pController->enterRoom(pRoom->getRoomName().toStdString());
+            }
+        }
+    }
 }
 
 

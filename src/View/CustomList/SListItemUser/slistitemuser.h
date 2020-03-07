@@ -22,6 +22,7 @@ public:
     void setUserTalking(bool bTalking);
 
     SListItemRoom* getRoom();
+    QString        getName();
 
 
     ~SListItemUser() override;

@@ -24,10 +24,17 @@ public:
     void addUser(SListItemUser* pUser);
     void deleteUser(SListItemUser* pUser);
 
+    void deleteAll();
+
 
     void    setRoomName     (QString sName);
     void    setRoomPassword (QString sPassword);
     void    setRoomMaxUsers (size_t iMaxUsers);
+
+    void    setIsWelcomeRoom(bool bIsWelcomeRoom);
+
+
+    void    eraseUserFromRoom(SListItemUser* pUser);
 
 
     std::vector<SListItemUser*> getUsers();
@@ -35,6 +42,7 @@ public:
     QString getRoomName ();
     QString getPassword ();
     size_t  getMaxUsers ();
+    bool    getIsWelcomeRoom();
 
 
 
@@ -48,10 +56,16 @@ private:
 
     std::vector<SListItemUser*> vUsers;
 
+
     SListWidget* pList;
 
 
     QString sRoomName;
     QString sPassword;
+
+
     size_t  iMaxUsers;
+
+
+    bool    bIsWelcomeRoom;
 };

@@ -18,6 +18,7 @@ class AudioService;
 class SettingsManager;
 
 class User;
+class SListItemRoom;
 
 
 #define  CLIENT_VERSION                "2.23.3"
@@ -64,6 +65,13 @@ public:
         void  sendMessage                      (std::wstring message);
 
 
+    // Rooms
+
+        void  enterRoom                        (std::string sName);
+        void  canMoveToRoom                    ();
+        void  userEntersRoom                   ();
+
+
     // Stop / Delete / Disconnect
 
         void  deleteDisconnectedUserFromList   ();
@@ -80,6 +88,7 @@ public:
         std::string    getUserName             () const;
         unsigned short getPingNormalBelow      () const;
         unsigned short getPingWarningBelow     () const;
+        SListItemRoom* getUserRoom             () const;
 
         size_t         getOtherUsersVectorSize () const;
         User*          getOtherUser            (size_t i) const;
@@ -136,6 +145,7 @@ private:
     std::mutex         mtxOtherUsers;
     std::mutex         mtxTCPRead;
     std::mutex         mtxUDPRead;
+    std::mutex         mtxRooms;
 
 
     clock_t            lastTimeServerKeepAliveCame;

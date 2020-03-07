@@ -26,6 +26,8 @@
 #include "Model/SettingsManager/SettingsFile.h"
 #include "Model/net_params.h"
 #include "Model/OutputTextType.h"
+#include "View/CustomList/SListItemUser/slistitemuser.h"
+#include "View/CustomList/SListItemRoom/slistitemroom.h"
 #include "Model/User.h"
 
 
@@ -35,6 +37,13 @@ enum CONNECT_MESSAGE  {
     CM_WRONG_CLIENT         = 3,
     CM_SERVER_INFO          = 4,
     CM_NEED_PASSWORD        = 5
+};
+
+enum ROOM_COMMAND
+{
+    RC_ENTER_ROOM           = 15,
+    RC_CAN_ENTER_ROOM       = 20,
+    RC_USER_ENTERS_ROOM     = 25
 };
 
 enum SERVER_MESSAGE  {
@@ -120,6 +129,18 @@ unsigned short NetworkService::getPingWarningBelow() const
     return iPingWarningBelow;
 }
 
+SListItemRoom *NetworkService::getUserRoom() const
+{
+    if (pThisUser)
+    {
+        return dynamic_cast<SListItemUser*>(pThisUser->pListWidgetItem)->getRoom();
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
 size_t NetworkService::getOtherUsersVectorSize() const
 {
     return vOtherUsers .size();
@@ -163,13 +184,17 @@ void NetworkService::eraseDisconnectedUser(std::string sUserName, char cDisconne
     {
         SListItemUser* pItem = pDisconnectedUser ->pListWidgetItem;
 
+        if (pItem->getRoom() == pThisUser->pListWidgetItem->getRoom())
+        {
+            pAudioService ->playConnectDisconnectSound(false);
+        }
+
         pAudioService ->deleteUserAudio     (pDisconnectedUser);
 
         delete pDisconnectedUser;
         vOtherUsers .erase( vOtherUsers .begin() + iUserPosInVector );
 
         pMainWindow   ->deleteUserFromList  (pItem);
-        pAudioService ->playConnectDisconnectSound(false);
 
         pMainWindow   ->showUserDisconnectNotice(sUserName, SilentMessageColor(true), cDisconnectType);
     }
@@ -530,6 +555,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
                 char roomCount = 0;
                 std::memcpy(&roomCount, readBuffer + iReadBytes, 1);
+                iReadBytes++;
 
 
                 for (char i = 0;   i < roomCount;   i++)
@@ -572,7 +598,14 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     iReadBytes += 2;
 
 
-                    pMainWindow->addRoom(sRoomName, sRoomPass, iMaxUsers);
+                    bool bFirstRoom = false;
+
+                    if (i == 0)
+                    {
+                        bFirstRoom = true;
+                    }
+
+                    pMainWindow->addRoom(sRoomName, sRoomPass, iMaxUsers, bFirstRoom);
 
 
 
@@ -916,11 +949,25 @@ void NetworkService::listenTCPFromServer()
                     break;
                 }
                 case(SM_KICKED):
-
+                {
                     // We were kicked
                     pMainWindow ->printOutput("You were kicked by the server.", SilentMessageColor(false), true);
 
                     // Next message will be FIN
+                    break;
+                }
+                case(RC_CAN_ENTER_ROOM):
+                {
+                    canMoveToRoom();
+
+                    break;
+                }
+                case(RC_USER_ENTERS_ROOM):
+                {
+                    userEntersRoom();
+
+                    break;
+                }
                 }
             }
 
@@ -1091,7 +1138,11 @@ void NetworkService::receiveInfoAboutNewUser()
     User* pNewUser = new User( sNewUserName, 0, pMainWindow ->addNewUserToList(sNewUserName) );
 
     pAudioService ->setupUserAudio( pNewUser );
-    pAudioService ->playConnectDisconnectSound(true);
+
+    if (pThisUser->pListWidgetItem->getRoom()->getIsWelcomeRoom())
+    {
+        pAudioService ->playConnectDisconnectSound(true);
+    }
 
     vOtherUsers .push_back( pNewUser );
 
@@ -1369,6 +1420,22 @@ void NetworkService::sendMessage(std::wstring message)
     }
 
     delete[] pSendBuffer;
+}
+
+void NetworkService::enterRoom(std::string sName)
+{
+    if (bTextListen)
+    {
+        char vBuffer[MAX_NAME_LENGTH + 3];
+        memset(vBuffer, 0, MAX_NAME_LENGTH + 3);
+
+        vBuffer[0] = RC_ENTER_ROOM;
+        vBuffer[1] = static_cast<char>(sName.size());
+
+        std::memcpy(vBuffer + 2, sName.c_str(), sName.size());
+
+        send(pThisUser->sockUserTCP, vBuffer, static_cast<int>(sName.size()) + 2, 0);
+    }
 }
 
 void NetworkService::sendVoiceMessage(char *pVoiceMessage, int iMessageSize, bool bLast)
@@ -1705,4 +1772,63 @@ void NetworkService::cleanUp()
 
 
     mtxOtherUsers .unlock();
+}
+
+void NetworkService::canMoveToRoom()
+{
+    char vBuffer[MAX_NAME_LENGTH + 1];
+    memset(vBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    char cRoomNameSize = 0;
+
+    recv(pThisUser->sockUserTCP, &cRoomNameSize, 1, 0);
+
+    recv(pThisUser->sockUserTCP, vBuffer, cRoomNameSize, 0);
+
+    mtxRooms.lock();
+
+    pMainWindow->moveUserToRoom(pThisUser->pListWidgetItem, vBuffer);
+
+    mtxRooms.unlock();
+}
+
+void NetworkService::userEntersRoom()
+{
+    char vBuffer[MAX_NAME_LENGTH + 1];
+    memset(vBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    char cNameSize = 0;
+
+    recv(pThisUser->sockUserTCP, &cNameSize, 1, 0);
+
+    recv(pThisUser->sockUserTCP, vBuffer, cNameSize, 0);
+
+    std::string sUserName(vBuffer);
+    memset(vBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    char cRoomNameSize = 0;
+
+    recv(pThisUser->sockUserTCP, &cRoomNameSize, 1, 0);
+
+    recv(pThisUser->sockUserTCP, vBuffer, cRoomNameSize, 0);
+
+    std::string sRoomName(vBuffer);
+
+    mtxOtherUsers.lock();
+
+    for (size_t i = 0; i < vOtherUsers.size(); i++)
+    {
+        if (vOtherUsers[i]->sUserName == sUserName)
+        {
+            mtxRooms.lock();
+
+            pMainWindow->moveUserToRoom(vOtherUsers[i]->pListWidgetItem, sRoomName);
+
+            mtxRooms.unlock();
+
+            break;
+        }
+    }
+
+    mtxOtherUsers.unlock();
 }

@@ -15,7 +15,7 @@ SListWidget::SListWidget(QWidget *parent) :
 {
 }
 
-void SListWidget::addRoom(QString sRoomName, QString sPassword, size_t iMaxUsers)
+void SListWidget::addRoom(QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom)
 {
     if (vRooms.size() == MAX_ROOMS)
     {
@@ -25,6 +25,7 @@ void SListWidget::addRoom(QString sRoomName, QString sPassword, size_t iMaxUsers
     {
         SListItemRoom* pNewItem = new SListItemRoom(sRoomName, this, sPassword, iMaxUsers);
         pNewItem->setItemType(true);
+        pNewItem->setIsWelcomeRoom(bFirstRoom);
 
         vRooms.push_back(pNewItem);
 
@@ -79,7 +80,27 @@ void SListWidget::deleteUser(SListItemUser *pUser)
 
 void SListWidget::deleteAll()
 {
+    for (size_t i = 0; i < vRooms.size(); i++)
+    {
+        vRooms[i]->deleteAll();
 
+        delete vRooms[i];
+    }
+
+    vRooms.clear();
+}
+
+void SListWidget::moveUser(SListItemUser *pUser, QString sToRoom)
+{
+    pUser->getRoom()->eraseUserFromRoom(pUser);
+
+    for (size_t i = 0; i < vRooms.size(); i++)
+    {
+        if (vRooms[i]->getRoomName() == sToRoom)
+        {
+            vRooms[i]->addUser(pUser);
+        }
+    }
 }
 
 void SListWidget::renameRoom(SListItemRoom *pRoom, QString sNewName)

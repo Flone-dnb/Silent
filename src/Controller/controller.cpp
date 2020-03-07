@@ -81,6 +81,11 @@ bool Controller::isSettingsCreatedFirstTime()
     return pSettingsManager ->isSettingsCreatedFirstTime();
 }
 
+SListItemRoom *Controller::getCurrentUserRoom()
+{
+    return pNetworkService->getUserRoom();
+}
+
 float Controller::getUserCurrentVolume(std::string sUserName)
 {
     return pAudioService ->getUserCurrentVolume(sUserName);
@@ -109,6 +114,11 @@ void Controller::setNewUserVolume(std::string sUserName, float fVolume)
 void Controller::sendMessage(std::wstring sMessage)
 {
     pNetworkService ->sendMessage(sMessage);
+}
+
+void Controller::enterRoom(std::string sRoomName)
+{
+    pNetworkService->enterRoom(sRoomName);
 }
 
 void Controller::disconnect()

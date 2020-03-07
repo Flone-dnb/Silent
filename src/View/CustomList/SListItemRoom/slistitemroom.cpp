@@ -13,6 +13,8 @@
 
 SListItemRoom::SListItemRoom(QString sName, SListWidget* pList, QString sPassword, size_t iMaxUsers)
 {
+    bIsWelcomeRoom = false;
+
     this->pList = pList;
 
     sRoomName = sName;
@@ -31,6 +33,8 @@ void SListItemRoom::addUser(SListItemUser *pUser)
     }
 
     vUsers.push_back(pUser);
+
+    pUser->setRoom(this);
 
 
     int iStartRow = pList->row(this);
@@ -57,6 +61,9 @@ void SListItemRoom::addUser(SListItemUser *pUser)
     {
         pList->insertItem(iInsertRowIndex, pUser);
     }
+
+    // Update info.
+    setText(getRoomFullName());
 }
 
 void SListItemRoom::deleteUser(SListItemUser *pUser)
@@ -70,6 +77,22 @@ void SListItemRoom::deleteUser(SListItemUser *pUser)
             vUsers.erase( vUsers.begin() + i );
         }
     }
+
+    // Update info.
+    setText(getRoomFullName());
+}
+
+void SListItemRoom::deleteAll()
+{
+    for (size_t i = 0; i < vUsers.size(); i++)
+    {
+        delete vUsers[i];
+    }
+
+    vUsers.clear();
+
+    // Update info.
+    setText(getRoomFullName());
 }
 
 void SListItemRoom::setRoomName(QString sName)
@@ -90,6 +113,26 @@ void SListItemRoom::setRoomMaxUsers(size_t iMaxUsers)
 {
     this->iMaxUsers = iMaxUsers;
 
+    setText(getRoomFullName());
+}
+
+void SListItemRoom::setIsWelcomeRoom(bool bIsWelcomeRoom)
+{
+    this->bIsWelcomeRoom = bIsWelcomeRoom;
+}
+
+void SListItemRoom::eraseUserFromRoom(SListItemUser *pUser)
+{
+    for (size_t i = 0; i < vUsers.size(); i++)
+    {
+        if (vUsers[i] == pUser)
+        {
+            vUsers.erase( vUsers.begin() + i );
+            pList->takeItem(pList->row(pUser));
+        }
+    }
+
+    // Update info.
     setText(getRoomFullName());
 }
 
@@ -118,6 +161,11 @@ size_t SListItemRoom::getMaxUsers()
     return iMaxUsers;
 }
 
+bool SListItemRoom::getIsWelcomeRoom()
+{
+    return bIsWelcomeRoom;
+}
+
 SListItemRoom::~SListItemRoom()
 {
 
@@ -125,6 +173,11 @@ SListItemRoom::~SListItemRoom()
 
 QString SListItemRoom::getRoomFullName()
 {
+    QFont f = font();
+    f.setPointSize(11);
+    setFont(f);
+
+
     QString sFullName = sRoomName;
 
     sFullName += "    ";
@@ -132,7 +185,7 @@ QString SListItemRoom::getRoomFullName()
     sFullName += "(";
     if (iMaxUsers == 0)
     {
-        sFullName += "0)";
+        sFullName += QString::number(vUsers.size()) + ")";
     }
     else
     {

@@ -67,10 +67,11 @@ public:
         void              enableInteractiveElements  (bool bMenu,                        bool bTypeAndSend);
         void              setOnlineUsersCount        (int onlineCount);
         void              setConnectDisconnectButton (bool bConnect);
-        QListWidgetItem*  addNewUserToList           (std::string name);
-        void              addRoom                    (std::string sRoomName, std::wstring sPassword = L"", size_t iMaxUsers = 0);
+        SListItemUser*    addNewUserToList           (std::string name);
+        void              addRoom                    (std::string sRoomName, std::wstring sPassword = L"", size_t iMaxUsers = 0, bool bFirstRoom = false);
         size_t            getRoomCount               ();
         SListItemUser*    addUserToRoomIndex         (std::string sName, size_t iRoomIndex);
+        void              moveUserToRoom             (SListItemUser* pUser, std::string sRoomName);
 
 
     // Input message QPlainTextEdit
@@ -128,6 +129,8 @@ private slots:
         void  on_listWidget_users_customContextMenuRequested (const QPoint &pos);
         void  slotSetNewUserVolume                           (QString userName, float fVolume);
         void  slotChangeUserVolume                           ();
+        void  slotEnterRoom                                  ();
+        void  on_listWidget_users_itemDoubleClicked          (QListWidgetItem *item);
 
 
     // Called from SettingsWindow
@@ -176,7 +179,6 @@ private slots:
         void  on_pushButton_clicked             ();
         void  customqplaintextedit_return_pressed();
 
-
 private:
 
     void showSettingsWindow ();
@@ -195,6 +197,8 @@ private:
     // Context menu in list
     QMenu*           pMenuContextMenu;
     QAction*         pActionChangeVolume;
+
+    QAction*         pActionEnterRoom;
 
 
     QTimer*          pTimer;

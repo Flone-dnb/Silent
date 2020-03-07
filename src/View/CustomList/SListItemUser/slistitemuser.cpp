@@ -33,8 +33,6 @@ void SListItemUser::setPing(int iPing)
     sFormatedName += this->sName;
     sFormatedName += " [" + QString::number(iPing) + " ms]";
 
-    setColor();
-
     setText(sFormatedName);
 
     this->iCurrentPing = iPing;
@@ -43,11 +41,18 @@ void SListItemUser::setPing(int iPing)
 void SListItemUser::setUserTalking(bool bTalking)
 {
     this->bTalking = bTalking;
+
+    setColor();
 }
 
 SListItemRoom *SListItemUser::getRoom()
 {
     return pRoom;
+}
+
+QString SListItemUser::getName()
+{
+    return sName;
 }
 
 SListItemUser::~SListItemUser()
