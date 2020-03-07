@@ -11,9 +11,6 @@
 #define RES_ICONS_MAIN_PATH ":/icons/appMainIcon.png"
 #define RES_ICONS_MAIN_SIZE_XY 128
 
-#define RES_ICONS_USERPING_NORMAL       ":/icons/user_normal_ping.png"
-#define RES_ICONS_USERPING_NORMAL_TALK  ":/icons/user_normal_ping_talking.png"
-
 
 
 // Style

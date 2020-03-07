@@ -28,9 +28,13 @@ public:
 
 private:
 
+    void setColor();
+
     SListItemRoom* pRoom;
 
     QString sName;
 
     int iCurrentPing;
+
+    bool bTalking;
 };

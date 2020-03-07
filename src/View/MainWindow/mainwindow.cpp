@@ -100,6 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType <SilentMessageColor> ("SilentMessageColor");
     qRegisterMetaType <std::string>        ("std::string");
     qRegisterMetaType <QTextBlock>         ("QTextBlock");
+    qRegisterMetaType <QVector<int>>       ("QVector<int>");
 
 
 

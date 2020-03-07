@@ -6,8 +6,6 @@
 	<file>icons/appMainIcon.png</file>
 	<file>icons/GitHub-Mark-Light.png</file>
 	<file>icons/GitHub-Mark-Light-Hover.png</file>
-	<file>icons/user_normal_ping.png</file>
-	<file>icons/user_normal_ping_talking.png</file>
 	
 </qresource>
 </RCC>

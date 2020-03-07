@@ -6,17 +6,20 @@
 #include "slistitemuser.h"
 
 #include "View/StyleAndInfoPaths.h"
+#include <QFont>
 
 SListItemUser::SListItemUser(QString sName)
 {
     QString sFormatedName = "    ";
     sFormatedName += sName;
 
-    setText(sFormatedName);
+    bTalking = false;
 
     pRoom = nullptr;
 
     this->sName = sName;
+
+    setText(sFormatedName);
 }
 
 void SListItemUser::setRoom(SListItemRoom *pRoom)
@@ -30,6 +33,8 @@ void SListItemUser::setPing(int iPing)
     sFormatedName += this->sName;
     sFormatedName += " [" + QString::number(iPing) + " ms]";
 
+    setColor();
+
     setText(sFormatedName);
 
     this->iCurrentPing = iPing;
@@ -37,16 +42,7 @@ void SListItemUser::setPing(int iPing)
 
 void SListItemUser::setUserTalking(bool bTalking)
 {
-    // Set color on ping circle
-
-    if (bTalking)
-    {
-        setIcon(QIcon(RES_ICONS_USERPING_NORMAL_TALK));
-    }
-    else
-    {
-        setIcon(QIcon(RES_ICONS_USERPING_NORMAL));
-    }
+    this->bTalking = bTalking;
 }
 
 SListItemRoom *SListItemUser::getRoom()
@@ -56,4 +52,16 @@ SListItemRoom *SListItemUser::getRoom()
 
 SListItemUser::~SListItemUser()
 {
+}
+
+void SListItemUser::setColor()
+{
+    if (bTalking)
+    {
+        setForeground(QBrush(QColor(240, 0, 0)));
+    }
+    else
+    {
+        setForeground(QBrush(QColor(Qt::white)));
+    }
 }
