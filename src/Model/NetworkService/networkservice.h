@@ -68,8 +68,6 @@ public:
     // Rooms
 
         void  enterRoom                        (std::string sName);
-        void  canMoveToRoom                    ();
-        void  userEntersRoom                   ();
 
 
     // Stop / Delete / Disconnect
@@ -114,6 +112,12 @@ private:
     // Erases spaces at the borders of the address string.
 
         std::string formatAdressString         (const std::string& sAdress);
+
+
+    // Rooms
+
+        void  canMoveToRoom                    ();
+        void  userEntersRoom                   ();
 
 
     // VOIP

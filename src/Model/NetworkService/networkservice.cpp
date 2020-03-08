@@ -1827,6 +1827,9 @@ void NetworkService::userEntersRoom()
 
     std::string sRoomName(vBuffer);
 
+    std::string sOldRoom = "";
+    std::string sOurRoom = "";
+
     mtxOtherUsers.lock();
 
     for (size_t i = 0; i < vOtherUsers.size(); i++)
@@ -1834,6 +1837,9 @@ void NetworkService::userEntersRoom()
         if (vOtherUsers[i]->sUserName == sUserName)
         {
             mtxRooms.lock();
+
+            sOurRoom = pThisUser->pListWidgetItem->getRoom()->getRoomName().toStdString();
+            sOldRoom             = vOtherUsers[i]->pListWidgetItem->getRoom()->getRoomName().toStdString();
 
             pMainWindow->moveUserToRoom(vOtherUsers[i]->pListWidgetItem, sRoomName);
 
@@ -1844,4 +1850,13 @@ void NetworkService::userEntersRoom()
     }
 
     mtxOtherUsers.unlock();
+
+    if (sOurRoom == sOldRoom)
+    {
+        pAudioService ->playConnectDisconnectSound(false);
+    }
+    else if (sOurRoom == sRoomName)
+    {
+        pAudioService ->playConnectDisconnectSound(true);
+    }
 }
