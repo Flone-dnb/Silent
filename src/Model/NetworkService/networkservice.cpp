@@ -42,7 +42,10 @@ enum CONNECT_MESSAGE  {
 enum ROOM_COMMAND
 {
     RC_ENTER_ROOM           = 15,
+
     RC_CAN_ENTER_ROOM       = 20,
+    RC_ROOM_IS_FULL         = 21,
+
     RC_USER_ENTERS_ROOM     = 25
 };
 
@@ -890,8 +893,6 @@ void NetworkService::listenTCPFromServer()
                 {
                 case(SM_NEW_USER):
                 {
-                    lastTimeServerKeepAliveCame = clock();
-
                     // We received info about the new user
 
                     receiveInfoAboutNewUser();
@@ -900,8 +901,6 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(SM_SOMEONE_DISCONNECTED):
                 {
-                    lastTimeServerKeepAliveCame = clock();
-
                     // Someone disconnected
 
                     deleteDisconnectedUserFromList();
@@ -910,8 +909,6 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(SM_CAN_START_UDP):
                 {
-                    lastTimeServerKeepAliveCame = clock();
-
                     std::thread listenVoiceThread (&NetworkService::listenUDPFromServer, this);
                     listenVoiceThread .detach();
 
@@ -919,16 +916,12 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(SM_SPAM_NOTICE):
                 {
-                    lastTimeServerKeepAliveCame = clock();
-
                     pMainWindow ->showMessageBox(true, "You can't send messages that quick.");
 
                     break;
                 }
                 case(SM_PING):
                 {
-                    lastTimeServerKeepAliveCame = clock();
-
                     // It's ping
                     receivePing();
 
@@ -943,16 +936,11 @@ void NetworkService::listenTCPFromServer()
                     char keepAliveChar = 9;
                     send(pThisUser ->sockUserTCP, &keepAliveChar, 1, 0);
 
-                    lastTimeServerKeepAliveCame = clock();
-
                     break;
                 }
                 case(SM_USERMESSAGE):
                 {
                     // It's a message
-
-                    lastTimeServerKeepAliveCame = clock();
-
                     receiveMessage();
 
                     break;
@@ -967,21 +955,25 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(RC_CAN_ENTER_ROOM):
                 {
-                    lastTimeServerKeepAliveCame = clock();
-
                     canMoveToRoom();
 
                     break;
                 }
                 case(RC_USER_ENTERS_ROOM):
                 {
-                    lastTimeServerKeepAliveCame = clock();
-
                     userEntersRoom();
 
                     break;
                 }
+                case(RC_ROOM_IS_FULL):
+                {
+                    pMainWindow->showMessageBox(true, "The room is full.");
+
+                    break;
                 }
+                }
+
+                lastTimeServerKeepAliveCame = clock();
             }
 
             mtxTCPRead .unlock();
