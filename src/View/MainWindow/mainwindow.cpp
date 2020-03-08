@@ -725,9 +725,18 @@ void MainWindow::on_listWidget_users_customContextMenuRequested(const QPoint &po
             pActionChangeVolume->setVisible(false);
             pActionEnterRoom->setVisible(true);
 
-            QPoint globalPos = ui->listWidget_users->mapToGlobal(pos);
+            SListItemRoom* pRoom = dynamic_cast<SListItemRoom*>(pListItem);
 
-            pMenuContextMenu->exec(globalPos);
+            if (pRoom != pController->getCurrentUserRoom())
+            {
+                QPoint globalPos = ui->listWidget_users->mapToGlobal(pos);
+
+                pMenuContextMenu->exec(globalPos);
+            }
+            else
+            {
+                ui->listWidget_users->clearSelection();
+            }
         }
         else
         {

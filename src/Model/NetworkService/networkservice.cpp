@@ -769,7 +769,7 @@ void NetworkService::serverMonitor()
         clock_t timePassed        = clock() - lastTimeServerKeepAliveCame;
         float timePassedInSeconds = static_cast <float> (timePassed)/CLOCKS_PER_SEC;
 
-        if ( timePassedInSeconds > (INTERVAL_KEEPALIVE_SEC * 2) )
+        if ( timePassedInSeconds > (INTERVAL_KEEPALIVE_SEC * 3) )
         {
             lostConnection();
             return;
@@ -890,6 +890,8 @@ void NetworkService::listenTCPFromServer()
                 {
                 case(SM_NEW_USER):
                 {
+                    lastTimeServerKeepAliveCame = clock();
+
                     // We received info about the new user
 
                     receiveInfoAboutNewUser();
@@ -898,6 +900,8 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(SM_SOMEONE_DISCONNECTED):
                 {
+                    lastTimeServerKeepAliveCame = clock();
+
                     // Someone disconnected
 
                     deleteDisconnectedUserFromList();
@@ -906,6 +910,7 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(SM_CAN_START_UDP):
                 {
+                    lastTimeServerKeepAliveCame = clock();
 
                     std::thread listenVoiceThread (&NetworkService::listenUDPFromServer, this);
                     listenVoiceThread .detach();
@@ -914,12 +919,16 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(SM_SPAM_NOTICE):
                 {
+                    lastTimeServerKeepAliveCame = clock();
+
                     pMainWindow ->showMessageBox(true, "You can't send messages that quick.");
 
                     break;
                 }
                 case(SM_PING):
                 {
+                    lastTimeServerKeepAliveCame = clock();
+
                     // It's ping
                     receivePing();
 
@@ -958,12 +967,16 @@ void NetworkService::listenTCPFromServer()
                 }
                 case(RC_CAN_ENTER_ROOM):
                 {
+                    lastTimeServerKeepAliveCame = clock();
+
                     canMoveToRoom();
 
                     break;
                 }
                 case(RC_USER_ENTERS_ROOM):
                 {
+                    lastTimeServerKeepAliveCame = clock();
+
                     userEntersRoom();
 
                     break;
