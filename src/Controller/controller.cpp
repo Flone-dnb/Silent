@@ -121,6 +121,11 @@ void Controller::enterRoom(std::string sRoomName)
     pNetworkService->enterRoom(sRoomName);
 }
 
+void Controller::enterRoomWithPassword(std::string sRoomName, std::wstring sPassword)
+{
+    pNetworkService->enterRoomWithPassword(sRoomName, sPassword);
+}
+
 void Controller::disconnect()
 {
     pNetworkService ->disconnect();

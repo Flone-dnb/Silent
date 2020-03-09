@@ -23,7 +23,6 @@
 // STL
 #include <thread>
 
-
 // Custom
 #include "View/ConnectWindow/connectwindow.h"
 #include "Controller/controller.h"
@@ -35,6 +34,8 @@
 #include "View/CustomQPlainTextEdit/customqplaintextedit.h"
 #include "View/CustomList/SListItemUser/slistitemuser.h"
 #include "View/CustomList/SListItemRoom/slistitemroom.h"
+#include "View/RoomPassInputWindow/roompassinputwindow.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -131,6 +132,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
     connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
     connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
+    connect(this, &MainWindow::signalShowPasswordInputWindow,      this, &MainWindow::slotShowPasswordInputWindow);
 
 
 
@@ -174,6 +176,22 @@ void MainWindow::slotShowMessageBox(bool bWarningBox, std::string message)
     {
         QMessageBox::information(this, "Information", QString::fromStdString(message));
     }
+}
+
+void MainWindow::slotShowPasswordInputWindow(std::string sRoomName)
+{
+    RoomPassInputWindow* pWindow = new RoomPassInputWindow(QString::fromStdString(sRoomName), this);
+
+    pWindow->setWindowModality(Qt::WindowModality::WindowModal);
+
+    connect(pWindow, &RoomPassInputWindow::signalEnterRoomWithPassword, this, &MainWindow::slotEnterRoomWithPassword);
+
+    pWindow->show();
+}
+
+void MainWindow::slotEnterRoomWithPassword(QString sRoomName, QString sPassword)
+{
+    pController->enterRoomWithPassword(sRoomName.toStdString(), sPassword.toStdWString());
 }
 
 
@@ -577,6 +595,11 @@ void MainWindow::showOldText(wchar_t *pText)
 void MainWindow::showMessageBox(bool bWarningBox, std::string message)
 {
     emit signalShowMessageBox(bWarningBox, message);
+}
+
+void MainWindow::showPasswordInputWindow(std::string sRoomName)
+{
+    emit signalShowPasswordInputWindow(sRoomName);
 }
 
 void MainWindow::clearTextEdit()

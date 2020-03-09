@@ -42,9 +42,12 @@ enum CONNECT_MESSAGE  {
 enum ROOM_COMMAND
 {
     RC_ENTER_ROOM           = 15,
+    RC_ENTER_ROOM_WITH_PASS = 16,
 
     RC_CAN_ENTER_ROOM       = 20,
     RC_ROOM_IS_FULL         = 21,
+    RC_PASSWORD_REQ         = 22,
+    RC_WRONG_PASSWORD       = 23,
 
     RC_USER_ENTERS_ROOM     = 25
 };
@@ -971,6 +974,27 @@ void NetworkService::listenTCPFromServer()
 
                     break;
                 }
+                case(RC_PASSWORD_REQ):
+                {
+                    char cRoomNameSize = 0;
+
+                    recv(pThisUser->sockUserTCP, &cRoomNameSize, 1, 0);
+
+                    char vNameBuffer[MAX_NAME_LENGTH + 1];
+                    memset(vNameBuffer, 0, MAX_NAME_LENGTH + 1);
+
+                    recv(pThisUser->sockUserTCP, vNameBuffer, cRoomNameSize, 0);
+
+                    pMainWindow->showPasswordInputWindow(vNameBuffer);
+
+                    break;
+                }
+                case(RC_WRONG_PASSWORD):
+                {
+                    pMainWindow->showMessageBox(true, "Wrong password.");
+
+                    break;
+                }
                 }
 
                 lastTimeServerKeepAliveCame = clock();
@@ -1440,6 +1464,32 @@ void NetworkService::enterRoom(std::string sName)
         std::memcpy(vBuffer + 2, sName.c_str(), sName.size());
 
         send(pThisUser->sockUserTCP, vBuffer, static_cast<int>(sName.size()) + 2, 0);
+    }
+}
+
+void NetworkService::enterRoomWithPassword(std::string sRoomName, std::wstring sPassword)
+{
+    if (bTextListen)
+    {
+        char vBuffer[MAX_NAME_LENGTH * 3 + 5];
+        memset(vBuffer, 0, MAX_NAME_LENGTH * 3 + 5);
+
+
+        vBuffer[0] = RC_ENTER_ROOM_WITH_PASS;
+        vBuffer[1] = static_cast<char>(sRoomName.size());
+
+        int iCurrentIndex = 2;
+
+        std::memcpy(vBuffer + iCurrentIndex, sRoomName.c_str(), sRoomName.size());
+        iCurrentIndex += sRoomName.size();
+
+        vBuffer[iCurrentIndex] = static_cast<char>(sPassword.size());
+        iCurrentIndex++;
+
+        std::memcpy(vBuffer + iCurrentIndex, sPassword.c_str(), sPassword.size() * 2);
+        iCurrentIndex += sRoomName.size() * 2;
+
+        send(pThisUser->sockUserTCP, vBuffer, iCurrentIndex, 0);
     }
 }
 

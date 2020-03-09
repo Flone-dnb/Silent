@@ -43,6 +43,7 @@ public:
 
         void           sendMessage                (std::wstring sMessage);
         void           enterRoom                  (std::string sRoomName);
+        void           enterRoomWithPassword      (std::string sRoomName, std::wstring sPassword);
 
 
     // Settings

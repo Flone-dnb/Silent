@@ -68,6 +68,7 @@ public:
     // Rooms
 
         void  enterRoom                        (std::string sName);
+        void  enterRoomWithPassword            (std::string sRoomName, std::wstring sPassword);
 
 
     // Stop / Delete / Disconnect

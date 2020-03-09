@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>501</width>
-    <height>300</height>
+    <width>494</width>
+    <height>284</height>
    </rect>
   </property>
   <property name="font">
@@ -232,7 +232,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="30,40,30">
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
@@ -249,7 +249,7 @@
       <item>
        <widget class="QPushButton" name="pushButton_2">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -257,7 +257,7 @@
         <property name="minimumSize">
          <size>
           <width>200</width>
-          <height>25</height>
+          <height>20</height>
          </size>
         </property>
         <property name="font">
@@ -296,7 +296,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>501</width>
+     <width>494</width>
      <height>30</height>
     </rect>
    </property>
