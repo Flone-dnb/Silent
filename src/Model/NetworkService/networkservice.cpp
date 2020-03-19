@@ -1487,7 +1487,7 @@ void NetworkService::enterRoomWithPassword(std::string sRoomName, std::wstring s
         iCurrentIndex++;
 
         std::memcpy(vBuffer + iCurrentIndex, sPassword.c_str(), sPassword.size() * 2);
-        iCurrentIndex += sRoomName.size() * 2;
+        iCurrentIndex += sPassword.size() * 2;
 
         send(pThisUser->sockUserTCP, vBuffer, iCurrentIndex, 0);
     }
