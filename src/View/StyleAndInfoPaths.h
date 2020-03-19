@@ -8,8 +8,9 @@
 
 // Resources
 
-#define RES_ICONS_MAIN_PATH ":/icons/appMainIcon.png"
-#define RES_ICONS_MAIN_SIZE_XY 128
+#define RES_ICONS_MAIN_PATH     ":/icons/appMainIcon.png"
+#define RES_ICONS_CLOSE_PATH    ":/icons/close.png"
+#define RES_ICONS_MAIN_SIZE_XY  128
 
 
 

@@ -35,6 +35,7 @@
 #include "View/CustomList/SListItemUser/slistitemuser.h"
 #include "View/CustomList/SListItemRoom/slistitemroom.h"
 #include "View/RoomPassInputWindow/roompassinputwindow.h"
+#include "View/WindowControlWidget/windowcontrolwidget.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -142,6 +143,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     slotApplyTheme();
 
+
+    WindowControlWidget* pControlWindowWidget = new WindowControlWidget(this);
+    connect(pControlWindowWidget, &WindowControlWidget::signalClose, this, &MainWindow::close);
+    connect(pControlWindowWidget, &WindowControlWidget::signalHide, this, &MainWindow::slotHideWindow);
+    connect(pControlWindowWidget, &WindowControlWidget::signalMaximize, this, &MainWindow::slotMaxWindow);
+
+    ui->menuBar->setCornerWidget(pControlWindowWidget, Qt::Corner::TopRightCorner);
 
 
     if ( pController ->isSettingsCreatedFirstTime() )
@@ -392,6 +400,23 @@ void MainWindow::slotApplyTheme()
             }
         }
     }
+}
+
+void MainWindow::slotMaxWindow()
+{
+    if (windowState() == Qt::WindowState::WindowMaximized)
+    {
+        setWindowState(Qt::WindowState::WindowNoState);
+    }
+    else
+    {
+        setWindowState(Qt::WindowState::WindowMaximized);
+    }
+}
+
+void MainWindow::slotHideWindow()
+{
+    setWindowState(Qt::WindowState::WindowMinimized);
 }
 
 void MainWindow::connectTo(std::string adress, std::string port, std::string userName, std::wstring sPass)
@@ -845,6 +870,22 @@ void MainWindow::closeEvent(QCloseEvent *event)
     Q_UNUSED(event)
 
     pController->stop();
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton) {
+        move(event->globalPos() - dragPosition);
+        event->accept();
+    }
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        dragPosition = event->globalPos() - frameGeometry().topLeft();
+        event->accept();
+    }
 }
 
 void MainWindow::on_listWidget_users_itemDoubleClicked(QListWidgetItem *item)

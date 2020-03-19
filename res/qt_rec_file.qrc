@@ -4,8 +4,16 @@
 	<file>themes/default.css</file>
 
 	<file>icons/appMainIcon.png</file>
+	
 	<file>icons/GitHub-Mark-Light.png</file>
 	<file>icons/GitHub-Mark-Light-Hover.png</file>
+	
+	<file>icons/close.png</file>
+	<file>icons/close-hover.png</file>
+	<file>icons/max.png</file>
+	<file>icons/max-hover.png</file>
+	<file>icons/hide.png</file>
+	<file>icons/hide-hover.png</file>
 	
 </qresource>
 </RCC>

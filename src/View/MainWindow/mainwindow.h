@@ -117,6 +117,8 @@ protected:
 
     void hideEvent     (QHideEvent* event);
     void closeEvent    (QCloseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
 
 private slots:
@@ -177,6 +179,9 @@ private slots:
         void  slotEnterRoomWithPassword         (QString sRoomName, QString sPassword);
         void  slotApplyTheme                    ();
 
+        void  slotMaxWindow                     ();
+        void  slotHideWindow                    ();
+
 
     // UI
 
@@ -218,4 +223,7 @@ private:
     QString          outputHTMLtimeStart;
     QString          outputHTMLmessageStart;
     QString          outputHTMLmessageEnd;
+
+
+    QPoint           dragPosition;
 };

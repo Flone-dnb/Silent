@@ -286,6 +286,63 @@ QPushButton[cssClass="github"]
     border-image: url(":/icons/GitHub-Mark-Light.png");
 }
 
+QPushButton[cssClass="close-icon"]
+{
+    border: none;
+    width: 30px;
+    height: 32px;
+    background-color: transparent;
+    border-image: url(":/icons/close.png");
+}
+
+QPushButton[cssClass="max-icon"]
+{
+    border: none;
+    width: 30px;
+    height: 32px;
+    background-color: transparent;
+    border-image: url(":/icons/max.png");
+}
+
+QPushButton[cssClass="hide-icon"]
+{
+    border: none;
+    width: 30px;
+    height: 32px;
+    background-color: transparent;
+    border-image: url(":/icons/hide.png");
+}
+
+QPushButton[cssClass="hide-icon"]:hover
+{
+    border-image: url(":/icons/hide-hover.png");
+}
+
+QPushButton[cssClass="hide-icon"]:pressed
+{
+    border-image: url(":/icons/hide.png");
+}
+
+QPushButton[cssClass="max-icon"]:hover
+{
+    border-image: url(":/icons/max-hover.png");
+}
+
+QPushButton[cssClass="max-icon"]:pressed
+{
+    border-image: url(":/icons/max.png");
+}
+
+QPushButton[cssClass="close-icon"]:hover
+{
+    border-image: url(":/icons/close-hover.png");
+}
+
+QPushButton[cssClass="close-icon"]:pressed
+{
+    border-image: url(":/icons/close.png");
+}
+
 QPushButton[cssClass="github"]:hover
 {
     border-image: url(":/icons/GitHub-Mark-Light-Hover.png");

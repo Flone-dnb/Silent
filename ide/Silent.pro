@@ -31,7 +31,8 @@ FORMS += \
     ../src/View/MainWindow/mainwindow.ui \
     ../src/View/RoomPassInputWindow/roompassinputwindow.ui \
     ../src/View/SettingsWindow/settingswindow.ui \
-    ../src/View/SingleUserSettings/singleusersettings.ui
+    ../src/View/SingleUserSettings/singleusersettings.ui \
+    ../src/View/WindowControlWidget/windowcontrolwidget.ui
 
 HEADERS += \
     ../src/Controller/controller.h \
@@ -53,7 +54,8 @@ HEADERS += \
     ../src/View/SettingsWindow/settingswindow.h \
     ../src/View/SingleUserSettings/singleusersettings.h \
     ../src/Model/net_params.h \
-    ../src/View/StyleAndInfoPaths.h
+    ../src/View/StyleAndInfoPaths.h \
+    ../src/View/WindowControlWidget/windowcontrolwidget.h
 
 SOURCES += \
     ../src/Controller/controller.cpp \
@@ -70,6 +72,7 @@ SOURCES += \
     ../src/View/MainWindow/mainwindow.cpp \
     ../src/View/RoomPassInputWindow/roompassinputwindow.cpp \
     ../src/View/SingleUserSettings/singleusersettings.cpp \
+    ../src/View/WindowControlWidget/windowcontrolwidget.cpp \
     ../src/main.cpp \
     ../src/View/SettingsWindow/settingswindow.cpp \
 
