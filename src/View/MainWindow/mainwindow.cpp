@@ -582,12 +582,19 @@ size_t MainWindow::getRoomCount()
 
 SListItemUser* MainWindow::addUserToRoomIndex(std::string sName, size_t iRoomIndex)
 {
+    if (iRoomIndex == 0)
+    {
+        ui ->label_chatRoom ->setText(ui->listWidget_users->getRoomNames()[0]);
+    }
+
     return ui->listWidget_users->addUser(QString::fromStdString(sName), ui->listWidget_users->getRooms()[iRoomIndex]);
 }
 
 void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
 {
     ui ->listWidget_users ->moveUser(pUser, QString::fromStdString(sRoomName));
+
+    ui ->label_chatRoom ->setText(QString::fromStdString(sRoomName));
 }
 
 void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)
