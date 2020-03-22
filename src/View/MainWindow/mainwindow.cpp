@@ -912,6 +912,7 @@ void MainWindow::on_listWidget_users_itemDoubleClicked(QListWidgetItem *item)
             else
             {
                 pController->enterRoom(pRoom->getRoomName().toStdString());
+                ui ->listWidget_users ->clearSelection();
             }
         }
     }
