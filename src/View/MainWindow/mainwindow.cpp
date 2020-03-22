@@ -131,6 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
     connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
     connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
+    connect(this, &MainWindow::signalClearTextChatOutput,          this, &MainWindow::slotClearTextChatOutput);
     connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
     connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
     connect(this, &MainWindow::signalShowPasswordInputWindow,      this, &MainWindow::slotShowPasswordInputWindow);
@@ -338,6 +339,11 @@ void MainWindow::slotShowOldText(wchar_t *pText)
 void MainWindow::slotClearTextEdit()
 {
     ui ->plainTextEdit_input ->clear();
+}
+
+void MainWindow::slotClearTextChatOutput()
+{
+    ui ->plainTextEdit ->clear();
 }
 
 void MainWindow::slotApplyTheme()
@@ -595,6 +601,8 @@ void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
     ui ->listWidget_users ->moveUser(pUser, QString::fromStdString(sRoomName));
 
     ui ->label_chatRoom ->setText(QString::fromStdString(sRoomName));
+
+    emit signalClearTextChatOutput();
 }
 
 void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)

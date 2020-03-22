@@ -97,6 +97,7 @@ signals:
         void signalShowUserConnectNotice             (std::string name, SilentMessageColor messageColor);
         void signalShowOldText                       (wchar_t* pText);
         void signalClearTextEdit                     ();
+        void signalClearTextChatOutput               ();
 
 
     // Update UI elements
@@ -156,6 +157,7 @@ private slots:
         void  slotShowUserConnectNotice         (std::string name, SilentMessageColor messageColor);
         void  slotShowOldText                   (wchar_t* pText);
         void  slotClearTextEdit                 ();
+        void  slotClearTextChatOutput           ();
 
 
     // Tray Icon
