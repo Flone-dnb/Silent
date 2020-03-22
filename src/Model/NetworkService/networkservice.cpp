@@ -60,7 +60,8 @@ enum SERVER_MESSAGE  {
     SM_PING                 = 8,
     SM_KEEPALIVE            = 9,
     SM_USERMESSAGE          = 10,
-    SM_KICKED               = 11
+    SM_KICKED               = 11,
+    SM_WRONG_PASSWORD_WAIT  = 12
 };
 
 enum USER_DISCONNECT_REASON
@@ -954,6 +955,12 @@ void NetworkService::listenTCPFromServer()
                     pMainWindow ->printOutput("You were kicked by the server.", SilentMessageColor(false), true);
 
                     // Next message will be FIN
+                    break;
+                }
+                case(SM_WRONG_PASSWORD_WAIT):
+                {
+                    pMainWindow->showMessageBox(true, "You must wait a couple of seconds after each incorrect password entry.");
+
                     break;
                 }
                 case(RC_CAN_ENTER_ROOM):
