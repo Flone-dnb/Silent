@@ -121,6 +121,7 @@ private:
         void  userEntersRoom                   ();
         void  serverMovedRoom                  ();
         void  serverDeletesRoom                ();
+        void  serverCreatesRoom                ();
 
 
     // VOIP

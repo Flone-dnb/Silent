@@ -107,6 +107,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType <std::string>        ("std::string");
     qRegisterMetaType <QTextBlock>         ("QTextBlock");
     qRegisterMetaType <QVector<int>>       ("QVector<int>");
+    qRegisterMetaType <size_t>             ("size_t");
 
 
 
@@ -135,6 +136,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
     connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
     connect(this, &MainWindow::signalShowPasswordInputWindow,      this, &MainWindow::slotShowPasswordInputWindow);
+    connect(this, &MainWindow::signalCreateRoom,                   this, &MainWindow::slotCreateRoom);
 
 
 
@@ -258,6 +260,11 @@ void MainWindow::slotSetConnectDisconnectButton(bool bConnect)
     {
         ui ->actionConnect ->setText("Disconnect");
     }
+}
+
+void MainWindow::slotCreateRoom(QString sName, QString sPassword, size_t iMaxUsers)
+{
+    ui ->listWidget_users ->addRoom(sName, sPassword, iMaxUsers);
 }
 
 void MainWindow::slotTrayIconActivated()
@@ -654,6 +661,11 @@ void MainWindow::deleteRoom(std::string sRoomName)
     }
 
     mtxList.unlock();
+}
+
+void MainWindow::createRoom(std::string sName, std::u16string sPassword, size_t iMaxUsers)
+{
+    emit signalCreateRoom(QString::fromStdString(sName), QString::fromStdU16String(sPassword), iMaxUsers);
 }
 
 void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)

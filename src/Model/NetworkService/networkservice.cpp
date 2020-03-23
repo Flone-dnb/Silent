@@ -51,7 +51,8 @@ enum ROOM_COMMAND
 
     RC_USER_ENTERS_ROOM     = 25,
     RC_SERVER_MOVED_ROOM    = 26,
-    RC_SERVER_DELETES_ROOM  = 27
+    RC_SERVER_DELETES_ROOM  = 27,
+    RC_SERVER_CREATES_ROOM  = 28
 };
 
 enum SERVER_MESSAGE  {
@@ -1016,6 +1017,12 @@ void NetworkService::listenTCPFromServer()
 
                     break;
                 }
+                case(RC_SERVER_CREATES_ROOM):
+                {
+                    serverCreatesRoom();
+
+                    break;
+                }
                 }
 
                 lastTimeServerKeepAliveCame = clock();
@@ -1960,6 +1967,42 @@ void NetworkService::serverDeletesRoom()
     mtxOtherUsers.lock();
 
     pMainWindow->deleteRoom(vRoomNameBuffer);
+
+    mtxOtherUsers.unlock();
+    mtxRooms.unlock();
+}
+
+void NetworkService::serverCreatesRoom()
+{
+    char cRoomNameSize = 0;
+    recv(pThisUser->sockUserTCP, &cRoomNameSize, 1, 0);
+
+    char vRoomNameBuffer[MAX_NAME_LENGTH + 1];
+    memset(vRoomNameBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    recv(pThisUser->sockUserTCP, vRoomNameBuffer, cRoomNameSize, 0);
+
+
+
+    char cRoomPasswordSize = 0;
+    recv(pThisUser->sockUserTCP, &cRoomPasswordSize, 1, 0);
+    cRoomPasswordSize *= 2;
+
+    char16_t vRoomPassBuffer[MAX_NAME_LENGTH + 1];
+    memset(vRoomPassBuffer, 0, (MAX_NAME_LENGTH + 1) * 2);
+
+    recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(vRoomPassBuffer), cRoomPasswordSize, 0);
+
+
+    unsigned int iMaxUsers = 0;
+    recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(&iMaxUsers), sizeof(unsigned int), 0);
+
+
+
+    mtxRooms.lock();
+    mtxOtherUsers.lock();
+
+    pMainWindow->createRoom(vRoomNameBuffer, vRoomPassBuffer, iMaxUsers);
 
     mtxOtherUsers.unlock();
     mtxRooms.unlock();

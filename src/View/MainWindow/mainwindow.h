@@ -74,6 +74,7 @@ public:
         void              moveUserToRoom             (SListItemUser* pUser, std::string sRoomName);
         void              moveRoom                   (std::string sRoomName, bool bMoveUp);
         void              deleteRoom                 (std::string sRoomName);
+        void              createRoom                 (std::string sName, std::u16string sPassword, size_t iMaxUsers);
 
 
     // Input message QPlainTextEdit
@@ -107,6 +108,7 @@ signals:
         void signalPingAndTalkingToUser              (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
         void signalEnableInteractiveElements         (bool bMenu,                       bool bTypeAndSend);
         void signalSetConnectDisconnectButton        (bool bConnect);
+        void signalCreateRoom                        (QString sName, QString sPassword, size_t iMaxUsers);
 
 
     // Other
@@ -150,6 +152,7 @@ private slots:
         void  slotDeleteUserFromList            (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
         void  slotEnableInteractiveElements     (bool bMenu,                       bool bTypeAndSend);
         void  slotSetConnectDisconnectButton    (bool bConnect);
+        void  slotCreateRoom                    (QString sName, QString sPassword, size_t iMaxUsers);
 
 
     // Print on Chat Room QPlainTextEdit
