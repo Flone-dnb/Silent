@@ -605,6 +605,35 @@ void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
     emit signalClearTextChatOutput();
 }
 
+void MainWindow::moveRoom(std::string sRoomName, bool bMoveUp)
+{
+    mtxList.lock();
+
+    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+
+    QString sRoomToMoveName = QString::fromStdString(sRoomName);
+
+
+    for (size_t i = 0; i < vRooms.size(); i++)
+    {
+        if (vRooms[i]->getRoomName() == sRoomToMoveName)
+        {
+            if (bMoveUp)
+            {
+                ui ->listWidget_users ->moveRoomUp(vRooms[i]);
+            }
+            else
+            {
+                ui ->listWidget_users ->moveRoomDown(vRooms[i]);
+            }
+
+            break;
+        }
+    }
+
+    mtxList.unlock();
+}
+
 void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)
 {
     if (bDeleteAll)

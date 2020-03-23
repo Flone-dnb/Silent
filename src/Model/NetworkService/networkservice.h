@@ -119,6 +119,7 @@ private:
 
         void  canMoveToRoom                    ();
         void  userEntersRoom                   ();
+        void  serverMovedRoom                  ();
 
 
     // VOIP

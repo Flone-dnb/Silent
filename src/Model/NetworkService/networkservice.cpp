@@ -49,7 +49,8 @@ enum ROOM_COMMAND
     RC_PASSWORD_REQ         = 22,
     RC_WRONG_PASSWORD       = 23,
 
-    RC_USER_ENTERS_ROOM     = 25
+    RC_USER_ENTERS_ROOM     = 25,
+    RC_SERVER_MOVED_ROOM    = 26
 };
 
 enum SERVER_MESSAGE  {
@@ -1002,6 +1003,12 @@ void NetworkService::listenTCPFromServer()
 
                     break;
                 }
+                case(RC_SERVER_MOVED_ROOM):
+                {
+                    serverMovedRoom();
+
+                    break;
+                }
                 }
 
                 lastTimeServerKeepAliveCame = clock();
@@ -1908,4 +1915,26 @@ void NetworkService::userEntersRoom()
     {
         pAudioService ->playConnectDisconnectSound(true);
     }
+}
+
+void NetworkService::serverMovedRoom()
+{
+    char cRoomNameSize = 0;
+    recv(pThisUser->sockUserTCP, &cRoomNameSize, 1, 0);
+
+    char vRoomNameBuffer[MAX_NAME_LENGTH + 1];
+    memset(vRoomNameBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    recv(pThisUser->sockUserTCP, vRoomNameBuffer, cRoomNameSize, 0);
+
+    char cMoveUp = 0;
+    recv(pThisUser->sockUserTCP, &cMoveUp, 1, 0);
+
+    mtxRooms.lock();
+    mtxOtherUsers.lock();
+
+    pMainWindow->moveRoom(vRoomNameBuffer, cMoveUp);
+
+    mtxOtherUsers.unlock();
+    mtxRooms.unlock();
 }
