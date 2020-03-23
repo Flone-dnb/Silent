@@ -634,6 +634,28 @@ void MainWindow::moveRoom(std::string sRoomName, bool bMoveUp)
     mtxList.unlock();
 }
 
+void MainWindow::deleteRoom(std::string sRoomName)
+{
+    mtxList.lock();
+
+    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+
+    QString sRoomToMoveName = QString::fromStdString(sRoomName);
+
+
+    for (size_t i = 0; i < vRooms.size(); i++)
+    {
+        if (vRooms[i]->getRoomName() == sRoomToMoveName)
+        {
+            ui ->listWidget_users ->deleteRoom(vRooms[i]);
+
+            break;
+        }
+    }
+
+    mtxList.unlock();
+}
+
 void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)
 {
     if (bDeleteAll)

@@ -120,6 +120,7 @@ private:
         void  canMoveToRoom                    ();
         void  userEntersRoom                   ();
         void  serverMovedRoom                  ();
+        void  serverDeletesRoom                ();
 
 
     // VOIP

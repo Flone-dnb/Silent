@@ -73,6 +73,7 @@ public:
         SListItemUser*    addUserToRoomIndex         (std::string sName, size_t iRoomIndex);
         void              moveUserToRoom             (SListItemUser* pUser, std::string sRoomName);
         void              moveRoom                   (std::string sRoomName, bool bMoveUp);
+        void              deleteRoom                 (std::string sRoomName);
 
 
     // Input message QPlainTextEdit

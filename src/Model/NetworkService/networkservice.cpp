@@ -50,7 +50,8 @@ enum ROOM_COMMAND
     RC_WRONG_PASSWORD       = 23,
 
     RC_USER_ENTERS_ROOM     = 25,
-    RC_SERVER_MOVED_ROOM    = 26
+    RC_SERVER_MOVED_ROOM    = 26,
+    RC_SERVER_DELETES_ROOM  = 27
 };
 
 enum SERVER_MESSAGE  {
@@ -1009,6 +1010,12 @@ void NetworkService::listenTCPFromServer()
 
                     break;
                 }
+                case(RC_SERVER_DELETES_ROOM):
+                {
+                    serverDeletesRoom();
+
+                    break;
+                }
                 }
 
                 lastTimeServerKeepAliveCame = clock();
@@ -1934,6 +1941,25 @@ void NetworkService::serverMovedRoom()
     mtxOtherUsers.lock();
 
     pMainWindow->moveRoom(vRoomNameBuffer, cMoveUp);
+
+    mtxOtherUsers.unlock();
+    mtxRooms.unlock();
+}
+
+void NetworkService::serverDeletesRoom()
+{
+    char cRoomNameSize = 0;
+    recv(pThisUser->sockUserTCP, &cRoomNameSize, 1, 0);
+
+    char vRoomNameBuffer[MAX_NAME_LENGTH + 1];
+    memset(vRoomNameBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    recv(pThisUser->sockUserTCP, vRoomNameBuffer, cRoomNameSize, 0);
+
+    mtxRooms.lock();
+    mtxOtherUsers.lock();
+
+    pMainWindow->deleteRoom(vRoomNameBuffer);
 
     mtxOtherUsers.unlock();
     mtxRooms.unlock();
