@@ -1,12 +1,16 @@
-# Silent
+﻿# Silent
 <p align="center">
-  <img width="590" height="400" src="screenshot.png">
+  <img width="600" height="400" src="screenshot.png">
 </p>
 <br>
 Silent is an extremely lightweight, high quality - low latency voice chat made for gaming.<br>
 Must be used with the Silent Server application. <br>
 <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
+
+# Hidden features
+
+By pressing the right mouse button on the user/room in the 'online connected' list you can change the user's volume or 'Enter room'.
 
 # Add your style theme
 The Silent has different style themes that you can change.<br>
