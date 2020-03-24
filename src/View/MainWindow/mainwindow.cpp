@@ -668,6 +668,34 @@ void MainWindow::createRoom(std::string sName, std::u16string sPassword, size_t 
     emit signalCreateRoom(QString::fromStdString(sName), QString::fromStdU16String(sPassword), iMaxUsers);
 }
 
+void MainWindow::changeRoomSettings(std::string sOldName, std::string sNewName, size_t iMaxUsers)
+{
+    mtxList.lock();
+
+    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+
+    QString sOldRoomName = QString::fromStdString(sOldName);
+    QString sNewRoomName = QString::fromStdString(sNewName);
+
+
+    for (size_t i = 0; i < vRooms.size(); i++)
+    {
+        if (vRooms[i]->getRoomName() == sOldRoomName)
+        {
+            if (sOldRoomName != sNewRoomName)
+            {
+                ui ->listWidget_users ->renameRoom(vRooms[i], sNewRoomName);
+            }
+
+            vRooms[i] ->setRoomMaxUsers(iMaxUsers);
+
+            break;
+        }
+    }
+
+    mtxList.unlock();
+}
+
 void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll)
 {
     if (bDeleteAll)

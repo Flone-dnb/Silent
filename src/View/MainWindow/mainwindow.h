@@ -75,6 +75,7 @@ public:
         void              moveRoom                   (std::string sRoomName, bool bMoveUp);
         void              deleteRoom                 (std::string sRoomName);
         void              createRoom                 (std::string sName, std::u16string sPassword, size_t iMaxUsers);
+        void              changeRoomSettings         (std::string sOldName, std::string sNewName, size_t iMaxUsers);
 
 
     // Input message QPlainTextEdit

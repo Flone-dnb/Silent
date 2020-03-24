@@ -52,7 +52,8 @@ enum ROOM_COMMAND
     RC_USER_ENTERS_ROOM     = 25,
     RC_SERVER_MOVED_ROOM    = 26,
     RC_SERVER_DELETES_ROOM  = 27,
-    RC_SERVER_CREATES_ROOM  = 28
+    RC_SERVER_CREATES_ROOM  = 28,
+    RC_SERVER_CHANGES_ROOM  = 29
 };
 
 enum SERVER_MESSAGE  {
@@ -1020,6 +1021,12 @@ void NetworkService::listenTCPFromServer()
                 case(RC_SERVER_CREATES_ROOM):
                 {
                     serverCreatesRoom();
+
+                    break;
+                }
+                case(RC_SERVER_CHANGES_ROOM):
+                {
+                    serverChangesRoom();
 
                     break;
                 }
@@ -1992,6 +1999,42 @@ void NetworkService::serverCreatesRoom()
     mtxOtherUsers.lock();
 
     pMainWindow->createRoom(vRoomNameBuffer, u"", iMaxUsers);
+
+    mtxOtherUsers.unlock();
+    mtxRooms.unlock();
+}
+
+void NetworkService::serverChangesRoom()
+{
+    char cOldRoomName = 0;
+    recv(pThisUser->sockUserTCP, &cOldRoomName, 1, 0);
+
+    char vOldRoomNameBuffer[MAX_NAME_LENGTH + 1];
+    memset(vOldRoomNameBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    recv(pThisUser->sockUserTCP, vOldRoomNameBuffer, cOldRoomName, 0);
+
+
+
+    char cRoomName = 0;
+    recv(pThisUser->sockUserTCP, &cRoomName, 1, 0);
+
+    char vRoomNameBuffer[MAX_NAME_LENGTH + 1];
+    memset(vRoomNameBuffer, 0, MAX_NAME_LENGTH + 1);
+
+    recv(pThisUser->sockUserTCP, vRoomNameBuffer, cRoomName, 0);
+
+
+
+    unsigned int iMaxUsers = 0;
+    recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(&iMaxUsers), sizeof(unsigned int), 0);
+
+
+
+    mtxRooms.lock();
+    mtxOtherUsers.lock();
+
+    pMainWindow->changeRoomSettings(vOldRoomNameBuffer, vRoomNameBuffer, iMaxUsers);
 
     mtxOtherUsers.unlock();
     mtxRooms.unlock();
