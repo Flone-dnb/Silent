@@ -590,21 +590,6 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
 
 
-
-                    wchar_t bufferForWNames[MAX_NAME_LENGTH * 2 + 2];
-                    memset(bufferForWNames, 0, MAX_NAME_LENGTH * 2 + 2);
-
-                    char roomPassSize = 0;
-                    std::memcpy(&roomPassSize, readBuffer + iReadBytes, 1);
-                    iReadBytes++;
-
-                    std::memcpy(bufferForWNames, readBuffer + iReadBytes, roomPassSize);
-                    iReadBytes += roomPassSize;
-
-                    sRoomPass = bufferForWNames;
-
-
-
                     std::memcpy(&iMaxUsers, readBuffer + iReadBytes, 2);
                     iReadBytes += 2;
 
