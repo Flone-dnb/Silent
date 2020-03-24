@@ -1983,17 +1983,6 @@ void NetworkService::serverCreatesRoom()
     recv(pThisUser->sockUserTCP, vRoomNameBuffer, cRoomNameSize, 0);
 
 
-
-    char cRoomPasswordSize = 0;
-    recv(pThisUser->sockUserTCP, &cRoomPasswordSize, 1, 0);
-    cRoomPasswordSize *= 2;
-
-    char16_t vRoomPassBuffer[MAX_NAME_LENGTH + 1];
-    memset(vRoomPassBuffer, 0, (MAX_NAME_LENGTH + 1) * 2);
-
-    recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(vRoomPassBuffer), cRoomPasswordSize, 0);
-
-
     unsigned int iMaxUsers = 0;
     recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(&iMaxUsers), sizeof(unsigned int), 0);
 
@@ -2002,7 +1991,7 @@ void NetworkService::serverCreatesRoom()
     mtxRooms.lock();
     mtxOtherUsers.lock();
 
-    pMainWindow->createRoom(vRoomNameBuffer, vRoomPassBuffer, iMaxUsers);
+    pMainWindow->createRoom(vRoomNameBuffer, u"", iMaxUsers);
 
     mtxOtherUsers.unlock();
     mtxRooms.unlock();
