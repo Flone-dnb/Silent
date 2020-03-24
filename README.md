@@ -1,6 +1,6 @@
 ﻿# Silent
 <p align="center">
-  <img width="600" height="400" src="screenshot.png">
+  <img width="700" height="400" src="screenshot.png">
 </p>
 <br>
 Silent is an extremely lightweight, high quality - low latency voice chat made for gaming.<br>
