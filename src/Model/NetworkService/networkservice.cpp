@@ -65,7 +65,8 @@ enum SERVER_MESSAGE  {
     SM_KEEPALIVE            = 9,
     SM_USERMESSAGE          = 10,
     SM_KICKED               = 11,
-    SM_WRONG_PASSWORD_WAIT  = 12
+    SM_WRONG_PASSWORD_WAIT  = 12,
+    SM_GLOBAL_MESSAGE       = 13
 };
 
 enum USER_DISCONNECT_REASON
@@ -952,6 +953,12 @@ void NetworkService::listenTCPFromServer()
 
                     break;
                 }
+                case(SM_GLOBAL_MESSAGE):
+                {
+                    receiveServerMessage();
+
+                    break;
+                }
                 case(RC_CAN_ENTER_ROOM):
                 {
                     canMoveToRoom();
@@ -1390,6 +1397,23 @@ void NetworkService::receivePing()
         }
 
     }while(iCurrentPos < iPacketSize);
+}
+
+void NetworkService::receiveServerMessage()
+{
+    unsigned short int iMessageSize = 0;
+    recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(&iMessageSize), sizeof(unsigned short), 0);
+
+    char vMessageBuffer[MAX_BUFFER_SIZE];
+    memset(vMessageBuffer, 0, MAX_BUFFER_SIZE);
+
+    recv(pThisUser->sockUserTCP, vMessageBuffer, iMessageSize, 0);
+
+
+    pMainWindow->showServerMessage(vMessageBuffer);
+
+
+    pAudioService->playServerMessageSound();
 }
 
 void NetworkService::sendMessage(std::wstring message)

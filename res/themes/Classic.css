@@ -47,6 +47,13 @@ QPlainTextEdit[cssClass="chatOutput"]
     border: 1px solid rgb(71, 126, 158);
 }
 
+QPlainTextEdit
+{
+    background-color: rgb(23, 23, 23);
+    color: white;
+    border: 1px solid rgb(71, 126, 158);
+}
+
 QLineEdit
 {
     background-color: rgb(23, 23, 23);

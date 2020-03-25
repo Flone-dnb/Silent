@@ -87,6 +87,7 @@ public:
 
         void              showMessageBox             (bool bWarningBox, std::string message);
         void              showPasswordInputWindow    (std::string sRoomName);
+        void              showServerMessage          (std::string sMessage);
         void              applyTheme                 ();
 
     ~MainWindow();
@@ -116,6 +117,7 @@ signals:
 
         void signalShowMessageBox                    (bool bWarningBox, std::string message);
         void signalShowPasswordInputWindow           (std::string sRoomName);
+        void signalShowServerMessage                 (QString sMessage);
         void signalApplyTheme                        ();
 
 
@@ -184,6 +186,7 @@ private slots:
 
         void  slotShowMessageBox                (bool bWarningBox, std::string message);
         void  slotShowPasswordInputWindow       (std::string sRoomName);
+        void  slotShowServerMessage             (QString sMessage);
         void  slotEnterRoomWithPassword         (QString sRoomName, QString sPassword);
         void  slotApplyTheme                    ();
 

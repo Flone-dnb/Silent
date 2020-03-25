@@ -36,6 +36,7 @@
 #include "View/CustomList/SListItemRoom/slistitemroom.h"
 #include "View/RoomPassInputWindow/roompassinputwindow.h"
 #include "View/WindowControlWidget/windowcontrolwidget.h"
+#include "View/GlobalMessageWindow/globalmessagewindow.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -137,6 +138,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
     connect(this, &MainWindow::signalShowPasswordInputWindow,      this, &MainWindow::slotShowPasswordInputWindow);
     connect(this, &MainWindow::signalCreateRoom,                   this, &MainWindow::slotCreateRoom);
+    connect(this, &MainWindow::signalShowServerMessage,            this, &MainWindow::slotShowServerMessage);
 
 
 
@@ -196,6 +198,13 @@ void MainWindow::slotShowPasswordInputWindow(std::string sRoomName)
     pWindow->setWindowModality(Qt::WindowModality::WindowModal);
 
     connect(pWindow, &RoomPassInputWindow::signalEnterRoomWithPassword, this, &MainWindow::slotEnterRoomWithPassword);
+
+    pWindow->show();
+}
+
+void MainWindow::slotShowServerMessage(QString sMessage)
+{
+    GlobalMessageWindow* pWindow = new GlobalMessageWindow(sMessage, this);
 
     pWindow->show();
 }
@@ -731,6 +740,11 @@ void MainWindow::showMessageBox(bool bWarningBox, std::string message)
 void MainWindow::showPasswordInputWindow(std::string sRoomName)
 {
     emit signalShowPasswordInputWindow(sRoomName);
+}
+
+void MainWindow::showServerMessage(std::string sMessage)
+{
+    emit signalShowServerMessage(QString::fromStdString(sMessage));
 }
 
 void MainWindow::clearTextEdit()

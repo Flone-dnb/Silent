@@ -223,6 +223,11 @@ void AudioService::playConnectDisconnectSound(bool bConnectSound)
     }
 }
 
+void AudioService::playServerMessageSound()
+{
+    PlaySoundW( AUDIO_SERVER_MESSAGE_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+}
+
 void AudioService::playNewMessageSound()
 {
     PlaySoundW( AUDIO_NEW_MESSAGE_PATH, nullptr, SND_FILENAME | SND_ASYNC );

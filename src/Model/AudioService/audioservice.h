@@ -40,7 +40,7 @@ class User;
 #define  AUDIO_NEW_MESSAGE_PATH      L"sounds/newmessage.wav"
 #define  AUDIO_PRESS_PATH            L"sounds/press.wav"
 #define  AUDIO_UNPRESS_PATH          L"sounds/unpress.wav"
-
+#define  AUDIO_SERVER_MESSAGE_PATH   L"sounds/servermessage.wav"
 
 
 
@@ -68,6 +68,7 @@ public:
     // Play sound
 
         void   playConnectDisconnectSound    (bool bConnectSound);
+        void   playServerMessageSound        ();
         void   playNewMessageSound           ();
         void   playLostConnectionSound       ();
 

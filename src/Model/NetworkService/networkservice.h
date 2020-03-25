@@ -21,7 +21,7 @@ class User;
 class SListItemRoom;
 
 
-#define  CLIENT_VERSION                "2.23.3"
+#define  CLIENT_VERSION                "3.0.0"
 
 
 
@@ -50,13 +50,6 @@ public:
 
         void  listenTCPFromServer              ();
         void  listenUDPFromServer              ();
-
-
-    // Receive
-
-        void  receiveInfoAboutNewUser          ();
-        void  receiveMessage                   ();
-        void  receivePing                      ();
 
 
     // Send
@@ -96,6 +89,13 @@ public:
 
 
 private:
+
+    // Receive
+
+        void  receiveInfoAboutNewUser          ();
+        void  receiveMessage                   ();
+        void  receivePing                      ();
+        void  receiveServerMessage             ();
 
 
     // User in "Stop / Delete / Disconnect" functions.

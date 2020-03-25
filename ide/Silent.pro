@@ -28,6 +28,7 @@ CONFIG += c++11
 FORMS += \
     ../src/View/AboutWindow/aboutwindow.ui \
     ../src/View/ConnectWindow/connectwindow.ui \
+    ../src/View/GlobalMessageWindow/globalmessagewindow.ui \
     ../src/View/MainWindow/mainwindow.ui \
     ../src/View/RoomPassInputWindow/roompassinputwindow.ui \
     ../src/View/SettingsWindow/settingswindow.ui \
@@ -49,6 +50,7 @@ HEADERS += \
     ../src/View/CustomList/SListItemUser/slistitemuser.h \
     ../src/View/CustomList/SListWidget/slistwidget.h \
     ../src/View/CustomQPlainTextEdit/customqplaintextedit.h \
+    ../src/View/GlobalMessageWindow/globalmessagewindow.h \
     ../src/View/MainWindow/mainwindow.h \
     ../src/View/RoomPassInputWindow/roompassinputwindow.h \
     ../src/View/SettingsWindow/settingswindow.h \
@@ -69,6 +71,7 @@ SOURCES += \
     ../src/View/CustomList/SListItemUser/slistitemuser.cpp \
     ../src/View/CustomList/SListWidget/slistwidget.cpp \
     ../src/View/CustomQPlainTextEdit/customqplaintextedit.cpp \
+    ../src/View/GlobalMessageWindow/globalmessagewindow.cpp \
     ../src/View/MainWindow/mainwindow.cpp \
     ../src/View/RoomPassInputWindow/roompassinputwindow.cpp \
     ../src/View/SingleUserSettings/singleusersettings.cpp \

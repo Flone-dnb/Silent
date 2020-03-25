@@ -52,6 +52,16 @@ QPlainTextEdit[cssClass="chatOutput"]
 selection-background-color: rgb(140, 0, 0);
     border: 1px solid rgb(240, 0, 0);
     border-radius: 6px;
+	color: white;
+}
+
+QPlainTextEdit
+{
+    background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(5, 5, 5, 255), stop:1 rgba(29, 29, 29, 255));
+selection-background-color: rgb(140, 0, 0);
+    border: 1px solid rgb(240, 0, 0);
+    border-radius: 6px;
+	color: white;
 }
 
 QLineEdit
