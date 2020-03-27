@@ -931,25 +931,17 @@ void MainWindow::slotChangeUserVolume()
 {
     if (ui->listWidget_users->currentRow() >= 0)
     {
-        QString nameWithPing = ui->listWidget_users->item( ui->listWidget_users->currentRow() )->text();
-        QString nameWithoutPing = "";
+        SListItem* pItem = dynamic_cast<SListItem*>(ui ->listWidget_users ->currentItem());
 
-        for (int i = 0; i < nameWithPing.size(); i++)
+        if (pItem->isRoom() == false)
         {
-            if (nameWithPing[i] == ' ')
-            {
-                break;
-            }
-            else
-            {
-                nameWithoutPing += nameWithPing[i];
-            }
-        }
+            SListItemUser* pUser = dynamic_cast<SListItemUser*>(pItem);
 
-        SingleUserSettings* pUserSettings = new SingleUserSettings(nameWithoutPing, pController ->getUserCurrentVolume(nameWithoutPing.toStdString()), this);
-        connect(pUserSettings, &SingleUserSettings::signalChangeUserVolume, this, &MainWindow::slotSetNewUserVolume);
-        pUserSettings->setWindowModality(Qt::WindowModality::WindowModal);
-        pUserSettings->show();
+            SingleUserSettings* pUserSettings = new SingleUserSettings(pUser->getName(), pController ->getUserCurrentVolume(pUser->getName().toStdString()), this);
+            connect(pUserSettings, &SingleUserSettings::signalChangeUserVolume, this, &MainWindow::slotSetNewUserVolume);
+            pUserSettings->setWindowModality(Qt::WindowModality::WindowModal);
+            pUserSettings->show();
+        }
     }
 }
 

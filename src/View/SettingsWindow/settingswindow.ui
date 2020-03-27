@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
-    <height>284</height>
+    <width>490</width>
+    <height>261</height>
    </rect>
   </property>
   <property name="font">
@@ -249,7 +249,7 @@
       <item>
        <widget class="QPushButton" name="pushButton_2">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -296,8 +296,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>494</width>
-     <height>30</height>
+     <width>490</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>
