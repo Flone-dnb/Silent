@@ -22,7 +22,8 @@ public:
                  bool bPlayPushToTalkSound        = true,
                  const std::string& sConnectString= "",
                  unsigned short int iPort         = 51337,
-                 const std::wstring sPassword   = L"")
+                 const std::wstring sPassword     = L"",
+                 std::wstring sInputDeviceName    = L"")
     {
         this ->iPushToTalkButton    = iPushToTalkButton;
         this ->iMasterVolume        = iMasterVolume;
@@ -32,6 +33,7 @@ public:
         this ->sConnectString       = sConnectString;
         this ->iPort                = iPort;
         this ->sPassword            = sPassword;
+        this ->sInputDeviceName     = sInputDeviceName;
     }
 
 
@@ -75,6 +77,7 @@ public:
     std::string        sThemeName;
     std::string        sConnectString;
     std::wstring       sPassword;
+    std::wstring       sInputDeviceName;
 
 
     int                iPushToTalkButton;

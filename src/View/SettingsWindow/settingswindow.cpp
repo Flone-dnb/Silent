@@ -23,7 +23,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
-SettingsWindow::SettingsWindow(SettingsFile* pSettingsFile, QWidget *parent) : QMainWindow(parent), ui(new Ui::SettingsWindow)
+SettingsWindow::SettingsWindow(SettingsFile* pSettingsFile,  std::vector<QString> vInputDevices, QWidget *parent) : QMainWindow(parent), ui(new Ui::SettingsWindow)
 {
     ui ->setupUi(this);
     setFixedSize( width(), height() );
@@ -39,7 +39,7 @@ SettingsWindow::SettingsWindow(SettingsFile* pSettingsFile, QWidget *parent) : Q
     iOriginalMasterVolume     = pSettingsFile ->iMasterVolume;
 
 
-    updateUIToSettings(pSettingsFile);
+    updateUIToSettings(pSettingsFile, vInputDevices);
 }
 
 
@@ -174,11 +174,16 @@ void SettingsWindow::on_pushButton_2_clicked()
 
     pNewSettingsFile ->bPlayPushToTalkSound = ui ->checkBox_pushToTalkSound ->isChecked();
 
+    if (ui ->comboBox_input ->currentIndex() != 0)
+    {
+        pNewSettingsFile ->sInputDeviceName = ui ->comboBox_input ->currentText() .toStdWString();
+    }
+
     emit signalSaveSettings( pNewSettingsFile );
     close();
 }
 
-void SettingsWindow::updateUIToSettings(SettingsFile* pSettingsFile)
+void SettingsWindow::updateUIToSettings(SettingsFile* pSettingsFile, std::vector<QString> vInputDevices)
 {
     ui ->pushButton_pushtotalk   ->setText  ( QString::fromStdString( pSettingsFile ->getPushToTalkButtonName() ) );
     ui ->horizontalSlider_volume ->setValue ( pSettingsFile ->iMasterVolume );
@@ -188,6 +193,25 @@ void SettingsWindow::updateUIToSettings(SettingsFile* pSettingsFile)
     ui ->comboBox_themes ->setCurrentText( QString::fromStdString(pSettingsFile ->sThemeName) );
 
     ui ->checkBox_pushToTalkSound ->setChecked( pSettingsFile ->bPlayPushToTalkSound );
+
+
+    ui ->comboBox_input ->addItem("Auto-select");
+
+    for (size_t i = 0; i < vInputDevices.size(); i++)
+    {
+        ui ->comboBox_input ->addItem(vInputDevices[i]);
+    }
+
+    ui ->comboBox_input ->setCurrentIndex(0);
+
+    for (size_t i = 0; i < vInputDevices.size(); i++)
+    {
+        if (vInputDevices[i] == pSettingsFile->sInputDeviceName)
+        {
+            ui ->comboBox_input ->setCurrentIndex(1 + i);
+            break;
+        }
+    }
 }
 
 void SettingsWindow::showThemes()

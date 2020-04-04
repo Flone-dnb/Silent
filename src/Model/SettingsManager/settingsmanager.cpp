@@ -83,6 +83,7 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyCon
         pSettingsFile ->iMasterVolume        = pCurrentSettingsFile ->iMasterVolume;
         pSettingsFile ->sThemeName           = pCurrentSettingsFile ->sThemeName;
         pSettingsFile ->bPlayPushToTalkSound = pCurrentSettingsFile ->bPlayPushToTalkSound;
+        pSettingsFile ->sInputDeviceName     = pCurrentSettingsFile ->sInputDeviceName;
     }
     else
     {
@@ -210,6 +211,16 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyCon
 
     newSettingsFile .write
             ( reinterpret_cast <char*>( const_cast<wchar_t*>(pSettingsFile ->sPassword .c_str()) ), cPassSize * 2 );
+
+
+    // Input device
+    unsigned char cInputDeviceNameSize = static_cast <unsigned char>( pSettingsFile ->sInputDeviceName.size() );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&cInputDeviceNameSize), sizeof(cInputDeviceNameSize) );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*>( const_cast<wchar_t*>(pSettingsFile ->sInputDeviceName .c_str()) ), cInputDeviceNameSize * 2 );
 
     // NEW SETTINGS GO HERE
     // + don't forget to update "if ( bSetOnlyConnectInfo )" above, where code is:
@@ -437,6 +448,28 @@ SettingsFile *SettingsManager::readSettings()
         settingsFile .read(reinterpret_cast<char*>(vWBuffer), cPasswordSize * sizeof(wchar_t));
 
         pSettingsFile ->sPassword = vWBuffer;
+
+
+        if (settingsFile .eof())
+        {
+            settingsFile .close();
+
+            saveSettings(pSettingsFile);
+
+            return pSettingsFile;
+        }
+
+
+        // Input device
+        unsigned char cInputDeviceSize = 0;
+        settingsFile .read( reinterpret_cast<char*>(&cInputDeviceSize), sizeof(cInputDeviceSize) );
+
+        wchar_t vDeviceBuffer[UCHAR_MAX];
+        memset(vDeviceBuffer, 0, UCHAR_MAX * sizeof(wchar_t));
+
+        settingsFile .read(reinterpret_cast<char*>(vDeviceBuffer), cInputDeviceSize * sizeof(wchar_t));
+
+        pSettingsFile ->sInputDeviceName = vDeviceBuffer;
 
 
         settingsFile .close();

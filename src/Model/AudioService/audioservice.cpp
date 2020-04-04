@@ -78,6 +78,37 @@ float AudioService::getUserCurrentVolume(const std::string &sUserName)
     return fUserVolume;
 }
 
+std::vector<std::wstring> AudioService::getInputDevices()
+{
+    UINT iInDeviceCount = waveInGetNumDevs();
+
+    std::vector<std::wstring> vSupportedDevices;
+
+    for (UINT i = 0; i < iInDeviceCount; i++)
+    {
+        WAVEINCAPS deviceInfo;
+
+        MMRESULT result = waveInGetDevCaps(i, &deviceInfo, sizeof(deviceInfo));
+        if (result)
+        {
+            char fault [256];
+            memset (fault, 0, 256);
+
+            waveInGetErrorTextA (result, fault, 256);
+            pMainWindow ->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
+                                       SilentMessageColor(false),
+                                       true);
+           continue;
+        }
+        else
+        {
+            vSupportedDevices.push_back(deviceInfo.szPname);
+        }
+    }
+
+    return vSupportedDevices;
+}
+
 void AudioService::setNewMasterVolume(unsigned short int iVolume)
 {
     pNetworkService ->getOtherUsersMutex() ->lock();
@@ -167,9 +198,16 @@ bool AudioService::start()
 {
     MMRESULT result;
 
+    UINT iDeviceID = WAVE_MAPPER;
+
+    int iPreferredDeviceID = getInputDeviceID( pSettingsManager ->getCurrentSettings() ->sInputDeviceName );
+    if (iPreferredDeviceID != -1)
+    {
+        iDeviceID = static_cast<UINT>(iPreferredDeviceID);
+    }
 
     // Start input device
-    result = waveInOpen (&hWaveIn,  WAVE_MAPPER,  &Format,  0L,  0L,  WAVE_FORMAT_DIRECT);
+    result = waveInOpen (&hWaveIn,  iDeviceID,  &Format,  0L,  0L,  WAVE_FORMAT_DIRECT);
 
     if (result)
     {
@@ -994,6 +1032,38 @@ void AudioService::waitForAllBuffers(User* pUser, bool bClearPackets, size_t* iL
             pUser ->vAudioPackets[i] = nullptr;
         }
     }
+}
+
+int AudioService::getInputDeviceID(std::wstring sDeviceName)
+{
+    UINT iInDeviceCount = waveInGetNumDevs();
+
+    for (UINT i = 0; i < iInDeviceCount; i++)
+    {
+        WAVEINCAPS deviceInfo;
+
+        MMRESULT result = waveInGetDevCaps(i, &deviceInfo, sizeof(deviceInfo));
+        if (result)
+        {
+            char fault [256];
+            memset (fault, 0, 256);
+
+            waveInGetErrorTextA (result, fault, 256);
+            pMainWindow ->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
+                                       SilentMessageColor(false),
+                                       true);
+           continue;
+        }
+        else
+        {
+            if (sDeviceName == std::wstring(deviceInfo.szPname))
+            {
+                return static_cast<int>(i);
+            }
+        }
+    }
+
+    return -1;
 }
 
 void AudioService::stop()

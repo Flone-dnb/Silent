@@ -104,11 +104,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Register types
 
-    qRegisterMetaType <SilentMessageColor> ("SilentMessageColor");
-    qRegisterMetaType <std::string>        ("std::string");
-    qRegisterMetaType <QTextBlock>         ("QTextBlock");
-    qRegisterMetaType <QVector<int>>       ("QVector<int>");
-    qRegisterMetaType <size_t>             ("size_t");
+    qRegisterMetaType <SilentMessageColor>   ("SilentMessageColor");
+    qRegisterMetaType <std::string>          ("std::string");
+    qRegisterMetaType <QTextBlock>           ("QTextBlock");
+    qRegisterMetaType <QVector<int>>         ("QVector<int>");
+    qRegisterMetaType <size_t>               ("size_t");
+    qRegisterMetaType <std::vector<QString>> ("std::vector<QString>");
 
 
 
@@ -808,10 +809,17 @@ void MainWindow::showSettingsWindow()
 
 
 
+    std::vector<std::wstring> vInputDevices = pController->getInputDevices();
+    std::vector<QString> vAudioInputDevices;
+
+    for (size_t i = 0; i < vInputDevices.size(); i++)
+    {
+        vAudioInputDevices.push_back(QString::fromStdWString(vInputDevices[i]));
+    }
 
     // Show SettingsWindow
 
-    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), this);
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), vAudioInputDevices, this);
     connect(pSettingsWindow, &SettingsWindow::signalSaveSettings, this, &MainWindow::slotSaveSettings);
     pSettingsWindow ->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow ->setWindowOpacity(0);
@@ -846,8 +854,16 @@ void MainWindow::hideEvent(QHideEvent *event)
 
 void MainWindow::on_actionSettings_triggered()
 {
+    std::vector<std::wstring> vInputDevices = pController->getInputDevices();
+    std::vector<QString> vAudioInputDevices;
+
+    for (size_t i = 0; i < vInputDevices.size(); i++)
+    {
+        vAudioInputDevices.push_back(QString::fromStdWString(vInputDevices[i]));
+    }
+
     // Show SettingsWindow
-    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), this);
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), vAudioInputDevices, this);
     connect(pSettingsWindow, &SettingsWindow::signalSaveSettings, this, &MainWindow::slotSaveSettings);
     pSettingsWindow->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow->show();

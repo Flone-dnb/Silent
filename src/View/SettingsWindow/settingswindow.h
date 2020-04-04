@@ -31,7 +31,7 @@ class SettingsWindow : public QMainWindow
 
 public:
 
-    explicit SettingsWindow                        (SettingsFile* pSettingsFile, QWidget *parent = nullptr);
+    explicit SettingsWindow                        (SettingsFile* pSettingsFile, std::vector<QString> vInputDevices, QWidget *parent = nullptr);
 
     ~SettingsWindow                                ();
 
@@ -52,7 +52,7 @@ private slots:
 
 private:
 
-    void  updateUIToSettings                       (SettingsFile* pSettingsFile);
+    void  updateUIToSettings                       (SettingsFile* pSettingsFile, std::vector<QString> vInputDevices);
     void  showThemes                               ();
     void  refreshVolumeSliderText                  ();
 

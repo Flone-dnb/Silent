@@ -86,6 +86,18 @@ SListItemRoom *Controller::getCurrentUserRoom()
     return pNetworkService->getUserRoom();
 }
 
+std::vector<std::wstring> Controller::getInputDevices()
+{
+    if (pAudioService)
+    {
+        return pAudioService->getInputDevices();
+    }
+    else
+    {
+        return std::vector<std::wstring>();
+    }
+}
+
 float Controller::getUserCurrentVolume(std::string sUserName)
 {
     return pAudioService ->getUserCurrentVolume(sUserName);

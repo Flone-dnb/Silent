@@ -102,6 +102,7 @@ public:
     // GET functions
 
         float  getUserCurrentVolume          (const std::string& sUserName);
+        std::vector<std::wstring> getInputDevices();
 
 
 
@@ -123,6 +124,9 @@ private:
         void  waitForPlayToEnd  (User* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
         void  waitForAllBuffers (User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
 
+    // Used in start()
+
+        int  getInputDeviceID  (std::wstring sDeviceName);
 
     // -------------------------------------------------------------
 

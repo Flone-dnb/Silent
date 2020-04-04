@@ -9,6 +9,7 @@
 // STL
 #include <string>
 #include <mutex>
+#include <vector>
 
 
 class NetworkService;
@@ -62,6 +63,7 @@ public:
         SettingsFile*  getCurrentSettingsFile     ();
         bool           isSettingsCreatedFirstTime ();
         SListItemRoom* getCurrentUserRoom         ();
+        std::vector<std::wstring> getInputDevices ();
 
 
 
