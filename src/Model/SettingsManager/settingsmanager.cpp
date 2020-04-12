@@ -359,8 +359,6 @@ SettingsFile *SettingsManager::readSettings()
         {
             settingsFile .close();
 
-            saveSettings(pSettingsFile);
-
             return pSettingsFile;
         }
 
@@ -399,8 +397,6 @@ SettingsFile *SettingsManager::readSettings()
         {
             settingsFile .close();
 
-            saveSettings(pSettingsFile);
-
             return pSettingsFile;
         }
 
@@ -417,8 +413,6 @@ SettingsFile *SettingsManager::readSettings()
         if (settingsFile .eof())
         {
             settingsFile .close();
-
-            saveSettings(pSettingsFile);
 
             return pSettingsFile;
         }
@@ -454,8 +448,6 @@ SettingsFile *SettingsManager::readSettings()
         {
             settingsFile .close();
 
-            saveSettings(pSettingsFile);
-
             return pSettingsFile;
         }
 
@@ -481,9 +473,6 @@ SettingsFile *SettingsManager::readSettings()
 
 
         bSettingsFileCreatedFirstTime = true;
-
-
-        saveSettings(pSettingsFile);
     }
 
 
