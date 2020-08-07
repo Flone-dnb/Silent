@@ -119,6 +119,9 @@
               <property name="singleStep">
                <number>5</number>
               </property>
+              <property name="pageStep">
+               <number>6553</number>
+              </property>
               <property name="value">
                <number>60000</number>
               </property>
