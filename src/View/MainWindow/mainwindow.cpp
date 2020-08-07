@@ -802,7 +802,7 @@ void MainWindow::onExecCalled()
     pMenuContextMenu    = new QMenu(this);
     connect(pMenuContextMenu, &QMenu::aboutToHide, this, &MainWindow::slotOnMenuClose);
 
-    pActionChangeVolume = new QAction("Change Volume");
+    pActionChangeVolume = new QAction("Change User Volume");
     pActionEnterRoom    = new QAction("Enter Room");
 
     pMenuContextMenu ->addAction(pActionChangeVolume);
