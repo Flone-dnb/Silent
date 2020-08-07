@@ -206,6 +206,7 @@ private:
 
     void showSettingsWindow ();
     void closeApp           ();
+    void applyDefaultTheme  ();
 
 
 

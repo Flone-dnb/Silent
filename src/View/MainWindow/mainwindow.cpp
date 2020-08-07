@@ -726,6 +726,31 @@ void MainWindow::showSettingsWindow()
     }
 }
 
+void MainWindow::applyDefaultTheme()
+{
+    // Set the default theme
+
+    QFile File;
+    File.setFileName(QString(STYLE_THEMES_PATH_FROM_EXE)
+                      + QString(STYLE_THEME_DEFAULT_NAME)
+                      + ".css");
+
+    if( File .exists()
+        &&
+        File .open(QFile::ReadOnly) )
+    {
+        QString StyleSheet = QLatin1String( File .readAll() );
+
+        qApp->setStyleSheet(StyleSheet);
+
+        File .close();
+    }
+    else
+    {
+        QMessageBox::warning(this, "Error", "Could not open default theme file \"" + QString(STYLE_THEME_DEFAULT_NAME) + ".css\".");
+    }
+}
+
 void MainWindow::hideEvent(QHideEvent *event)
 {
     Q_UNUSED(event)
@@ -836,6 +861,8 @@ void MainWindow::onExecCalled()
 
 
     connect(ui ->plainTextEdit_input, &CustomQPlainTextEdit::signalReturnPressed, this, &MainWindow::customqplaintextedit_return_pressed);
+
+    applyDefaultTheme();
 
     // Create Controller
 
