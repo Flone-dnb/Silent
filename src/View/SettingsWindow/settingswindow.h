@@ -38,11 +38,18 @@ public:
 signals:
 
     void  applyNewMasterVolume                     ();
+    void  closedSettingsWindow                     ();
+    void  signalSetAudioInputVolume                (int iVolume);
 
 protected:
 
     void  keyPressEvent                            (QKeyEvent*   event);
     void  mousePressEvent                          (QMouseEvent* event);
+    void  closeEvent                               (QCloseEvent* event);
+
+public slots:
+
+    void  slotSetVoiceVolume                       (int iVolume);
 
 private slots:
 
@@ -51,6 +58,8 @@ private slots:
     void  on_pushButton_2_clicked                  ();
 
     void on_comboBox_input_currentIndexChanged(int index);
+
+    void on_horizontalSlider_input_volume_mult_sliderMoved(int position);
 
 private:
 
@@ -74,6 +83,7 @@ private:
     // Changed settings
     bool                bPushToTalkChanged;
     bool                bMasterVolumeChanged;
+    int                 iInputVolumeMult;
 
 
     // Original settings

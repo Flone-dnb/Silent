@@ -38,6 +38,8 @@ public:
         void           connectTo                  (std::string sAdress,    std::string sPort,  std::string sUserName,  std::wstring sPass = L"");
         void           disconnect                 ();
         void           stop                       ();
+        void           unpauseTestRecording       ();
+        void           pauseTestRecording         ();
 
 
     // Chat functions
@@ -50,6 +52,7 @@ public:
     // Settings
 
         void           applyNewMasterVolumeFromSettings       ();
+        void           applyAudioInputVolume      (int iVolume);
         void           setNewUserVolume           (std::string sUserName,  float fVolume);
 
 

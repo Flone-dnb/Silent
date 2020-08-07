@@ -85,6 +85,7 @@ public:
 
     // Other
 
+        void              showVoiceVolumeValueInSettings(int iVolume);
         void              showMessageBox             (bool bWarningBox, std::string message);
         void              showPasswordInputWindow    (std::string sRoomName);
         void              showServerMessage          (std::string sMessage);
@@ -115,6 +116,7 @@ signals:
 
     // Other
 
+        void signalShowVoiceVolumeValueInSettings    (int iVolume);
         void signalShowMessageBox                    (bool bWarningBox, std::string message);
         void signalShowPasswordInputWindow           (std::string sRoomName);
         void signalShowServerMessage                 (QString sMessage);
@@ -188,8 +190,10 @@ private slots:
         void  slotShowPasswordInputWindow       (std::string sRoomName);
         void  slotShowServerMessage             (QString sMessage);
         void  slotEnterRoomWithPassword         (QString sRoomName, QString sPassword);
+        void  slotApplyAudioInputVolume         (int iVolume);
         void  slotApplyTheme                    ();
         void  slotApplyMasterVolume             ();
+        void  slotSettingsWindowClosed          ();
 
         void  slotMaxWindow                     ();
         void  slotHideWindow                    ();

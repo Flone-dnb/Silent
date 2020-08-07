@@ -308,6 +308,22 @@ QSlider::sub-page:disabled
     background: gray;
 }
 
+QSlider::handle:disabled#voiceVolumeMeter
+{
+    background-color: transparent;
+    border: transparent;
+}
+
+QSlider::add-page:disabled#voiceVolumeMeter
+{
+    background: gray;
+}
+
+QSlider::sub-page:disabled#voiceVolumeMeter
+{
+    background: rgb(0, 179, 0);
+}
+
 
 /* --------------------------------------------------------- */
 /*                        QSlider                            */

@@ -25,7 +25,8 @@ public:
                  const std::string& sConnectString= "",
                  unsigned short int iPort         = 51337,
                  const std::wstring sPassword     = L"",
-                 std::wstring sInputDeviceName    = L"")
+                 std::wstring sInputDeviceName    = L"",
+                 int iInputVolumeMultiplier       = 100)
     {
         this ->iPushToTalkButton    = iPushToTalkButton;
         this ->iMasterVolume        = iMasterVolume;
@@ -36,6 +37,7 @@ public:
         this ->iPort                = iPort;
         this ->sPassword            = sPassword;
         this ->sInputDeviceName     = sInputDeviceName;
+        this ->iInputVolumeMultiplier = iInputVolumeMultiplier;
     }
 
 
@@ -83,6 +85,7 @@ public:
 
 
     int                iPushToTalkButton;
+    int                iInputVolumeMultiplier;
     unsigned short int iMasterVolume;
 
 

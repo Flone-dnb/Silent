@@ -165,6 +165,14 @@ void Controller::applyNewMasterVolumeFromSettings()
     }
 }
 
+void Controller::applyAudioInputVolume(int iVolume)
+{
+    if (pAudioService)
+    {
+        pAudioService ->setInputAudioVolume(iVolume);
+    }
+}
+
 void Controller::disconnect()
 {
     pNetworkService ->disconnect();
@@ -173,6 +181,22 @@ void Controller::disconnect()
 void Controller::stop()
 {
     pNetworkService ->stop();
+}
+
+void Controller::unpauseTestRecording()
+{
+    if (pAudioService)
+    {
+        pAudioService ->setTestRecordingPause(false);
+    }
+}
+
+void Controller::pauseTestRecording()
+{
+    if (pAudioService)
+    {
+        pAudioService ->setTestRecordingPause(true);
+    }
 }
 
 

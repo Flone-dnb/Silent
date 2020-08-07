@@ -100,6 +100,11 @@ void MainWindow::slotEnterRoomWithPassword(QString sRoomName, QString sPassword)
     pController->enterRoomWithPassword(sRoomName.toStdString(), sPassword.toStdWString());
 }
 
+void MainWindow::slotApplyAudioInputVolume(int iVolume)
+{
+    pController->applyAudioInputVolume(iVolume);
+}
+
 
 
 void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage)
@@ -309,7 +314,14 @@ void MainWindow::slotApplyTheme()
 
 void MainWindow::slotApplyMasterVolume()
 {
+    pController ->pauseTestRecording();
+
     pController ->applyNewMasterVolumeFromSettings();
+}
+
+void MainWindow::slotSettingsWindowClosed()
+{
+    pController ->pauseTestRecording();
 }
 
 void MainWindow::slotMaxWindow()
@@ -640,6 +652,11 @@ void MainWindow::clearTextEdit()
     emit signalClearTextEdit();
 }
 
+void MainWindow::showVoiceVolumeValueInSettings(int iVolume)
+{
+    emit signalShowVoiceVolumeValueInSettings(iVolume);
+}
+
 void MainWindow::applyTheme()
 {
     emit signalApplyTheme();
@@ -708,6 +725,10 @@ void MainWindow::showSettingsWindow()
 
     SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getSettingsManager(), vAudioInputDevices, this);
     connect(pSettingsWindow, &SettingsWindow::applyNewMasterVolume, this, &MainWindow::slotApplyMasterVolume);
+    connect(this, &MainWindow::signalShowVoiceVolumeValueInSettings, pSettingsWindow, &SettingsWindow::slotSetVoiceVolume);
+    connect(pSettingsWindow, &SettingsWindow::closedSettingsWindow, this, &MainWindow::slotSettingsWindowClosed);
+    connect(pSettingsWindow, &SettingsWindow::signalSetAudioInputVolume, this, &MainWindow::slotApplyAudioInputVolume);
+    pController->unpauseTestRecording();
     pSettingsWindow ->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow ->setWindowOpacity(0);
     pSettingsWindow ->show();
@@ -772,6 +793,10 @@ void MainWindow::on_actionSettings_triggered()
     // Show SettingsWindow
     SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getSettingsManager(), vAudioInputDevices, this);
     connect(pSettingsWindow, &SettingsWindow::applyNewMasterVolume, this, &MainWindow::slotApplyMasterVolume);
+    connect(this, &MainWindow::signalShowVoiceVolumeValueInSettings, pSettingsWindow, &SettingsWindow::slotSetVoiceVolume);
+    connect(pSettingsWindow, &SettingsWindow::closedSettingsWindow, this, &MainWindow::slotSettingsWindowClosed);
+    connect(pSettingsWindow, &SettingsWindow::signalSetAudioInputVolume, this, &MainWindow::slotApplyAudioInputVolume);
+    pController->unpauseTestRecording();
     pSettingsWindow->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow->show();
 }

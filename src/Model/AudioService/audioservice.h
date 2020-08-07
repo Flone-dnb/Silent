@@ -63,6 +63,7 @@ public:
 
         void   prepareForStart               ();
         bool   start                         ();
+        void   startTestWaveOut              ();
 
 
     // Play sound
@@ -81,10 +82,9 @@ public:
 
     // Audio data record/play
 
+        void   setTestRecordingPause         (bool bPause);
         void   playAudioData                 (short int* pAudio,    std::string sUserName, bool bLast);
         void   play                          (User* pUser);
-        void   sendAudioData                 (short* pAudio);
-        void   recordOnPress                 ();
 
 
     // Stop
@@ -94,6 +94,7 @@ public:
 
     // SET functions
 
+        void   setInputAudioVolume           (int iVolume);
         void   setNewUserVolume              (std::string sUserName,  float fVolume);
         void   setNewMasterVolume            (unsigned short int iVolume);
         void   setNetworkService             (NetworkService* pNetworkService);
@@ -112,12 +113,22 @@ public:
 
 private:
 
-    // Used in recordOnPress()
+    // Recording
 
-        bool  addInBuffer       (LPWAVEHDR buffer);
+        void   recordOnPress                 ();
+        void   testRecord                    ();
+
+
+    // Used in recordOnPress()/testRecord()
+
+        bool  addInBuffer       (LPWAVEHDR buffer, bool bTestDevice = false);
         bool  addOutBuffer      (HWAVEOUT  hWaveOut, LPWAVEHDR buffer);
         void  waitAndSendBuffer (WAVEHDR* WaveInHdr, short int* pWaveIn);
+        void  waitAndShowBufferVolume(WAVEHDR* WaveInHdr, short int* pWaveIn);
         void  waitForAllInBuffers();
+        void  waitForAllTestInBuffers();
+        void  sendAudioData     (short* pAudio);
+        void  sendAudioDataVolume(short* pAudio);
 
     // Used in play()
 
@@ -138,6 +149,7 @@ private:
 
     // Waveform-audio input device
     HWAVEIN          hWaveIn;
+    HWAVEIN          hTestWaveIn; // Used to show the voice meter in the Settings window.
 
 
     // Audio format
@@ -149,6 +161,10 @@ private:
     WAVEHDR          WaveInHdr2;
     WAVEHDR          WaveInHdr3;
     WAVEHDR          WaveInHdr4;
+    WAVEHDR          TestWaveInHdr1;
+    WAVEHDR          TestWaveInHdr2;
+    WAVEHDR          TestWaveInHdr3;
+    WAVEHDR          TestWaveInHdr4;
 
 
     // "In" buffers
@@ -156,6 +172,10 @@ private:
     short int*       pWaveIn2;
     short int*       pWaveIn3;
     short int*       pWaveIn4;
+    short int*       pTestWaveIn1;
+    short int*       pTestWaveIn2;
+    short int*       pTestWaveIn3;
+    short int*       pTestWaveIn4;
 
 
     // Record quality
@@ -167,6 +187,9 @@ private:
 
 
     // Push-to-talk
+    int              iAudioInputVolume;
     float            fMasterVolumeMult;
     bool             bInputReady;
+    bool             bTestInputReady;
+    bool             bPauseTestInput;
 };

@@ -38,7 +38,6 @@ SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<Q
     bPushToTalkChanged               = false;
     bMasterVolumeChanged             = false;
 
-
     updateUIToSettings(vInputDevices);
 
     bInit = false;
@@ -114,6 +113,25 @@ void SettingsWindow::mousePressEvent(QMouseEvent *event)
     }
 }
 
+void SettingsWindow::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+
+    emit closedSettingsWindow();
+
+    if (pSettingsManager ->getCurrentSettings() ->iInputVolumeMultiplier != iInputVolumeMult)
+    {
+        emit signalSetAudioInputVolume(pSettingsManager ->getCurrentSettings() ->iInputVolumeMultiplier);
+    }
+
+    deleteLater();
+}
+
+void SettingsWindow::slotSetVoiceVolume(int iVolume)
+{
+    ui ->voiceVolumeMeter ->setValue(iVolume);
+}
+
 void SettingsWindow::on_pushButton_pushtotalk_clicked()
 {
     ui ->pushButton_pushtotalk ->setText("Waiting for button");
@@ -173,6 +191,8 @@ void SettingsWindow::on_pushButton_2_clicked()
         pSettingsFile ->sInputDeviceName = ui ->comboBox_input ->currentText() .toStdWString();
     }
 
+    pSettingsFile ->iInputVolumeMultiplier = ui ->horizontalSlider_input_volume_mult ->value();
+
     pSettingsManager ->saveCurrentSettings();
 
     emit applyNewMasterVolume();
@@ -183,6 +203,11 @@ void SettingsWindow::on_pushButton_2_clicked()
 void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
 {
     SettingsFile* pSettingsFile = pSettingsManager ->getCurrentSettings();
+
+    iInputVolumeMult = pSettingsFile ->iInputVolumeMultiplier;
+
+    ui ->label_input_voice_mult ->setText(QString::number(iInputVolumeMult) + "%");
+    ui ->horizontalSlider_input_volume_mult ->setValue(iInputVolumeMult);
 
     ui ->pushButton_pushtotalk   ->setText  ( QString::fromStdString( pSettingsFile ->getPushToTalkButtonName() ) );
     ui ->horizontalSlider_volume ->setValue ( pSettingsFile ->iMasterVolume );
@@ -232,4 +257,11 @@ void SettingsWindow::on_comboBox_input_currentIndexChanged(int index)
     {
         QMessageBox::warning(this, "Notice", "The audio input device will be changed only after the program is restarted!");
     }
+}
+
+void SettingsWindow::on_horizontalSlider_input_volume_mult_sliderMoved(int position)
+{
+    ui ->label_input_voice_mult ->setText(QString::number(position) + "%");
+
+    emit signalSetAudioInputVolume(position);
 }

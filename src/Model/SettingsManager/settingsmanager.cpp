@@ -189,6 +189,11 @@ void SettingsManager::saveCurrentSettings()
 
 
 
+    // Write input volume multiplier.
+    newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->iInputVolumeMultiplier), sizeof(pCurrentSettingsFile ->iInputVolumeMultiplier));
+
+
+
     // NEW SETTINGS GO HERE
     // Don't forget to update "readSettings()".
 
@@ -398,6 +403,11 @@ SettingsFile *SettingsManager::readSettings()
         settingsFile .read(reinterpret_cast<char*>(vDeviceBuffer), cInputDeviceSize * sizeof(wchar_t));
 
         pSettingsFile ->sInputDeviceName = vDeviceBuffer;
+
+
+
+        // Read input volume multiplier.
+        settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->iInputVolumeMultiplier), sizeof(pSettingsFile ->iInputVolumeMultiplier));
 
 
 
