@@ -61,6 +61,45 @@ QLineEdit
     border: 1px solid rgb(71, 126, 158);
 }
 
+
+QTabBar::tab
+{
+    background-color: rgb(23, 23, 23);
+    color: white;
+}
+
+QTabBar::tab:selected
+{
+    background-color: rgb(71, 126, 158);
+    color: white;
+}
+
+QTabWidget::pane {
+    border: 1px solid rgb(71, 126, 158);
+    background-color: rgb(23, 23, 23);
+    color: white;
+}
+
+
+
+QGroupBox
+{
+    border: 1px solid rgb(71, 126, 158);
+    border-radius: 6px;
+    background-color: rgb(23, 23, 23);
+    color: white;
+    padding-top: 25%;
+    margin-top: 0;
+}
+
+QGroupBox::title
+{
+    background-color: transparent;
+    color: white;
+    subcontrol-position: top center;
+}
+
+
 QListWidget
 {
 	background-color: rgb(23, 23, 23);

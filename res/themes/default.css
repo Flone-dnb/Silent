@@ -73,6 +73,48 @@ selection-background-color: rgb(140, 0, 0);
     border-radius: 6px;
 }
 
+
+
+QTabBar::tab
+{
+    background-color: rgba(35, 35, 35, 255);
+    color: white;
+}
+
+QTabBar::tab:selected
+{
+    background-color: rgba(200, 0, 0, 255);
+    color: white;
+}
+
+QTabWidget::pane {
+    border: 1px solid red;
+    border-radius: 6px;
+    background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
+    color: white;
+}
+
+
+
+QGroupBox
+{
+    border: 1px solid red;
+    border-radius: 6px;
+    background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
+    color: white;
+    padding-top: 25%;
+    margin-top: 0;
+}
+
+QGroupBox::title
+{
+    background-color: transparent;
+    color: white;
+    subcontrol-position: top center;
+}
+
+
+
 QListWidget
 {
 	background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(5, 5, 5, 255), stop:1 rgba(29, 29, 29, 255));
