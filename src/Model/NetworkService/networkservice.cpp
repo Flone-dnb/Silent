@@ -562,7 +562,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 // READ online info
 
                 int iReadBytes = 0;
-                int iOnline    = 0;
+                int iOnline    = 1; // '1' - this user.
 
 
                 char roomCount = 0;
