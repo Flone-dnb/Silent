@@ -155,18 +155,10 @@ void SettingsWindow::on_pushButton_2_clicked()
     {
         pSettingsFile ->iPushToTalkButton = iPushToTalkKey;
     }
-    else
-    {
-        pSettingsFile ->iPushToTalkButton = iOriginalPushToTalkButton;
-    }
 
     if (bMasterVolumeChanged)
     {
         pSettingsFile ->iMasterVolume = iMasterVolume;
-    }
-    else
-    {
-        pSettingsFile ->iMasterVolume = iOriginalMasterVolume;
     }
 
     pSettingsFile ->sThemeName = ui ->comboBox_themes ->currentText() .toStdString();
