@@ -1020,6 +1020,23 @@ void MainWindow::on_listWidget_users_itemDoubleClicked(QListWidgetItem *item)
                 ui ->listWidget_users ->clearSelection();
             }
         }
+        else
+        {
+            ui ->listWidget_users ->clearSelection();
+        }
+    }
+}
+
+void MainWindow::on_listWidget_users_itemClicked(QListWidgetItem *item)
+{
+    if (ui ->listWidget_users ->currentRow() >= 0)
+    {
+        SListItem* pItem = dynamic_cast<SListItem*>(item);
+
+        if (pItem->isRoom() == false)
+        {
+            ui ->listWidget_users ->clearSelection();
+        }
     }
 }
 

@@ -200,6 +200,8 @@ private slots:
         void  on_pushButton_clicked             ();
         void  customqplaintextedit_return_pressed();
 
+        void on_listWidget_users_itemClicked(QListWidgetItem *item);
+
 private:
 
     void showSettingsWindow ();
