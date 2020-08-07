@@ -29,6 +29,7 @@ SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<Q
     ui ->setupUi(this);
     setFixedSize( width(), height() );
 
+    bInit = true;
 
     this->pSettingsManager = pSettingsManager;
 
@@ -39,6 +40,8 @@ SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<Q
 
 
     updateUIToSettings(vInputDevices);
+
+    bInit = false;
 }
 
 
@@ -222,3 +225,11 @@ void SettingsWindow::showThemes()
     }
 }
 
+
+void SettingsWindow::on_comboBox_input_currentIndexChanged(int index)
+{
+    if (bInit == false)
+    {
+        QMessageBox::warning(this, "Notice", "The audio input device will be changed only after the program is restarted!");
+    }
+}

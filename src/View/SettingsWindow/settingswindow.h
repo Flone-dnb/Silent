@@ -50,6 +50,8 @@ private slots:
     void  on_pushButton_pushtotalk_clicked         ();
     void  on_pushButton_2_clicked                  ();
 
+    void on_comboBox_input_currentIndexChanged(int index);
+
 private:
 
     void  updateUIToSettings                       (std::vector<QString> vInputDevices);
@@ -80,4 +82,7 @@ private:
 
 
     Ui::SettingsWindow* ui;
+
+
+    bool                bInit;
 };
