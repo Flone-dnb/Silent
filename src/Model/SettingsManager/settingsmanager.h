@@ -28,10 +28,11 @@ public:
     SettingsManager(MainWindow* pMainWindow);
 
 
-    void           saveSettings (SettingsFile* pSettingsFile, bool bSetOnlyConnectInfo = false);
+    void           saveCurrentSettings        ();
 
-    SettingsFile*  getCurrentSettings();
-    bool           isSettingsCreatedFirstTime();
+    SettingsFile*  getCurrentSettings         ();
+
+    bool           isSettingsCreatedFirstTime ();
 
 
     ~SettingsManager();
@@ -49,8 +50,6 @@ private:
     SettingsFile*      pCurrentSettingsFile;
 
 
-    std::mutex         mtxRefreshSettings;
-
-
     bool               bSettingsFileCreatedFirstTime;
+    bool               bInit;
 };

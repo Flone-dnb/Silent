@@ -8,6 +8,10 @@
 
 // STL
 #include <fstream>
+#include <codecvt>
+#include <locale>
+
+// Other
 #include <shlobj.h>
 
 // Custom
@@ -27,16 +31,25 @@ SettingsManager::SettingsManager(MainWindow* pMainWindow)
 
     bSettingsFileCreatedFirstTime = false;
 
+    bInit = true;
+
 
     pCurrentSettingsFile = nullptr;
     pCurrentSettingsFile = readSettings();
+
+    if (pCurrentSettingsFile && bSettingsFileCreatedFirstTime)
+    {
+        saveCurrentSettings();
+    }
+
+    bInit = false;
 }
 
 
 
 
 
-void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyConnectInfo)
+void SettingsManager::saveCurrentSettings()
 {
     // Get the path to the Documents folder.
 
@@ -45,9 +58,10 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyCon
 
     if (result != S_OK)
     {
-        pMainWindow ->showMessageBox(true, "Can't open the Documents folder to read the settings.");
+        pMainWindow ->showMessageBox(true, "An error occurred at SettingsManager::saveCurrentSettings(). Error: "
+                                           "can't open the Documents folder to read the settings.");
 
-        delete pSettingsFile;
+        delete pCurrentSettingsFile;
 
         return;
     }
@@ -76,156 +90,107 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyCon
 
 
 
-
-    if ( bSetOnlyConnectInfo )
-    {
-        pSettingsFile ->iPushToTalkButton    = pCurrentSettingsFile ->iPushToTalkButton;
-        pSettingsFile ->iMasterVolume        = pCurrentSettingsFile ->iMasterVolume;
-        pSettingsFile ->sThemeName           = pCurrentSettingsFile ->sThemeName;
-        pSettingsFile ->bPlayPushToTalkSound = pCurrentSettingsFile ->bPlayPushToTalkSound;
-        pSettingsFile ->sInputDeviceName     = pCurrentSettingsFile ->sInputDeviceName;
-    }
-    else
-    {
-        pSettingsFile ->sConnectString = pCurrentSettingsFile ->sConnectString;
-        pSettingsFile ->iPort          = pCurrentSettingsFile ->iPort;
-        pSettingsFile ->sPassword      = pCurrentSettingsFile ->sPassword;
-    }
-
-
-
-
     // Write new setting to the new file.
 
-    // Push-to-Talk button
-    newSettingsFile .write
-            ( reinterpret_cast <char*> (&pSettingsFile ->iPushToTalkButton), sizeof(pSettingsFile ->iPushToTalkButton) );
-
-    // Master Volume
-    newSettingsFile .write
-            ( reinterpret_cast <char*> (&pSettingsFile ->iMasterVolume),     sizeof(pSettingsFile ->iMasterVolume)     );
-
-
-
-
-    if ( bSetOnlyConnectInfo )
-    {
-        char cUserNameLength = static_cast <char> ( pSettingsFile ->sUsername .size() );
-
-        newSettingsFile .write
-                ( reinterpret_cast <char*> (&cUserNameLength),          sizeof(cUserNameLength) );
-
-        newSettingsFile .write
-                ( pSettingsFile ->sUsername .c_str(), cUserNameLength );
-    }
-    else
-    {
-        if ( settingsFile .is_open() )
-        {
-            // Open the old file to copy user name.
-
-            int iOldFileSize = 0;
-
-            settingsFile .seekg(0, std::ios::end);
-            iOldFileSize     = static_cast <int> ( settingsFile .tellg() );
-            settingsFile .seekg( sizeof(pSettingsFile ->iPushToTalkButton) + sizeof(pSettingsFile ->iMasterVolume) );
-
-
-
-            iOldFileSize    -= ( sizeof(pSettingsFile ->iPushToTalkButton)
-                                 + sizeof(pSettingsFile ->iMasterVolume) );
-
-
-
-
-            // Copy user name
-
-            char cUserNameLength = 0;
-            settingsFile .read ( reinterpret_cast <char*> (&cUserNameLength), sizeof(cUserNameLength) );
-
-            char vBuffer[UCHAR_MAX];
-            memset(vBuffer, 0, UCHAR_MAX);
-
-            settingsFile .read( vBuffer, cUserNameLength );
-
-            pSettingsFile ->sUsername = vBuffer;
-
-
-
-
-            // Write this user name
-
-            newSettingsFile .write
-                    ( reinterpret_cast <char*> (&cUserNameLength),          sizeof(cUserNameLength) );
-
-            newSettingsFile .write
-                    ( pSettingsFile ->sUsername .c_str(), cUserNameLength );
-        }
-        else
-        {
-            // User name: no name
-            unsigned char cNameSize = 0;
-            newSettingsFile .write( reinterpret_cast <char*> (&cNameSize), sizeof(cNameSize) );
-        }
-    }
-
-
-    // Theme name
-    unsigned char cThemeLength = static_cast <unsigned char> ( pSettingsFile ->sThemeName .size() );
+    // Write magic number.
+    int iMagicNumber = SILENT_MAGIC_NUMBER;
 
     newSettingsFile .write
-            ( reinterpret_cast <char*> (&cThemeLength),          sizeof(cThemeLength) );
+            ( reinterpret_cast <char*> (&iMagicNumber), sizeof(iMagicNumber) );
+
+
+
+    // Write settings version.
+    unsigned short int iSettingsVersion = SILENT_SETTINGS_FILE_VERSION;
 
     newSettingsFile .write
-            ( pSettingsFile ->sThemeName .c_str(), cThemeLength );
+            ( reinterpret_cast <char*> (&iSettingsVersion), sizeof(iSettingsVersion) );
 
 
 
-    // Push-to-Talk press/unpress sound
-    char cPlayPushToTalkSound = pSettingsFile ->bPlayPushToTalkSound;
+    // Write push-to-Talk button.
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&pCurrentSettingsFile ->iPushToTalkButton), sizeof(pCurrentSettingsFile ->iPushToTalkButton) );
+
+
+
+    // Write master Volume.
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&pCurrentSettingsFile ->iMasterVolume),     sizeof(pCurrentSettingsFile ->iMasterVolume)     );
+
+
+
+    // Write user name.
+    char cUserNameLength = static_cast <char> ( pCurrentSettingsFile ->sUsername .size() );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&cUserNameLength), sizeof(cUserNameLength) );
+
+    newSettingsFile .write
+            ( pCurrentSettingsFile ->sUsername .c_str(), cUserNameLength );
+
+
+
+    // Write theme name.
+    unsigned char cThemeLength = static_cast <unsigned char> ( pCurrentSettingsFile ->sThemeName .size() );
+
+    newSettingsFile .write
+            ( reinterpret_cast <char*> (&cThemeLength),  sizeof(cThemeLength) );
+
+    newSettingsFile .write
+            ( pCurrentSettingsFile ->sThemeName .c_str(), cThemeLength );
+
+
+
+    // Write push-to-Talk press/unpress sound.
+    char cPlayPushToTalkSound = pCurrentSettingsFile ->bPlayPushToTalkSound;
 
     newSettingsFile .write
             ( &cPlayPushToTalkSound, sizeof(cPlayPushToTalkSound) );
 
 
-    // Connect string
-    unsigned char cConnectStringSize = static_cast <unsigned char>( pSettingsFile ->sConnectString.size() );
+
+    // Write connect string.
+    unsigned char cConnectStringSize = static_cast <unsigned char>( pCurrentSettingsFile ->sConnectString.size() );
 
     newSettingsFile .write
             ( reinterpret_cast <char*> (&cConnectStringSize), sizeof(cConnectStringSize) );
 
     newSettingsFile .write
-            ( const_cast <char*>       (pSettingsFile ->sConnectString .c_str()), cConnectStringSize );
+            ( const_cast <char*>       (pCurrentSettingsFile ->sConnectString .c_str()), cConnectStringSize );
 
 
-    // Port
+
+    // Write port.
     newSettingsFile .write
-            ( reinterpret_cast <char*> (&pSettingsFile ->iPort), sizeof(pSettingsFile ->iPort) );
+            ( reinterpret_cast <char*> (&pCurrentSettingsFile ->iPort), sizeof(pCurrentSettingsFile ->iPort) );
 
 
-    // Password
-    unsigned char cPassSize = static_cast <unsigned char>( pSettingsFile ->sPassword.size() );
+
+    // Write password.
+    unsigned char cPassSize = static_cast <unsigned char>( pCurrentSettingsFile ->sPassword.size() );
 
     newSettingsFile .write
             ( reinterpret_cast <char*> (&cPassSize), sizeof(cPassSize) );
 
     newSettingsFile .write
-            ( reinterpret_cast <char*>( const_cast<wchar_t*>(pSettingsFile ->sPassword .c_str()) ), cPassSize * 2 );
+            ( reinterpret_cast <char*>( const_cast<wchar_t*>(pCurrentSettingsFile ->sPassword .c_str()) ), cPassSize * sizeof(wchar_t) );
 
 
-    // Input device
-    unsigned char cInputDeviceNameSize = static_cast <unsigned char>( pSettingsFile ->sInputDeviceName.size() );
+
+    // Write input device name.
+    unsigned char cInputDeviceNameSize = static_cast <unsigned char>( pCurrentSettingsFile ->sInputDeviceName.size() );
 
     newSettingsFile .write
             ( reinterpret_cast <char*> (&cInputDeviceNameSize), sizeof(cInputDeviceNameSize) );
 
     newSettingsFile .write
-            ( reinterpret_cast <char*>( const_cast<wchar_t*>(pSettingsFile ->sInputDeviceName .c_str()) ), cInputDeviceNameSize * 2 );
+            ( reinterpret_cast <char*>( const_cast<wchar_t*>(pCurrentSettingsFile ->sInputDeviceName .c_str()) ), cInputDeviceNameSize * sizeof(wchar_t) );
+
+
 
     // NEW SETTINGS GO HERE
-    // + don't forget to update "if ( bSetOnlyConnectInfo )" above, where code is:
-    // "pSettingsFile ->iPushToTalkButton    = pCurrentSettingsFile ->iPushToTalkButton;"
-    // + don't forget to update "readSettings()"
+    // Don't forget to update "readSettings()".
 
 
 
@@ -247,47 +212,11 @@ void SettingsManager::saveSettings(SettingsFile* pSettingsFile, bool bSetOnlyCon
 
 
 
+    // Update theme if it was changed.
 
-    // Save the old theme
-
-    std::string sOldTheme = "";
-
-    if (pCurrentSettingsFile)
+    if (bInit == false)
     {
-        sOldTheme = pCurrentSettingsFile ->sThemeName;
-    }
-    else
-    {
-        sOldTheme = pSettingsFile ->sThemeName;
-    }
-
-    // Update our 'pCurrentSettingsFile' to new settings
-
-    // Careful here
-    // AudioService takes settings (calls getSettings()) very often.
-
-    mtxRefreshSettings .lock();
-
-
-    if (pCurrentSettingsFile)
-    {
-        delete pCurrentSettingsFile;
-        pCurrentSettingsFile = nullptr;
-    }
-
-
-    pCurrentSettingsFile = pSettingsFile;
-
-    mtxRefreshSettings .unlock();
-
-
-
-
-    // Update theme if it was changed
-
-    if ( pCurrentSettingsFile ->sThemeName != sOldTheme )
-    {
-        pMainWindow ->applyTheme();
+       pMainWindow ->applyTheme();
     }
 }
 
@@ -333,42 +262,73 @@ SettingsFile *SettingsManager::readSettings()
 
     // Open the settings file.
 
-    std::wstring adressToSettings = std::wstring(my_documents);
-    adressToSettings             += L"\\" + std::wstring(SETTINGS_NAME);
+    std::wstring addressToSettings = std::wstring(my_documents);
+    addressToSettings             += L"\\" + std::wstring(SETTINGS_NAME);
 
-    std::ifstream settingsFile (adressToSettings, std::ios::binary);
+    std::ifstream settingsFile (addressToSettings, std::ios::binary);
 
     if ( settingsFile .is_open() )
     {
         // Read the settings.
 
 
+        // Read magic number.
 
-        // Read push-to-talk button
-        settingsFile .read( reinterpret_cast <char*> (&pSettingsFile ->iPushToTalkButton), sizeof(pSettingsFile ->iPushToTalkButton) );
+        int iMagicNumber = 0;
+        settingsFile .read( reinterpret_cast<char*>(&iMagicNumber), sizeof(iMagicNumber) );
 
-
-
-        // Read master volume
-        settingsFile .read( reinterpret_cast <char*> (&pSettingsFile ->iMasterVolume),     sizeof(pSettingsFile ->iMasterVolume) );
-
-
-
-        // Old version settings may end somewhere here
-        if (settingsFile .eof())
+        if (iMagicNumber != SILENT_MAGIC_NUMBER)
         {
+            using convert_type = std::codecvt_utf8<wchar_t>;
+            std::wstring_convert<convert_type, wchar_t> converter;
+
+            std::string converted_addr_str = converter.to_bytes( addressToSettings );
+
+            pMainWindow ->showMessageBox(true, "An error occurred at SettingsManager::readSettings(). Error: "
+                                               "the settings file, located at \"" + converted_addr_str + "\" is not a Silent settings file "
+                                               "(it may have an old format from the older version).\n"
+                                               "\n"
+                                               "This file will be deleted and replaced with the valid Silent settings file. No further actions required.");
             settingsFile .close();
+            _wremove ( addressToSettings .c_str() );
+
+            bSettingsFileCreatedFirstTime = true;
 
             return pSettingsFile;
         }
 
 
+        // Read settings version.
 
-        // Read user name length
+        unsigned short int iSettingsVersion = SILENT_SETTINGS_FILE_VERSION;
+
+        settingsFile .read( reinterpret_cast<char*>(&iSettingsVersion), sizeof(iSettingsVersion) );
+
+
+
+        // ------------------------------------------------
+        // ------------------------------------------------
+        //           HANDLE OLD VERSIONS HERE
+        // ------------------------------------------------
+        // ------------------------------------------------
+
+
+
+        // Read push-to-talk button.
+        settingsFile .read( reinterpret_cast <char*> (&pSettingsFile ->iPushToTalkButton), sizeof(pSettingsFile ->iPushToTalkButton) );
+
+
+
+        // Read master volume.
+        settingsFile .read( reinterpret_cast <char*> (&pSettingsFile ->iMasterVolume),     sizeof(pSettingsFile ->iMasterVolume) );
+
+
+
+        // Read user name length.
         unsigned char cUserNameLength = 0;
         settingsFile .read( reinterpret_cast <char*> (&cUserNameLength), sizeof(cUserNameLength) );
 
-        // Read user name
+        // Read user name.
         char vBuffer[UCHAR_MAX];
         memset(vBuffer, 0, UCHAR_MAX);
 
@@ -378,11 +338,11 @@ SettingsFile *SettingsManager::readSettings()
 
 
 
-        // Read theme length
+        // Read theme name length.
         unsigned char cThemeLength = 0;
         settingsFile .read( reinterpret_cast <char*> (&cThemeLength), sizeof(cThemeLength) );
 
-        // Read theme name
+        // Read theme name.
         memset(vBuffer, 0, UCHAR_MAX);
 
         settingsFile .read( vBuffer, cThemeLength );
@@ -391,18 +351,7 @@ SettingsFile *SettingsManager::readSettings()
 
 
 
-
-        // Old version settings may end somewhere here
-        if (settingsFile .eof())
-        {
-            settingsFile .close();
-
-            return pSettingsFile;
-        }
-
-
-
-        // Read push-to-talk sound enabled
+        // Read push-to-talk sound enabled.
         char cPushToTalkSoundEnabled = 0;
         settingsFile .read( &cPushToTalkSoundEnabled, sizeof(cPushToTalkSoundEnabled) );
 
@@ -410,15 +359,7 @@ SettingsFile *SettingsManager::readSettings()
 
 
 
-        if (settingsFile .eof())
-        {
-            settingsFile .close();
-
-            return pSettingsFile;
-        }
-
-
-        // Read connect string
+        // Read connect string.
         unsigned char cConnectStringSize = 0;
         settingsFile .read( reinterpret_cast<char*>(&cConnectStringSize), sizeof(cConnectStringSize) );
 
@@ -428,11 +369,13 @@ SettingsFile *SettingsManager::readSettings()
         pSettingsFile ->sConnectString = vBuffer;
 
 
-        // Read port
+
+        // Read port.
         settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->iPort), sizeof(pSettingsFile ->iPort));
 
 
-        // Read password
+
+        // Read password.
         unsigned char cPasswordSize = 0;
         settingsFile .read( reinterpret_cast<char*>(&cPasswordSize), sizeof(cPasswordSize) );
 
@@ -444,15 +387,8 @@ SettingsFile *SettingsManager::readSettings()
         pSettingsFile ->sPassword = vWBuffer;
 
 
-        if (settingsFile .eof())
-        {
-            settingsFile .close();
 
-            return pSettingsFile;
-        }
-
-
-        // Input device
+        // Read input device name.
         unsigned char cInputDeviceSize = 0;
         settingsFile .read( reinterpret_cast<char*>(&cInputDeviceSize), sizeof(cInputDeviceSize) );
 
@@ -464,13 +400,13 @@ SettingsFile *SettingsManager::readSettings()
         pSettingsFile ->sInputDeviceName = vDeviceBuffer;
 
 
+
         settingsFile .close();
     }
     else
     {
         // The settings file does not exist.
         // Create one and write default settings.
-
 
         bSettingsFileCreatedFirstTime = true;
     }
@@ -482,9 +418,6 @@ SettingsFile *SettingsManager::readSettings()
 
 SettingsFile *SettingsManager::getCurrentSettings()
 {
-    mtxRefreshSettings .lock();
-    mtxRefreshSettings .unlock();
-
     return pCurrentSettingsFile;
 }
 

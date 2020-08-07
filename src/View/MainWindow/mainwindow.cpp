@@ -31,6 +31,7 @@
 #include "View/AboutWindow/aboutwindow.h"
 #include "View/StyleAndInfoPaths.h"
 #include "Model/SettingsManager/SettingsFile.h"
+#include "Model/SettingsManager/settingsmanager.h"
 #include "View/CustomQPlainTextEdit/customqplaintextedit.h"
 #include "View/CustomList/SListItemUser/slistitemuser.h"
 #include "View/CustomList/SListItemRoom/slistitemroom.h"
@@ -51,128 +52,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->plainTextEdit_input     ->setProperty("cssClass", "userInput");
     ui ->plainTextEdit           ->setProperty("cssClass", "chatOutput");
 
-
-
-
-    // Setup tray icon
-
-    pTrayIcon      = new QSystemTrayIcon(this);
-
-    QIcon icon     = QIcon(RES_ICONS_MAIN_PATH);
-    pTrayIcon      ->setIcon(icon);
-
-    connect(pTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::slotTrayIconActivated);
-
-
-
-
-    // Output HTML
-
-    outputHTMLtimeStart    = "<font style=\"color: ";
-    outputHTMLmessageStart = "<font color=\"";
-    outputHTMLmessageEnd   = "</font>";
-
-
-
-
-    // Create Controller
-
-    pController    = new Controller(this);
-
-
-
-
-    // Setup context menu for 'connected users' list
-
-    ui ->listWidget_users ->setContextMenuPolicy (Qt::CustomContextMenu);
-    ui ->listWidget_users ->setViewMode          (QListView::ListMode);
-
-    pMenuContextMenu    = new QMenu(this);
-    connect(pMenuContextMenu, &QMenu::aboutToHide, this, &MainWindow::slotOnMenuClose);
-
-    pActionChangeVolume = new QAction("Change Volume");
-    pActionEnterRoom    = new QAction("Enter Room");
-
-    pMenuContextMenu ->addAction(pActionChangeVolume);
-    pMenuContextMenu ->addAction(pActionEnterRoom);
-
-    connect(pActionChangeVolume, &QAction::triggered, this, &MainWindow::slotChangeUserVolume);
-    connect(pActionEnterRoom, &QAction::triggered, this, &MainWindow::slotEnterRoom);
-
-
-
-
-    // Register types
-
-    qRegisterMetaType <SilentMessageColor>   ("SilentMessageColor");
-    qRegisterMetaType <std::string>          ("std::string");
-    qRegisterMetaType <QTextBlock>           ("QTextBlock");
-    qRegisterMetaType <QVector<int>>         ("QVector<int>");
-    qRegisterMetaType <size_t>               ("size_t");
-    qRegisterMetaType <std::vector<QString>> ("std::vector<QString>");
-
-
-
-
-    // Setup Connect window
-
-    pConnectWindow = new connectWindow(this);
-    pConnectWindow ->setWindowModality(Qt::WindowModality::WindowModal);
-
-    connect(pConnectWindow, &connectWindow::connectTo,      this, &MainWindow::connectTo);
-    connect(pConnectWindow, &connectWindow::showMainWindow, this, &MainWindow::show);
-
-
-
-
-    // This to this connects
-
-    connect(this, &MainWindow::signalTypeOnScreen,                 this, &MainWindow::typeSomeOnScreen);
-    connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
-    connect(this, &MainWindow::signalShowMessageBox,               this, &MainWindow::slotShowMessageBox);
-    connect(this, &MainWindow::signalShowUserDisconnectNotice,     this, &MainWindow::slotShowUserDisconnectNotice);
-    connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
-    connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
-    connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
-    connect(this, &MainWindow::signalClearTextChatOutput,          this, &MainWindow::slotClearTextChatOutput);
-    connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
-    connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
-    connect(this, &MainWindow::signalShowPasswordInputWindow,      this, &MainWindow::slotShowPasswordInputWindow);
-    connect(this, &MainWindow::signalCreateRoom,                   this, &MainWindow::slotCreateRoom);
-    connect(this, &MainWindow::signalShowServerMessage,            this, &MainWindow::slotShowServerMessage);
-
-
-
-    connect(ui ->plainTextEdit_input, &CustomQPlainTextEdit::signalReturnPressed, this, &MainWindow::customqplaintextedit_return_pressed);
-
-
-
-    slotApplyTheme();
-
-
     WindowControlWidget* pControlWindowWidget = new WindowControlWidget(this);
     connect(pControlWindowWidget, &WindowControlWidget::signalClose, this, &MainWindow::close);
     connect(pControlWindowWidget, &WindowControlWidget::signalHide, this, &MainWindow::slotHideWindow);
     connect(pControlWindowWidget, &WindowControlWidget::signalMaximize, this, &MainWindow::slotMaxWindow);
 
     ui->menuBar->setCornerWidget(pControlWindowWidget, Qt::Corner::TopRightCorner);
-
-
-    if ( pController ->isSettingsCreatedFirstTime() )
-    {
-        // Show SettingsWindow to the user
-
-        // We use a timer because here (in the constructor) the main (from the main.cpp) event handler is not launched so it won't
-        // show our SettingsWindow with opacity change (see 'checkIfSettingsExists() function). We will wait for some time and then show it.
-        pTimer = new QTimer();
-        pTimer ->setInterval(650);
-        connect(pTimer, &QTimer::timeout, this, &MainWindow::showSettingsWindow);
-        pTimer ->start();
-    }
-    else
-    {
-        pTimer = nullptr;
-    }
 }
 
 
@@ -408,13 +293,10 @@ void MainWindow::slotApplyTheme()
                     File .close();
 
 
-                    SettingsFile* pNewSettings = new SettingsFile();
-                    pNewSettings ->iPushToTalkButton = pController ->getCurrentSettingsFile() ->iPushToTalkButton;
-                    pNewSettings ->iMasterVolume     = pController ->getCurrentSettingsFile() ->iMasterVolume;
-                    pNewSettings ->sUsername         = pController ->getCurrentSettingsFile() ->sUsername;
-                    pNewSettings ->sThemeName        = STYLE_THEME_DEFAULT_NAME;
+                    SettingsFile* pSettings = pController ->getSettingsManager() ->getCurrentSettings();
+                    pSettings ->sThemeName        = STYLE_THEME_DEFAULT_NAME;
 
-                    pController ->saveSettings( pNewSettings );
+                    pController ->getSettingsManager() ->saveCurrentSettings();
                 }
                 else
                 {
@@ -423,6 +305,11 @@ void MainWindow::slotApplyTheme()
             }
         }
     }
+}
+
+void MainWindow::slotApplyMasterVolume()
+{
+    pController ->applyNewMasterVolumeFromSettings();
 }
 
 void MainWindow::slotMaxWindow()
@@ -819,8 +706,8 @@ void MainWindow::showSettingsWindow()
 
     // Show SettingsWindow
 
-    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), vAudioInputDevices, this);
-    connect(pSettingsWindow, &SettingsWindow::signalSaveSettings, this, &MainWindow::slotSaveSettings);
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getSettingsManager(), vAudioInputDevices, this);
+    connect(pSettingsWindow, &SettingsWindow::applyNewMasterVolume, this, &MainWindow::slotApplyMasterVolume);
     pSettingsWindow ->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow ->setWindowOpacity(0);
     pSettingsWindow ->show();
@@ -837,11 +724,6 @@ void MainWindow::showSettingsWindow()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
-}
-
-void MainWindow::slotSaveSettings(SettingsFile* pSettingsFile)
-{
-    pController->saveSettings(pSettingsFile);
 }
 
 void MainWindow::hideEvent(QHideEvent *event)
@@ -863,8 +745,8 @@ void MainWindow::on_actionSettings_triggered()
     }
 
     // Show SettingsWindow
-    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getCurrentSettingsFile(), vAudioInputDevices, this);
-    connect(pSettingsWindow, &SettingsWindow::signalSaveSettings, this, &MainWindow::slotSaveSettings);
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getSettingsManager(), vAudioInputDevices, this);
+    connect(pSettingsWindow, &SettingsWindow::applyNewMasterVolume, this, &MainWindow::slotApplyMasterVolume);
     pSettingsWindow->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow->show();
 }
@@ -872,6 +754,108 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::slotOnMenuClose()
 {
     ui ->listWidget_users ->clearSelection();
+}
+
+void MainWindow::onExecCalled()
+{
+    // Setup tray icon
+
+    pTrayIcon      = new QSystemTrayIcon(this);
+
+    QIcon icon     = QIcon(RES_ICONS_MAIN_PATH);
+    pTrayIcon      ->setIcon(icon);
+
+    connect(pTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::slotTrayIconActivated);
+
+
+
+
+    // Output HTML
+
+    outputHTMLtimeStart    = "<font style=\"color: ";
+    outputHTMLmessageStart = "<font color=\"";
+    outputHTMLmessageEnd   = "</font>";
+
+
+    // This to this connects
+
+    connect(this, &MainWindow::signalTypeOnScreen,                 this, &MainWindow::typeSomeOnScreen);
+    connect(this, &MainWindow::signalEnableInteractiveElements,    this, &MainWindow::slotEnableInteractiveElements);
+    connect(this, &MainWindow::signalShowMessageBox,               this, &MainWindow::slotShowMessageBox);
+    connect(this, &MainWindow::signalShowUserDisconnectNotice,     this, &MainWindow::slotShowUserDisconnectNotice);
+    connect(this, &MainWindow::signalShowUserConnectNotice,        this, &MainWindow::slotShowUserConnectNotice);
+    connect(this, &MainWindow::signalApplyTheme,                   this, &MainWindow::slotApplyTheme);
+    connect(this, &MainWindow::signalClearTextEdit,                this, &MainWindow::slotClearTextEdit);
+    connect(this, &MainWindow::signalClearTextChatOutput,          this, &MainWindow::slotClearTextChatOutput);
+    connect(this, &MainWindow::signalShowOldText,                  this, &MainWindow::slotShowOldText);
+    connect(this, &MainWindow::signalSetConnectDisconnectButton,   this, &MainWindow::slotSetConnectDisconnectButton);
+    connect(this, &MainWindow::signalShowPasswordInputWindow,      this, &MainWindow::slotShowPasswordInputWindow);
+    connect(this, &MainWindow::signalCreateRoom,                   this, &MainWindow::slotCreateRoom);
+    connect(this, &MainWindow::signalShowServerMessage,            this, &MainWindow::slotShowServerMessage);
+
+
+    // Setup context menu for 'connected users' list
+
+    ui ->listWidget_users ->setContextMenuPolicy (Qt::CustomContextMenu);
+    ui ->listWidget_users ->setViewMode          (QListView::ListMode);
+
+    pMenuContextMenu    = new QMenu(this);
+    connect(pMenuContextMenu, &QMenu::aboutToHide, this, &MainWindow::slotOnMenuClose);
+
+    pActionChangeVolume = new QAction("Change Volume");
+    pActionEnterRoom    = new QAction("Enter Room");
+
+    pMenuContextMenu ->addAction(pActionChangeVolume);
+    pMenuContextMenu ->addAction(pActionEnterRoom);
+
+    connect(pActionChangeVolume, &QAction::triggered, this, &MainWindow::slotChangeUserVolume);
+    connect(pActionEnterRoom, &QAction::triggered, this, &MainWindow::slotEnterRoom);
+
+
+
+
+    // Register types
+
+    qRegisterMetaType <SilentMessageColor>   ("SilentMessageColor");
+    qRegisterMetaType <std::string>          ("std::string");
+    qRegisterMetaType <QTextBlock>           ("QTextBlock");
+    qRegisterMetaType <QVector<int>>         ("QVector<int>");
+    qRegisterMetaType <size_t>               ("size_t");
+    qRegisterMetaType <std::vector<QString>> ("std::vector<QString>");
+
+
+
+
+    // Setup Connect window
+
+    pConnectWindow = new connectWindow(this);
+    pConnectWindow ->setWindowModality(Qt::WindowModality::WindowModal);
+
+    connect(pConnectWindow, &connectWindow::connectTo,      this, &MainWindow::connectTo);
+    connect(pConnectWindow, &connectWindow::showMainWindow, this, &MainWindow::show);
+
+
+    connect(ui ->plainTextEdit_input, &CustomQPlainTextEdit::signalReturnPressed, this, &MainWindow::customqplaintextedit_return_pressed);
+
+    // Create Controller
+
+    pController    = new Controller(this);
+
+    slotApplyTheme();
+
+    if ( pController ->isSettingsCreatedFirstTime() )
+    {
+        // Show SettingsWindow to the user.
+
+        pTimer = new QTimer();
+        pTimer ->setInterval(500);
+        connect(pTimer, &QTimer::timeout, this, &MainWindow::showSettingsWindow);
+        pTimer ->start();
+    }
+    else
+    {
+        pTimer = nullptr;
+    }
 }
 
 void MainWindow::slotEnterRoom()

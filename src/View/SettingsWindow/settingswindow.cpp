@@ -15,6 +15,7 @@
 
 // Custom
 #include "View/StyleAndInfoPaths.h"
+#include "Model/SettingsManager/settingsmanager.h"
 #include "Model/SettingsManager/SettingsFile.h"
 
 
@@ -23,10 +24,13 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
-SettingsWindow::SettingsWindow(SettingsFile* pSettingsFile,  std::vector<QString> vInputDevices, QWidget *parent) : QMainWindow(parent), ui(new Ui::SettingsWindow)
+SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<QString> vInputDevices, QWidget *parent) : QMainWindow(parent), ui(new Ui::SettingsWindow)
 {
     ui ->setupUi(this);
     setFixedSize( width(), height() );
+
+
+    this->pSettingsManager = pSettingsManager;
 
 
     bWaitingForPushToTalkButtonInput = false;
@@ -34,12 +38,7 @@ SettingsWindow::SettingsWindow(SettingsFile* pSettingsFile,  std::vector<QString
     bMasterVolumeChanged             = false;
 
 
-
-    iOriginalPushToTalkButton = pSettingsFile ->iPushToTalkButton;
-    iOriginalMasterVolume     = pSettingsFile ->iMasterVolume;
-
-
-    updateUIToSettings(pSettingsFile, vInputDevices);
+    updateUIToSettings(vInputDevices);
 }
 
 
@@ -150,41 +149,46 @@ SettingsWindow::~SettingsWindow()
 
 void SettingsWindow::on_pushButton_2_clicked()
 {
-    SettingsFile* pNewSettingsFile = new SettingsFile();
+    SettingsFile* pSettingsFile = pSettingsManager ->getCurrentSettings();
 
     if (bPushToTalkChanged)
     {
-        pNewSettingsFile ->iPushToTalkButton = iPushToTalkKey;
+        pSettingsFile ->iPushToTalkButton = iPushToTalkKey;
     }
     else
     {
-        pNewSettingsFile ->iPushToTalkButton = iOriginalPushToTalkButton;
+        pSettingsFile ->iPushToTalkButton = iOriginalPushToTalkButton;
     }
 
     if (bMasterVolumeChanged)
     {
-        pNewSettingsFile ->iMasterVolume = iMasterVolume;
+        pSettingsFile ->iMasterVolume = iMasterVolume;
     }
     else
     {
-        pNewSettingsFile ->iMasterVolume = iOriginalMasterVolume;
+        pSettingsFile ->iMasterVolume = iOriginalMasterVolume;
     }
 
-    pNewSettingsFile ->sThemeName = ui ->comboBox_themes ->currentText() .toStdString();
+    pSettingsFile ->sThemeName = ui ->comboBox_themes ->currentText() .toStdString();
 
-    pNewSettingsFile ->bPlayPushToTalkSound = ui ->checkBox_pushToTalkSound ->isChecked();
+    pSettingsFile ->bPlayPushToTalkSound = ui ->checkBox_pushToTalkSound ->isChecked();
 
     if (ui ->comboBox_input ->currentIndex() != 0)
     {
-        pNewSettingsFile ->sInputDeviceName = ui ->comboBox_input ->currentText() .toStdWString();
+        pSettingsFile ->sInputDeviceName = ui ->comboBox_input ->currentText() .toStdWString();
     }
 
-    emit signalSaveSettings( pNewSettingsFile );
+    pSettingsManager ->saveCurrentSettings();
+
+    emit applyNewMasterVolume();
+
     close();
 }
 
-void SettingsWindow::updateUIToSettings(SettingsFile* pSettingsFile, std::vector<QString> vInputDevices)
+void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
 {
+    SettingsFile* pSettingsFile = pSettingsManager ->getCurrentSettings();
+
     ui ->pushButton_pushtotalk   ->setText  ( QString::fromStdString( pSettingsFile ->getPushToTalkButtonName() ) );
     ui ->horizontalSlider_volume ->setValue ( pSettingsFile ->iMasterVolume );
 

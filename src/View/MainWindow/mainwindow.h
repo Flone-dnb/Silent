@@ -129,6 +129,11 @@ protected:
     void mousePressEvent(QMouseEvent *event);
 
 
+public slots:
+
+    void  onExecCalled                      ();
+
+
 private slots:
 
     // Called from ConnectWindow
@@ -143,11 +148,6 @@ private slots:
         void  slotChangeUserVolume                           ();
         void  slotEnterRoom                                  ();
         void  on_listWidget_users_itemDoubleClicked          (QListWidgetItem *item);
-
-
-    // Called from SettingsWindow
-
-        void  slotSaveSettings                  (SettingsFile* pSettingsFile);
 
 
     // Update UI elements
@@ -189,6 +189,7 @@ private slots:
         void  slotShowServerMessage             (QString sMessage);
         void  slotEnterRoomWithPassword         (QString sRoomName, QString sPassword);
         void  slotApplyTheme                    ();
+        void  slotApplyMasterVolume             ();
 
         void  slotMaxWindow                     ();
         void  slotHideWindow                    ();

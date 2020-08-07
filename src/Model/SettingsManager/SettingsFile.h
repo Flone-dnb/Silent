@@ -9,6 +9,8 @@
 // STL
 #include <string>
 
+#define SILENT_MAGIC_NUMBER 51337
+#define SILENT_SETTINGS_FILE_VERSION 0
 
 class SettingsFile
 {

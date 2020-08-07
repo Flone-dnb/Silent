@@ -49,12 +49,13 @@ public:
 
     // Settings
 
-        void           saveSettings               (SettingsFile* pSettingsFile);
+        void           applyNewMasterVolumeFromSettings       ();
         void           setNewUserVolume           (std::string sUserName,  float fVolume);
 
 
     // GET functions
 
+        SettingsManager* getSettingsManager       ();
         float          getUserCurrentVolume       (std::string sUserName);
         std::string    getClientVersion           ();
         std::string    getUserName                ();
@@ -76,4 +77,6 @@ private:
     NetworkService*  pNetworkService;
     AudioService*    pAudioService;
     SettingsManager* pSettingsManager;
+
+    std::mutex       mtxSettings;
 };

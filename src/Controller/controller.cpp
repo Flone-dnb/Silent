@@ -26,7 +26,11 @@ Controller::Controller(MainWindow* pMainWindow)
     pSettingsManager = nullptr;
 
 
+    mtxSettings.lock();
+
     pSettingsManager = new SettingsManager (pMainWindow);
+
+    mtxSettings.unlock();
 
     if (pSettingsManager ->getCurrentSettings())
     {
@@ -73,7 +77,17 @@ unsigned short Controller::getPingWarningBelow()
 
 SettingsFile *Controller::getCurrentSettingsFile()
 {
-    return pSettingsManager ->getCurrentSettings();
+    mtxSettings.lock();
+    mtxSettings.unlock();
+
+    if (pSettingsManager)
+    {
+        return pSettingsManager ->getCurrentSettings();
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 bool Controller::isSettingsCreatedFirstTime()
@@ -108,19 +122,24 @@ void Controller::connectTo(std::string sAdress, std::string sPort, std::string s
     pNetworkService ->start(sAdress, sPort, sUserName, sPass);
 }
 
-void Controller::saveSettings (SettingsFile* pSettingsFile)
-{
-    pSettingsManager ->saveSettings(pSettingsFile);
-
-    if (pAudioService)
-    {
-        pAudioService ->setNewMasterVolume( pSettingsManager ->getCurrentSettings() ->iMasterVolume );
-    }
-}
-
 void Controller::setNewUserVolume(std::string sUserName, float fVolume)
 {
     pAudioService ->setNewUserVolume(sUserName, fVolume);
+}
+
+SettingsManager *Controller::getSettingsManager()
+{
+    mtxSettings.lock();
+    mtxSettings.unlock();
+
+    if (pSettingsManager)
+    {
+        return pSettingsManager;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 void Controller::sendMessage(std::wstring sMessage)
@@ -136,6 +155,14 @@ void Controller::enterRoom(std::string sRoomName)
 void Controller::enterRoomWithPassword(std::string sRoomName, std::wstring sPassword)
 {
     pNetworkService->enterRoomWithPassword(sRoomName, sPassword);
+}
+
+void Controller::applyNewMasterVolumeFromSettings()
+{
+    if (pAudioService)
+    {
+        pAudioService ->setNewMasterVolume( pSettingsManager ->getCurrentSettings() ->iMasterVolume );
+    }
 }
 
 void Controller::disconnect()

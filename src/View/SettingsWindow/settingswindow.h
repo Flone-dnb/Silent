@@ -12,7 +12,7 @@
 
 class QKeyEvent;
 class QMouseEvent;
-class SettingsFile;
+class SettingsManager;
 
 namespace Ui
 {
@@ -31,13 +31,13 @@ class SettingsWindow : public QMainWindow
 
 public:
 
-    explicit SettingsWindow                        (SettingsFile* pSettingsFile, std::vector<QString> vInputDevices, QWidget *parent = nullptr);
+    explicit SettingsWindow                        (SettingsManager* pSettingsManager, std::vector<QString> vInputDevices, QWidget *parent = nullptr);
 
     ~SettingsWindow                                ();
 
 signals:
 
-    void  signalSaveSettings                       (SettingsFile* pSettingsFile);
+    void  applyNewMasterVolume                     ();
 
 protected:
 
@@ -52,7 +52,7 @@ private slots:
 
 private:
 
-    void  updateUIToSettings                       (SettingsFile* pSettingsFile, std::vector<QString> vInputDevices);
+    void  updateUIToSettings                       (std::vector<QString> vInputDevices);
     void  showThemes                               ();
     void  refreshVolumeSliderText                  ();
 
@@ -60,6 +60,7 @@ private:
 
     // ----------------------------------------------
 
+    SettingsManager*    pSettingsManager;
 
 
     // Push-to-Talk button
