@@ -1002,11 +1002,20 @@ void AudioService::sendAudioData(short *pAudio)
 
 void AudioService::sendAudioDataVolume(short *pAudio)
 {
+    bool bInDBFS = true; // if true - CHANGE THE SLIDER RANGE IN UI THEN to [-55; 0]
+                         // if false - to [0; 100]
+
     // Set volume.
-    float fOutVolumeMult = fMasterVolumeMult + 2.0f; // to be more correct about the mic volume.
+    float fInputMult = fMasterVolumeMult;
+
+    if (bInDBFS == false)
+    {
+        fInputMult += 3.0f;
+    }
+
     for (int t = 0;  t < sampleCount;  t++)
     {
-        int iNewValue = static_cast <int> (pAudio[t] * fOutVolumeMult);
+        int iNewValue = static_cast <int> (pAudio[t] * fInputMult);
 
         if      (iNewValue > SHRT_MAX)
         {
@@ -1048,35 +1057,41 @@ void AudioService::sendAudioDataVolume(short *pAudio)
     // Find max volume.
 
     short maxVolume = 0;
+    double maxDBFS = -1000.0;
 
-    int iFirstHalf = sampleCount / 2;
-
-    for (int i = 0; i < iFirstHalf; i++)
+    for (int i = 0; i < sampleCount; i++)
     {
-        if (abs(pAudio[i]) > abs(maxVolume))
+        if (bInDBFS)
         {
-            maxVolume = static_cast<short>(abs(pAudio[i]));
+            double sampleInRange = static_cast<double>(pAudio[i]) / SHRT_MAX;
+
+            double sampleInDBFS = 20 * std::log10(abs(sampleInRange));
+
+            if (sampleInDBFS > maxDBFS)
+            {
+                maxDBFS = sampleInDBFS;
+            }
+        }
+        else
+        {
+            if (abs(pAudio[i]) > abs(maxVolume))
+            {
+                maxVolume = static_cast<short>(abs(pAudio[i]));
+            }
         }
     }
 
-    pMainWindow ->showVoiceVolumeValueInSettings(static_cast<int>(static_cast<float>(maxVolume) / SHRT_MAX * 100));
-
-
-    maxVolume = 0;
-
-    for (int i = iFirstHalf; i < sampleCount; i++)
+    if (bInDBFS)
     {
-        if (abs(pAudio[i]) > abs(maxVolume))
-        {
-            maxVolume = static_cast<short>(abs(pAudio[i]));
-        }
+        pMainWindow ->showVoiceVolumeValueInSettings(static_cast<int>(maxDBFS));
+    }
+    else
+    {
+        pMainWindow ->showVoiceVolumeValueInSettings(static_cast<int>(static_cast<float>(maxVolume) / SHRT_MAX * 100));
     }
 
 
     delete[] pAudio;
-
-
-    pMainWindow ->showVoiceVolumeValueInSettings(static_cast<int>(static_cast<float>(maxVolume) / SHRT_MAX * 100));
 }
 
 void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool bLast)
