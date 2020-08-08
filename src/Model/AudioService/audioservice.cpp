@@ -1003,9 +1003,10 @@ void AudioService::sendAudioData(short *pAudio)
 void AudioService::sendAudioDataVolume(short *pAudio)
 {
     // Set volume.
+    float fOutVolumeMult = fMasterVolumeMult + 2.0f; // to be more correct about the mic volume.
     for (int t = 0;  t < sampleCount;  t++)
     {
-        int iNewValue = static_cast <int> (pAudio[t] * fMasterVolumeMult);
+        int iNewValue = static_cast <int> (pAudio[t] * fOutVolumeMult);
 
         if      (iNewValue > SHRT_MAX)
         {
