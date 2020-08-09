@@ -26,7 +26,10 @@ public:
                  unsigned short int iPort         = 51337,
                  const std::wstring sPassword     = L"",
                  std::wstring sInputDeviceName    = L"",
-                 int iInputVolumeMultiplier       = 100)
+                 int iInputVolumeMultiplier       = 100,
+                 bool bPushToTalkVoiceMode        = true,
+                 int iVoiceStartRecValueInDBFS    = -30,
+                 bool bHearVoiceInSettings        = true)
     {
         this ->iPushToTalkButton    = iPushToTalkButton;
         this ->iMasterVolume        = iMasterVolume;
@@ -38,6 +41,9 @@ public:
         this ->sPassword            = sPassword;
         this ->sInputDeviceName     = sInputDeviceName;
         this ->iInputVolumeMultiplier = iInputVolumeMultiplier;
+        this ->bPushToTalkVoiceMode = bPushToTalkVoiceMode;
+        this ->iVoiceStartRecValueInDBFS = iVoiceStartRecValueInDBFS;
+        this ->bHearVoiceInSettings = bHearVoiceInSettings;
     }
 
 
@@ -86,6 +92,7 @@ public:
 
     int                iPushToTalkButton;
     int                iInputVolumeMultiplier;
+    int                iVoiceStartRecValueInDBFS;
     unsigned short int iMasterVolume;
 
 
@@ -93,4 +100,6 @@ public:
 
 
     bool               bPlayPushToTalkSound;
+    bool               bPushToTalkVoiceMode;
+    bool               bHearVoiceInSettings;
 };

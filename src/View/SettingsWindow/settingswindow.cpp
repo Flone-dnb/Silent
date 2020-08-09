@@ -30,6 +30,7 @@ SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<Q
     setFixedSize( width(), height() );
 
     bInit = true;
+    bShowedWarning = false;
 
     this->pSettingsManager = pSettingsManager;
 
@@ -124,6 +125,11 @@ void SettingsWindow::closeEvent(QCloseEvent *event)
         emit signalSetAudioInputVolume(pSettingsManager ->getCurrentSettings() ->iInputVolumeMultiplier);
     }
 
+    if (pSettingsManager ->getCurrentSettings() ->iVoiceStartRecValueInDBFS != ui ->horizontalSlider_start_voice_rec ->value())
+    {
+        emit signalSetVoiceStartValue(pSettingsManager ->getCurrentSettings() ->iVoiceStartRecValueInDBFS);
+    }
+
     deleteLater();
 }
 
@@ -165,6 +171,8 @@ void SettingsWindow::on_horizontalSlider_volume_valueChanged(int value)
 
 SettingsWindow::~SettingsWindow()
 {
+    delete ui ->voiceVolumeMeter;
+
     delete ui;
 }
 
@@ -192,6 +200,21 @@ void SettingsWindow::on_pushButton_2_clicked()
     }
 
     pSettingsFile ->iInputVolumeMultiplier = ui ->horizontalSlider_input_volume_mult ->value();
+
+    if (ui ->comboBox_voice_mode ->currentIndex() == 0)
+    {
+        pSettingsFile ->bPushToTalkVoiceMode = true;
+        emit signalSetShouldHearTestVoice(false);
+    }
+    else
+    {
+        pSettingsFile ->bPushToTalkVoiceMode = false;
+        emit signalSetShouldHearTestVoice(true);
+    }
+
+    pSettingsFile ->iVoiceStartRecValueInDBFS = ui ->horizontalSlider_start_voice_rec ->value();
+
+    pSettingsFile ->bHearVoiceInSettings = ui ->checkBox_hear_voice ->isChecked();
 
     pSettingsManager ->saveCurrentSettings();
 
@@ -236,6 +259,22 @@ void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
             break;
         }
     }
+
+    ui ->comboBox_voice_mode ->addItem("Push Button to Record Voice");
+    ui ->comboBox_voice_mode ->addItem("Talk to Record Voice");
+
+    if (pSettingsFile ->bPushToTalkVoiceMode)
+    {
+        ui ->comboBox_voice_mode ->setCurrentIndex(0);
+    }
+    else
+    {
+        ui ->comboBox_voice_mode ->setCurrentIndex(1);
+    }
+
+    ui ->horizontalSlider_start_voice_rec ->setValue(pSettingsFile ->iVoiceStartRecValueInDBFS);
+
+    ui ->checkBox_hear_voice ->setChecked(pSettingsFile ->bHearVoiceInSettings);
 }
 
 void SettingsWindow::showThemes()
@@ -259,9 +298,50 @@ void SettingsWindow::on_comboBox_input_currentIndexChanged(int index)
     }
 }
 
-void SettingsWindow::on_horizontalSlider_input_volume_mult_sliderMoved(int position)
+void SettingsWindow::on_horizontalSlider_input_volume_mult_valueChanged(int position)
 {
     ui ->label_input_voice_mult ->setText(QString::number(position) + "%");
 
     emit signalSetAudioInputVolume(position);
+}
+
+void SettingsWindow::on_horizontalSlider_start_voice_rec_valueChanged(int value)
+{
+    if (bInit == false && value < -40 && bShowedWarning == false)
+    {
+        QMessageBox::warning(this, "Warning", "Setting the threshold lower than -40 dBFS may cause issues, "
+                                              "such as your voice being delayed for other users at some point. "
+                                              "If your microphone is too quiet, change the Input Voice Volume Multiplier "
+                                              "slider to increase its volume.");
+
+        bShowedWarning = true;
+    }
+
+    emit signalSetVoiceStartValue(value);
+
+    ui ->label_start_voice_dbfs ->setText(QString::number(value) + " dBFS");
+
+    ui ->voiceVolumeMeter ->setStartValueInDBFS(value);
+}
+
+void SettingsWindow::on_voiceVolumeMeter_valueChanged(int value)
+{
+    ui ->label_voice_output_dbfs ->setText(QString::number(value) + " dBFS");
+}
+
+void SettingsWindow::on_comboBox_voice_mode_currentIndexChanged(int index)
+{
+    if (bInit == false)
+    {
+        if (index == 1)
+        {
+            emit signalSetShouldHearTestVoice(true);
+        }
+        else
+        {
+            emit signalSetShouldHearTestVoice(false);
+        }
+
+        QMessageBox::warning(this, "Warning", "The Voice Recording Mode will be changed only after the program is restarted!");
+    }
 }

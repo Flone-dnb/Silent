@@ -40,6 +40,8 @@ signals:
     void  applyNewMasterVolume                     ();
     void  closedSettingsWindow                     ();
     void  signalSetAudioInputVolume                (int iVolume);
+    void  signalSetVoiceStartValue                 (int iValue);
+    void  signalSetShouldHearTestVoice             (bool bHear);
 
 protected:
 
@@ -58,8 +60,12 @@ private slots:
     void  on_pushButton_2_clicked                  ();
 
     void on_comboBox_input_currentIndexChanged(int index);
+    void on_horizontalSlider_input_volume_mult_valueChanged(int position);
+    void on_horizontalSlider_start_voice_rec_valueChanged(int value);
 
-    void on_horizontalSlider_input_volume_mult_sliderMoved(int position);
+    void on_voiceVolumeMeter_valueChanged(int value);
+
+    void on_comboBox_voice_mode_currentIndexChanged(int index);
 
 private:
 
@@ -94,5 +100,6 @@ private:
     Ui::SettingsWindow* ui;
 
 
+    bool                bShowedWarning;
     bool                bInit;
 };

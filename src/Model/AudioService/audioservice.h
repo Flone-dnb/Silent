@@ -95,6 +95,8 @@ public:
     // SET functions
 
         void   setInputAudioVolume           (int iVolume);
+        void   setVoiceStartValue            (int iValue);
+        void   setShouldHearTestVoice        (bool bHear);
         void   setNewUserVolume              (std::string sUserName,  float fVolume);
         void   setNewMasterVolume            (unsigned short int iVolume);
         void   setNetworkService             (NetworkService* pNetworkService);
@@ -115,7 +117,8 @@ private:
 
     // Recording
 
-        void   recordOnPress                 ();
+        void   recordOnPush                  ();
+        void   recordOnTalk                  ();
         void   testRecord                    ();
 
 
@@ -123,16 +126,20 @@ private:
 
         bool  addInBuffer       (LPWAVEHDR buffer, bool bTestDevice = false);
         bool  addOutBuffer      (HWAVEOUT  hWaveOut, LPWAVEHDR buffer);
-        void  waitAndSendBuffer (WAVEHDR* WaveInHdr, short int* pWaveIn);
+        void  waitAndSendBuffer (WAVEHDR* WaveInHdr, short int* pWaveIn, bool bOnTalk = false);
         void  waitAndShowBufferVolume(WAVEHDR* WaveInHdr, short int* pWaveIn);
         void  waitForAllInBuffers();
         void  waitForAllTestInBuffers();
+        void  waitForAllTestOutBuffers();
         void  sendAudioData     (short* pAudio);
+        void  sendAudioDataOnTalk(short* pAudio);
         void  sendAudioDataVolume(short* pAudio);
+        void  testOutputAudio   ();
 
     // Used in play()
 
         void  waitForPlayToEnd  (User* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
+        void  waitForPlayOnTestToEnd(WAVEHDR* pWaveOutHdr);
         void  waitForAllBuffers (User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
 
     // Used in start()
@@ -178,6 +185,20 @@ private:
     short int*       pTestWaveIn4;
 
 
+    // Audio packets
+    std::vector<short*> vAudioPacketsForTest;
+    std::mutex          mtxAudioPacketsForTest;
+
+
+    // Waveform-audio output device
+    HWAVEOUT            hTestWaveOut;
+
+
+    // Audio buffers
+    WAVEHDR             TestWaveOutHdr1;
+    WAVEHDR             TestWaveOutHdr2;
+
+
     // Record quality
     // Do not set 'sampleCout' to more than ~700 (700 * 2 = 1400) (~MTU)
     // we '*2" because audio data in PCM16, 1 sample = 16 bits.
@@ -186,10 +207,16 @@ private:
     unsigned long    sampleRate  = 19400; // 19400 hz (samples per second)
 
 
-    // Push-to-talk
+    // Voice.
     int              iAudioInputVolume;
+    int              iLowerVoiceStartRecValueInDBFS;
+    int              iTestPacketsNeedToRecordLeft;
+    int              iPacketsNeedToRecordLeft;
     float            fMasterVolumeMult;
     bool             bInputReady;
     bool             bTestInputReady;
     bool             bPauseTestInput;
+    bool             bOutputTestVoice;
+    bool             bRecordTalk;
+    bool             bRecordedSome;
 };

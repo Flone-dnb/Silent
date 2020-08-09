@@ -89,7 +89,6 @@ QTabBar::tab:selected
 
 QTabWidget::pane {
     border: 1px solid red;
-    border-radius: 6px;
     background-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgba(7, 7, 7, 255), stop:1 rgba(25, 25, 25, 255));
     color: white;
 }

@@ -105,6 +105,16 @@ void MainWindow::slotApplyAudioInputVolume(int iVolume)
     pController->applyAudioInputVolume(iVolume);
 }
 
+void MainWindow::slotApplyVoiceStartValue(int iValue)
+{
+    pController->applyVoiceStartValue(iValue);
+}
+
+void MainWindow::slotApplyShouldHearTestVoice(bool bHear)
+{
+    pController->applyShouldHearTestVoice(bHear);
+}
+
 
 
 void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage)
@@ -728,6 +738,8 @@ void MainWindow::showSettingsWindow()
     connect(this, &MainWindow::signalShowVoiceVolumeValueInSettings, pSettingsWindow, &SettingsWindow::slotSetVoiceVolume);
     connect(pSettingsWindow, &SettingsWindow::closedSettingsWindow, this, &MainWindow::slotSettingsWindowClosed);
     connect(pSettingsWindow, &SettingsWindow::signalSetAudioInputVolume, this, &MainWindow::slotApplyAudioInputVolume);
+    connect(pSettingsWindow, &SettingsWindow::signalSetVoiceStartValue, this, &MainWindow::slotApplyVoiceStartValue);
+    connect(pSettingsWindow, &SettingsWindow::signalSetShouldHearTestVoice, this, &MainWindow::slotApplyShouldHearTestVoice);
     pController->unpauseTestRecording();
     pSettingsWindow ->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow ->setWindowOpacity(0);
@@ -796,6 +808,8 @@ void MainWindow::on_actionSettings_triggered()
     connect(this, &MainWindow::signalShowVoiceVolumeValueInSettings, pSettingsWindow, &SettingsWindow::slotSetVoiceVolume);
     connect(pSettingsWindow, &SettingsWindow::closedSettingsWindow, this, &MainWindow::slotSettingsWindowClosed);
     connect(pSettingsWindow, &SettingsWindow::signalSetAudioInputVolume, this, &MainWindow::slotApplyAudioInputVolume);
+    connect(pSettingsWindow, &SettingsWindow::signalSetVoiceStartValue, this, &MainWindow::slotApplyVoiceStartValue);
+    connect(pSettingsWindow, &SettingsWindow::signalSetShouldHearTestVoice, this, &MainWindow::slotApplyShouldHearTestVoice);
     pController->unpauseTestRecording();
     pSettingsWindow->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow->show();

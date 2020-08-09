@@ -191,6 +191,8 @@ private slots:
         void  slotShowServerMessage             (QString sMessage);
         void  slotEnterRoomWithPassword         (QString sRoomName, QString sPassword);
         void  slotApplyAudioInputVolume         (int iVolume);
+        void  slotApplyVoiceStartValue          (int iValue);
+        void  slotApplyShouldHearTestVoice      (bool bHear);
         void  slotApplyTheme                    ();
         void  slotApplyMasterVolume             ();
         void  slotSettingsWindowClosed          ();

@@ -31,6 +31,7 @@ FORMS += \
     ../src/View/GlobalMessageWindow/globalmessagewindow.ui \
     ../src/View/MainWindow/mainwindow.ui \
     ../src/View/RoomPassInputWindow/roompassinputwindow.ui \
+    ../src/View/SVoiceMeterWidget/svoicemeterwidget.ui \
     ../src/View/SettingsWindow/settingswindow.ui \
     ../src/View/SingleUserSettings/singleusersettings.ui \
     ../src/View/WindowControlWidget/windowcontrolwidget.ui
@@ -53,6 +54,7 @@ HEADERS += \
     ../src/View/GlobalMessageWindow/globalmessagewindow.h \
     ../src/View/MainWindow/mainwindow.h \
     ../src/View/RoomPassInputWindow/roompassinputwindow.h \
+    ../src/View/SVoiceMeterWidget/svoicemeterwidget.h \
     ../src/View/SettingsWindow/settingswindow.h \
     ../src/View/SingleUserSettings/singleusersettings.h \
     ../src/Model/net_params.h \
@@ -74,6 +76,7 @@ SOURCES += \
     ../src/View/GlobalMessageWindow/globalmessagewindow.cpp \
     ../src/View/MainWindow/mainwindow.cpp \
     ../src/View/RoomPassInputWindow/roompassinputwindow.cpp \
+    ../src/View/SVoiceMeterWidget/svoicemeterwidget.cpp \
     ../src/View/SingleUserSettings/singleusersettings.cpp \
     ../src/View/WindowControlWidget/windowcontrolwidget.cpp \
     ../src/main.cpp \

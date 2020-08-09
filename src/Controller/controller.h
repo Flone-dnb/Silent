@@ -53,6 +53,8 @@ public:
 
         void           applyNewMasterVolumeFromSettings       ();
         void           applyAudioInputVolume      (int iVolume);
+        void           applyVoiceStartValue       (int iValue);
+        void           applyShouldHearTestVoice   (bool bHear);
         void           setNewUserVolume           (std::string sUserName,  float fVolume);
 
 

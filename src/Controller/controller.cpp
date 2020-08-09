@@ -173,6 +173,22 @@ void Controller::applyAudioInputVolume(int iVolume)
     }
 }
 
+void Controller::applyVoiceStartValue(int iValue)
+{
+    if (pAudioService)
+    {
+        pAudioService ->setVoiceStartValue(iValue);
+    }
+}
+
+void Controller::applyShouldHearTestVoice(bool bHear)
+{
+    if (pAudioService)
+    {
+        pAudioService ->setShouldHearTestVoice(bHear);
+    }
+}
+
 void Controller::disconnect()
 {
     pNetworkService ->disconnect();

@@ -194,6 +194,21 @@ void SettingsManager::saveCurrentSettings()
 
 
 
+    // Write voice recording mode.
+    newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->bPushToTalkVoiceMode), sizeof(pCurrentSettingsFile ->bPushToTalkVoiceMode));
+
+
+
+    // Write voice recording start value.
+    newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->iVoiceStartRecValueInDBFS), sizeof(pCurrentSettingsFile ->iVoiceStartRecValueInDBFS));
+
+
+
+    // Write hear voice in settings.
+    newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->bHearVoiceInSettings), sizeof(pCurrentSettingsFile ->bHearVoiceInSettings));
+
+
+
     // NEW SETTINGS GO HERE
     // Don't forget to update "readSettings()".
 
@@ -311,14 +326,6 @@ SettingsFile *SettingsManager::readSettings()
 
 
 
-        // ------------------------------------------------
-        // ------------------------------------------------
-        //           HANDLE OLD VERSIONS HERE
-        // ------------------------------------------------
-        // ------------------------------------------------
-
-
-
         // Read push-to-talk button.
         settingsFile .read( reinterpret_cast <char*> (&pSettingsFile ->iPushToTalkButton), sizeof(pSettingsFile ->iPushToTalkButton) );
 
@@ -409,6 +416,25 @@ SettingsFile *SettingsManager::readSettings()
         // Read input volume multiplier.
         settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->iInputVolumeMultiplier), sizeof(pSettingsFile ->iInputVolumeMultiplier));
 
+
+
+        // Read voice recording mode.
+        settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->bPushToTalkVoiceMode), sizeof(pSettingsFile ->bPushToTalkVoiceMode));
+
+
+
+        // Read voice recording start value.
+        settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->iVoiceStartRecValueInDBFS), sizeof(pSettingsFile ->iVoiceStartRecValueInDBFS));
+
+
+
+        // Read hear voice in settings.
+        settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->bHearVoiceInSettings), sizeof(pSettingsFile ->bHearVoiceInSettings));
+
+
+        // ----------------------------------------------------------------
+        // Don't forget to handle OLD version using the 'iSettingsVersion'!
+        // ----------------------------------------------------------------
 
 
         settingsFile .close();
