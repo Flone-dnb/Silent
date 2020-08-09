@@ -8,22 +8,20 @@ Must be used with the Silent Server application. <br>
 <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
 
-# Try our server
-
+# Try Our Server
 Silent only works with the Silent Server, but if you don't want to set up your own server (which is very easy), you can just download Silent from the releases tab and connect to our server.<br>
 <br>
 Our server is located in Moscow, Russia and you can connect to it by typing in the domain name "silent-voip.xyz", the port is 51337.
 
-# Hidden features
-
+# Hidden Features
 By pressing the right mouse button on the user/room in the 'online connected' list you can change the user's volume or 'Enter room'.
 
-# Add your style theme
+# Add Your Style Theme
 The Silent has different style themes that you can change.<br>
 <br>
 To add your own theme you must go to the folder in which the Silent is installed. Then find folder "themes". In this folder, you will see themes that you can select in the Settings window. Copy and paste any .css file, rename it (only ASCII characters allowed) and change its content. After that, if you open the Silent - Settings Window you will see that your new theme can be selected there.<br>
 <br>
-If you want to see your theme in the official Silent build then you can make a pull request.
+If you would like to see your theme in the official Silent build, feel free to do a pull request.
 
 # License
 Please note that starting from version 2.23.0 the Silent is releasing under the Zlib license.<br>
