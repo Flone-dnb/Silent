@@ -83,7 +83,7 @@ public:
     // Audio data record/play
 
         void   setTestRecordingPause         (bool bPause);
-        void   playAudioData                 (short int* pAudio,    std::string sUserName, bool bLast);
+        void   playAudioData                 (short int* pAudio,  std::string sUserName,  bool bLast);
         void   play                          (User* pUser);
 
 
@@ -122,29 +122,29 @@ private:
         void   testRecord                    ();
 
 
-    // Used in recordOnPress()/testRecord()
+    // Used in recordOnPress()/recordOnTalk()/testRecord()
 
-        bool  addInBuffer       (LPWAVEHDR buffer, bool bTestDevice = false);
-        bool  addOutBuffer      (HWAVEOUT  hWaveOut, LPWAVEHDR buffer);
-        void  waitAndSendBuffer (WAVEHDR* WaveInHdr, short int* pWaveIn, bool bOnTalk = false);
-        void  waitAndShowBufferVolume(WAVEHDR* WaveInHdr, short int* pWaveIn);
-        void  waitForAllInBuffers();
-        void  waitForAllTestInBuffers();
-        void  waitForAllTestOutBuffers();
-        void  sendAudioData     (short* pAudio);
-        void  sendAudioDataOnTalk(short* pAudio);
-        void  sendAudioDataVolume(short* pAudio);
-        void  testOutputAudio   ();
+        bool  addInBuffer              (LPWAVEHDR buffer, bool bTestDevice = false);
+        bool  addOutBuffer             (HWAVEOUT  hWaveOut, LPWAVEHDR buffer);
+        void  waitAndSendBuffer        (WAVEHDR* WaveInHdr, short int* pWaveIn, bool bOnTalk = false);
+        void  waitAndShowBufferVolume  (WAVEHDR* WaveInHdr, short int* pWaveIn);
+        void  waitForAllInBuffers      ();
+        void  waitForAllTestInBuffers  ();
+        void  waitForAllTestOutBuffers ();
+        void  sendAudioData            (short* pAudio);
+        void  sendAudioDataOnTalk      (short* pAudio);
+        void  sendAudioDataVolume      (short* pAudio);
+        void  testOutputAudio          ();
 
     // Used in play()
 
-        void  waitForPlayToEnd  (User* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
-        void  waitForPlayOnTestToEnd(WAVEHDR* pWaveOutHdr);
-        void  waitForAllBuffers (User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
+        void  waitForPlayToEnd         (User* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
+        void  waitForPlayOnTestToEnd   (WAVEHDR* pWaveOutHdr);
+        void  waitForAllBuffers        (User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
 
     // Used in start()
 
-        int  getInputDeviceID  (std::wstring sDeviceName);
+        int  getInputDeviceID          (std::wstring sDeviceName);
 
     // -------------------------------------------------------------
 
