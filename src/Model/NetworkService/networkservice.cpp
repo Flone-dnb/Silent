@@ -1059,6 +1059,37 @@ void NetworkService::listenUDPFromServer()
     }
 
 
+    // Increase the send buffer size by 2, because we send a lot of data very fast.
+    // This is how we try to avoid the 10035 error on sendto() (sometimes happens on old/slow systems).
+
+    int iOptVal = 1;
+    int iOptLen  = sizeof(iOptVal);
+
+    int iReturnCode = getsockopt(pThisUser ->sockUserUDP, SOL_SOCKET, SO_SNDBUF, reinterpret_cast <char*> (&iOptVal), &iOptLen);
+    if (iReturnCode == SOCKET_ERROR)
+    {
+        pMainWindow ->printOutput("NetworkService::listenUDPFromServer()::getsockopt (increase the send buffer size by 2) failed: "
+                                 + std::to_string(WSAGetLastError())
+                                 + ".\nSkipping this step.\n",
+                                 SilentMessageColor(false),
+                                 true);
+    }
+    else
+    {
+        iOptVal *= 2;
+
+        iReturnCode = setsockopt(pThisUser ->sockUserUDP, SOL_SOCKET, SO_SNDBUF, reinterpret_cast <char*> (&iOptVal), iOptLen);
+        if (iReturnCode == SOCKET_ERROR)
+        {
+            pMainWindow ->printOutput("NetworkService::listenUDPFromServer()::setsockopt (increase the send buffer size by 2) failed: "
+                                     + std::to_string(WSAGetLastError())
+                                     + ".\nSkipping this step.\n",
+                                     SilentMessageColor(false),
+                                     true);
+        }
+    }
+
+
     // Send "READY" for first ping check packet.
 
     char cReadyForPing = UDP_SM_USER_READY;
@@ -1573,11 +1604,24 @@ void NetworkService::sendVoiceMessage(char *pVoiceMessage, int iMessageSize, boo
         {
             if (iSize == SOCKET_ERROR)
             {
-                pMainWindow->printOutput("\nWARNING:\nYour voice message has not been sent!\n"
-                                         "NetworkService::sendVoiceMessage()::sendto() failed and returned: "
-                                         + std::to_string(WSAGetLastError()) + ".\n",
-                                         SilentMessageColor(false),
-                                         true);
+                int iError = WSAGetLastError();
+
+                if (iError == 10035)
+                {
+                    pMainWindow->printOutput("\nWARNING:\nYour voice message has not been sent!\n"
+                                             "NetworkService::sendVoiceMessage()::sendto() failed and returned: "
+                                             + std::to_string(iError) + " (send buffer is full).\n",
+                                             SilentMessageColor(false),
+                                             true);
+                }
+                else
+                {
+                    pMainWindow->printOutput("\nWARNING:\nYour voice message has not been sent!\n"
+                                             "NetworkService::sendVoiceMessage()::sendto() failed and returned: "
+                                             + std::to_string(iError) + ".\n",
+                                             SilentMessageColor(false),
+                                             true);
+                }
             }
             else
             {
