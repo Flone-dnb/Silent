@@ -176,7 +176,7 @@ SettingsWindow::~SettingsWindow()
     delete ui;
 }
 
-void SettingsWindow::on_pushButton_2_clicked()
+void SettingsWindow::on_pushButton_apply_clicked()
 {
     SettingsFile* pSettingsFile = pSettingsManager ->getCurrentSettings();
 
@@ -197,6 +197,10 @@ void SettingsWindow::on_pushButton_2_clicked()
     if (ui ->comboBox_input ->currentIndex() != 0)
     {
         pSettingsFile ->sInputDeviceName = ui ->comboBox_input ->currentText() .toStdWString();
+    }
+    else
+    {
+        pSettingsFile ->sInputDeviceName = L"";
     }
 
     pSettingsFile ->iInputVolumeMultiplier = ui ->horizontalSlider_input_volume_mult ->value();
@@ -292,6 +296,8 @@ void SettingsWindow::showThemes()
 
 void SettingsWindow::on_comboBox_input_currentIndexChanged(int index)
 {
+    Q_UNUSED(index)
+
     if (bInit == false)
     {
         QMessageBox::warning(this, "Notice", "The audio input device will be changed only after the program is restarted!");

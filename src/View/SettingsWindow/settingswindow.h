@@ -55,17 +55,14 @@ public slots:
 
 private slots:
 
-    void  on_horizontalSlider_volume_valueChanged  (int value);
-    void  on_pushButton_pushtotalk_clicked         ();
-    void  on_pushButton_2_clicked                  ();
-
-    void on_comboBox_input_currentIndexChanged(int index);
-    void on_horizontalSlider_input_volume_mult_valueChanged(int position);
-    void on_horizontalSlider_start_voice_rec_valueChanged(int value);
-
-    void on_voiceVolumeMeter_valueChanged(int value);
-
-    void on_comboBox_voice_mode_currentIndexChanged(int index);
+    void  on_horizontalSlider_volume_valueChanged            (int value);
+    void  on_comboBox_input_currentIndexChanged              (int index);
+    void  on_horizontalSlider_input_volume_mult_valueChanged (int position);
+    void  on_horizontalSlider_start_voice_rec_valueChanged   (int value);
+    void  on_voiceVolumeMeter_valueChanged                   (int value);
+    void  on_comboBox_voice_mode_currentIndexChanged         (int index);
+    void  on_pushButton_pushtotalk_clicked                   ();
+    void  on_pushButton_apply_clicked                        ();
 
 private:
 
