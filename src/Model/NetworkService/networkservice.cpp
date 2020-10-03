@@ -486,7 +486,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 }
 
                 pMainWindow ->printOutput("\nYour Silent version (" + clientVersion + ") does not match the server's "
-                                         "last supported client version (" + std::string(versionBuffer) + ").\n"
+                                         "supported client version (" + std::string(versionBuffer) + ").\n"
                                          "Please change your Silent version to " + std::string(versionBuffer)
                                          + " if you want to connect to this server.",
                                          SilentMessageColor(false), true);
