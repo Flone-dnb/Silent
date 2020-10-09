@@ -30,7 +30,7 @@ SettingsManager::SettingsManager(MainWindow* pMainWindow)
 
 
     bSettingsFileCreatedFirstTime = false;
-
+    bReadOldSettingsFile = false;
     bInit = true;
 
 
@@ -207,6 +207,9 @@ void SettingsManager::saveCurrentSettings()
     // Write hear voice in settings.
     newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->bHearVoiceInSettings), sizeof(pCurrentSettingsFile ->bHearVoiceInSettings));
 
+
+    // Write play text message sound.
+    newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->bPlayTextMessageSound), sizeof(pCurrentSettingsFile ->bPlayTextMessageSound));
 
 
     // NEW SETTINGS GO HERE
@@ -432,6 +435,22 @@ SettingsFile *SettingsManager::readSettings()
         settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->bHearVoiceInSettings), sizeof(pSettingsFile ->bHearVoiceInSettings));
 
 
+        if (iSettingsVersion == 0)
+        {
+            // End of file.
+            settingsFile .close();
+
+            // Used to show the Settings Window on start.
+            bReadOldSettingsFile = true;
+
+            goto link_read_end;
+        }
+
+
+        // Read play text message sound.
+        settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->bPlayTextMessageSound), sizeof(pSettingsFile ->bPlayTextMessageSound));
+
+
         // ----------------------------------------------------------------
         // Don't forget to handle OLD version using the 'iSettingsVersion'!
         // ----------------------------------------------------------------
@@ -448,7 +467,7 @@ SettingsFile *SettingsManager::readSettings()
     }
 
 
-
+link_read_end:
     return pSettingsFile;
 }
 
@@ -460,6 +479,11 @@ SettingsFile *SettingsManager::getCurrentSettings()
 bool SettingsManager::isSettingsCreatedFirstTime()
 {
     return bSettingsFileCreatedFirstTime;
+}
+
+bool SettingsManager::isSettingsFileInOldFormat()
+{
+    return bReadOldSettingsFile;
 }
 
 SettingsManager::~SettingsManager()

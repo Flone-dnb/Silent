@@ -383,7 +383,10 @@ void AudioService::playServerMessageSound()
 
 void AudioService::playNewMessageSound()
 {
-    PlaySoundW( AUDIO_NEW_MESSAGE_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+    if (pSettingsManager ->getCurrentSettings() ->bPlayTextMessageSound)
+    {
+       PlaySoundW( AUDIO_NEW_MESSAGE_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+    }
 }
 
 void AudioService::playLostConnectionSound()

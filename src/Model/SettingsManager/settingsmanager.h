@@ -33,6 +33,7 @@ public:
     SettingsFile*  getCurrentSettings         ();
 
     bool           isSettingsCreatedFirstTime ();
+    bool           isSettingsFileInOldFormat  ();
 
 
     ~SettingsManager();
@@ -51,5 +52,6 @@ private:
 
 
     bool               bSettingsFileCreatedFirstTime;
+    bool               bReadOldSettingsFile;
     bool               bInit;
 };

@@ -968,7 +968,7 @@ void MainWindow::onExecCalled()
 
     slotApplyTheme();
 
-    if ( pController ->isSettingsCreatedFirstTime() )
+    if ( pController ->isSettingsCreatedFirstTime() || pController ->isSettingsFileInOldFormat() )
     {
         // Show SettingsWindow to the user.
 

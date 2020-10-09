@@ -68,6 +68,7 @@ public:
         unsigned short getPingWarningBelow        ();
         SettingsFile*  getCurrentSettingsFile     ();
         bool           isSettingsCreatedFirstTime ();
+        bool           isSettingsFileInOldFormat  ();
         SListItemRoom* getCurrentUserRoom         ();
         std::vector<std::wstring> getInputDevices ();
 

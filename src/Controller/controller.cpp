@@ -95,6 +95,11 @@ bool Controller::isSettingsCreatedFirstTime()
     return pSettingsManager ->isSettingsCreatedFirstTime();
 }
 
+bool Controller::isSettingsFileInOldFormat()
+{
+    return pSettingsManager ->isSettingsFileInOldFormat();
+}
+
 SListItemRoom *Controller::getCurrentUserRoom()
 {
     return pNetworkService->getUserRoom();

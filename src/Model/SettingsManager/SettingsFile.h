@@ -10,7 +10,7 @@
 #include <string>
 
 #define SILENT_MAGIC_NUMBER 51337
-#define SILENT_SETTINGS_FILE_VERSION 0
+#define SILENT_SETTINGS_FILE_VERSION 1
 
 class SettingsFile
 {
@@ -29,7 +29,8 @@ public:
                  int iInputVolumeMultiplier       = 100,
                  bool bPushToTalkVoiceMode        = true,
                  int iVoiceStartRecValueInDBFS    = -30,
-                 bool bHearVoiceInSettings        = true)
+                 bool bHearVoiceInSettings        = true,
+                 bool bPlayTextMessageSound       = true)
     {
         this ->iPushToTalkButton    = iPushToTalkButton;
         this ->iMasterVolume        = iMasterVolume;
@@ -44,6 +45,7 @@ public:
         this ->bPushToTalkVoiceMode = bPushToTalkVoiceMode;
         this ->iVoiceStartRecValueInDBFS = iVoiceStartRecValueInDBFS;
         this ->bHearVoiceInSettings = bHearVoiceInSettings;
+        this ->bPlayTextMessageSound = bPlayTextMessageSound;
     }
 
 
@@ -102,4 +104,5 @@ public:
     bool               bPlayPushToTalkSound;
     bool               bPushToTalkVoiceMode;
     bool               bHearVoiceInSettings;
+    bool               bPlayTextMessageSound;
 };

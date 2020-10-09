@@ -218,7 +218,8 @@ void SettingsWindow::on_pushButton_apply_clicked()
 
     pSettingsFile ->iVoiceStartRecValueInDBFS = ui ->horizontalSlider_start_voice_rec ->value();
 
-    pSettingsFile ->bHearVoiceInSettings = ui ->checkBox_hear_voice ->isChecked();
+    pSettingsFile ->bHearVoiceInSettings  = ui ->checkBox_hear_voice ->isChecked();
+    pSettingsFile ->bPlayTextMessageSound = ui ->checkBox_textMessageSound ->isChecked();
 
     pSettingsManager ->saveCurrentSettings();
 
@@ -279,6 +280,8 @@ void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
     ui ->horizontalSlider_start_voice_rec ->setValue(pSettingsFile ->iVoiceStartRecValueInDBFS);
 
     ui ->checkBox_hear_voice ->setChecked(pSettingsFile ->bHearVoiceInSettings);
+
+    ui ->checkBox_textMessageSound ->setChecked(pSettingsFile ->bPlayTextMessageSound);
 }
 
 void SettingsWindow::showThemes()
