@@ -586,9 +586,12 @@ void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
 
     resultFuture.get();
 
-    ui ->label_chatRoom ->setText(QString::fromStdString(sRoomName));
+    if (pController->getUserName() == pUser->getName().toStdString())
+    {
+        ui ->label_chatRoom ->setText(QString::fromStdString(sRoomName));
 
-    emit signalClearTextChatOutput();
+        emit signalClearTextChatOutput();
+    }
 
     mtxList.unlock();
 }
