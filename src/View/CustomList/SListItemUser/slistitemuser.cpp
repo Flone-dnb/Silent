@@ -29,9 +29,9 @@ void SListItemUser::setRoom(SListItemRoom *pRoom)
 
 void SListItemUser::setPing(int iPing)
 {
-    QString sFormatedName = "    ";
+    QString sFormatedName = "      ";
     sFormatedName += this->sName;
-    sFormatedName += " [" + QString::number(iPing) + " ms]";
+    sFormatedName += "  [" + QString::number(iPing) + " ms]";
 
     setText(sFormatedName);
 

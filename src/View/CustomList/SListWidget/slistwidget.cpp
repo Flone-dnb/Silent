@@ -6,6 +6,10 @@
 #include "slistwidget.h"
 
 #include <QMessageBox>
+#include <QLayout>
+#include <QLabel>
+#include <QWidget>
+#include <QHBoxLayout>
 
 #include "View/CustomList/SListItemUser/slistitemuser.h"
 #include "View/CustomList/SListItemRoom/slistitemroom.h"
@@ -30,6 +34,7 @@ void SListWidget::addRoom(QString sRoomName, QString sPassword, size_t iMaxUsers
         vRooms.push_back(pNewItem);
 
         addItem(pNewItem);
+        setItemWidget(pNewItem, pNewItem->getUIWidget());
     }
 }
 
@@ -99,6 +104,8 @@ void SListWidget::moveUser(SListItemUser *pUser, QString sToRoom)
         if (vRooms[i]->getRoomName() == sToRoom)
         {
             vRooms[i]->addUser(pUser);
+
+            break;
         }
     }
 }

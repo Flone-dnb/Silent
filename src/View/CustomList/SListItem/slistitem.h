@@ -7,12 +7,14 @@
 
 #include <QListWidgetItem>
 
+
 class SListItem : public QListWidgetItem
 {
+
 public:
 
     SListItem() = default;
-    SListItem         (QString sName);
+    SListItem(QString sName);
 
 
 

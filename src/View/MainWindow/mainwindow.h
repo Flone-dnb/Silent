@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <future>
 
 // Custom
 #include "Model/OutputTextType.h"
@@ -112,6 +113,9 @@ signals:
         void signalEnableInteractiveElements         (bool bMenu,                       bool bTypeAndSend);
         void signalSetConnectDisconnectButton        (bool bConnect);
         void signalCreateRoom                        (QString sName, QString sPassword, size_t iMaxUsers);
+        void signalDeleteUserFromList                (SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise);
+        void signalMoveUserToRoom                    (SListItemUser *pUser, QString sRoomName, std::promise<bool>* promiseResult);
+        void signalAddRoom                           (QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom, std::promise<int>* promiseRoomCount);
 
 
     // Other
@@ -120,15 +124,16 @@ signals:
         void signalShowMessageBox                    (bool bWarningBox, std::string message);
         void signalShowPasswordInputWindow           (std::string sRoomName);
         void signalShowServerMessage                 (QString sMessage);
+        void signalDeleteRoom                        (QString sRoomName, std::promise<int>* promiseRoomCount);
         void signalApplyTheme                        ();
 
 
 protected:
 
-    void hideEvent     (QHideEvent* event);
-    void closeEvent    (QCloseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
+    void hideEvent       (QHideEvent  *event);
+    void closeEvent      (QCloseEvent *event);
+    void mouseMoveEvent  (QMouseEvent *event);
+    void mousePressEvent (QMouseEvent *event);
 
 
 public slots:
@@ -154,7 +159,7 @@ private slots:
 
     // Update UI elements
 
-        void  slotDeleteUserFromList            (QListWidgetItem* pListWidgetItem, bool bDeleteAll = false);
+        void  slotDeleteUserFromList            (SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise);
         void  slotEnableInteractiveElements     (bool bMenu,                       bool bTypeAndSend);
         void  slotSetConnectDisconnectButton    (bool bConnect);
         void  slotCreateRoom                    (QString sName, QString sPassword, size_t iMaxUsers);
@@ -196,6 +201,9 @@ private slots:
         void  slotApplyTheme                    ();
         void  slotApplyMasterVolume             ();
         void  slotSettingsWindowClosed          ();
+        void  slotAddRoom                       (QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom, std::promise<int>* promiseRoomCount);
+        void  slotDeleteRoom                    (QString sRoomName, std::promise<int>* promiseRoomCount);
+        void  slotMoveUserToRoom                (SListItemUser *pUser, QString sRoomName, std::promise<bool>* promiseResult);
 
         void  slotMaxWindow                     ();
         void  slotHideWindow                    ();

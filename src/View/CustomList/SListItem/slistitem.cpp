@@ -12,6 +12,10 @@ SListItem::SListItem(QString sName)
     bIsRoom = false;
 }
 
+SListItem::~SListItem()
+{
+}
+
 void SListItem::setItemType(bool bIsRoom)
 {
     this->bIsRoom = bIsRoom;
@@ -20,9 +24,4 @@ void SListItem::setItemType(bool bIsRoom)
 bool SListItem::isRoom()
 {
     return bIsRoom;
-}
-
-SListItem::~SListItem()
-{
-
 }

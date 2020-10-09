@@ -5,9 +5,15 @@
 
 #pragma once
 
+// Qt
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QLabel>
 
+// STL
 #include <vector>
 
+// Custom
 #include "View/CustomList/SListItem/slistitem.h"
 
 
@@ -43,6 +49,7 @@ public:
     QString getPassword ();
     size_t  getMaxUsers ();
     bool    getIsWelcomeRoom();
+    QWidget* getUIWidget();
 
 
 
@@ -50,13 +57,18 @@ public:
 
 private:
 
-    QString getRoomFullName();
+    void setupUI();
+    void updateText();
 
 
 
     std::vector<SListItemUser*> vUsers;
 
 
+    QWidget*     pUIWidget;
+    QHBoxLayout* pLayout;
+    QLabel*      pRoomNameLabel;
+    QLabel*      pRoomPropsLabel;
     SListWidget* pList;
 
 

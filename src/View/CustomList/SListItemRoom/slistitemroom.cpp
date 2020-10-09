@@ -13,15 +13,18 @@
 
 SListItemRoom::SListItemRoom(QString sName, SListWidget* pList, QString sPassword, size_t iMaxUsers)
 {
+    setupUI();
+
     bIsWelcomeRoom = false;
 
     this->pList = pList;
 
     sRoomName = sName;
     this->sPassword = sPassword;
+
     this->iMaxUsers = iMaxUsers;
 
-    setText(getRoomFullName());
+    updateText();
 }
 
 void SListItemRoom::addUser(SListItemUser *pUser)
@@ -63,7 +66,7 @@ void SListItemRoom::addUser(SListItemUser *pUser)
     }
 
     // Update info.
-    setText(getRoomFullName());
+    updateText();
 }
 
 void SListItemRoom::deleteUser(SListItemUser *pUser)
@@ -79,7 +82,39 @@ void SListItemRoom::deleteUser(SListItemUser *pUser)
     }
 
     // Update info.
-    setText(getRoomFullName());
+    updateText();
+}
+
+void SListItemRoom::setupUI()
+{
+    pUIWidget = new QWidget();
+    QHBoxLayout* pLayout = new QHBoxLayout(pUIWidget);
+
+    QFont font;
+    font.setFamily("Segoe UI");
+    font.setPointSize(11);
+    font.setKerning(true);
+
+    pRoomNameLabel = new QLabel("");
+    pRoomNameLabel->setFont(font);
+    pRoomNameLabel->setAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
+    pRoomNameLabel->setMargin(0);
+
+    pRoomPropsLabel = new QLabel("");
+    pRoomPropsLabel->setFont(font);
+    pRoomPropsLabel->setAlignment(Qt::AlignmentFlag::AlignRight | Qt::AlignmentFlag::AlignVCenter);
+    pRoomPropsLabel->setMargin(0);
+
+    pLayout->addWidget(pRoomNameLabel);
+    pLayout->addWidget(pRoomPropsLabel);
+
+    pLayout->setStretch(0, 80);
+    pLayout->setStretch(1, 20);
+    pLayout->setContentsMargins(5, 2, 15, 2);
+
+    pLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+
+    setSizeHint(pUIWidget->sizeHint());
 }
 
 void SListItemRoom::deleteAll()
@@ -92,28 +127,28 @@ void SListItemRoom::deleteAll()
     vUsers.clear();
 
     // Update info.
-    setText(getRoomFullName());
+    updateText();
 }
 
 void SListItemRoom::setRoomName(QString sName)
 {
     sRoomName = sName;
 
-    setText(getRoomFullName());
+    updateText();
 }
 
 void SListItemRoom::setRoomPassword(QString sPassword)
 {
     this->sPassword = sPassword;
 
-    setText(getRoomFullName());
+    updateText();
 }
 
 void SListItemRoom::setRoomMaxUsers(size_t iMaxUsers)
 {
     this->iMaxUsers = iMaxUsers;
 
-    setText(getRoomFullName());
+    updateText();
 }
 
 void SListItemRoom::setIsWelcomeRoom(bool bIsWelcomeRoom)
@@ -129,11 +164,13 @@ void SListItemRoom::eraseUserFromRoom(SListItemUser *pUser)
         {
             vUsers.erase( vUsers.begin() + i );
             pList->takeItem(pList->row(pUser));
+
+            break;
         }
     }
 
     // Update info.
-    setText(getRoomFullName());
+    updateText();
 }
 
 std::vector<SListItemUser *> SListItemRoom::getUsers()
@@ -166,31 +203,29 @@ bool SListItemRoom::getIsWelcomeRoom()
     return bIsWelcomeRoom;
 }
 
-SListItemRoom::~SListItemRoom()
+QWidget* SListItemRoom::getUIWidget()
 {
-
+    return pUIWidget;
 }
 
-QString SListItemRoom::getRoomFullName()
+SListItemRoom::~SListItemRoom()
 {
-    QFont f = font();
-    f.setPointSize(11);
-    setFont(f);
+    delete pRoomNameLabel;
+    delete pRoomPropsLabel;
 
+    delete pUIWidget;
+}
 
-    QString sFullName = sRoomName;
+void SListItemRoom::updateText()
+{
+    pRoomNameLabel->setText(sRoomName);
 
-    sFullName += "    ";
-
-    sFullName += "(";
-    if (iMaxUsers == 0)
+    if (iMaxUsers != 0)
     {
-        sFullName += QString::number(vUsers.size()) + ")";
+        pRoomPropsLabel->setText(QString::number(vUsers.size()) + " / " + QString::number(iMaxUsers));
     }
     else
     {
-        sFullName += QString::number(vUsers.size()) + "/" + QString::number(iMaxUsers) + ")";
+        pRoomPropsLabel->setText(QString::number(vUsers.size()));
     }
-
-    return sFullName;
 }
