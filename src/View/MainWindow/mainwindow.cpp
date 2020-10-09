@@ -479,6 +479,8 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
 
     // Replace any '\n' to '<br>' because we will use "appendHtml()" function.
     sNameWithMessage .replace("\n", "<br>");
+    // Replace any ' ' to '&nbsp;'
+    sNameWithMessage .replace(" ", "&nbsp;");
 
 
     // Add <br> in the end of the message.
@@ -755,17 +757,20 @@ void MainWindow::customqplaintextedit_return_pressed()
 {
     if ( bAbleToSend && (ui ->plainTextEdit_input ->toPlainText() != "") )
     {
-        if (ui ->plainTextEdit_input ->toPlainText()[ ui ->plainTextEdit_input ->toPlainText() .size() - 1 ] == "\n")
+        std::wstring sMessage = ui ->plainTextEdit_input ->toPlainText() .toStdWString();
+        if (filterMessageText(sMessage))
         {
-            std::wstring text = ui ->plainTextEdit_input ->toPlainText() .toStdWString();
+            showMessageBox(true, "Your message is too big!");
+            return;
+        }
 
-            text = text .substr( 0, text .size() - 1 );
-
-            pController ->sendMessage(text);
+        if (sMessage != L"")
+        {
+            pController ->sendMessage( sMessage );
         }
         else
         {
-            pController ->sendMessage( ui ->plainTextEdit_input ->toPlainText() .toStdWString() );
+            clearTextEdit();
         }
     }
 }
@@ -1156,6 +1161,99 @@ void MainWindow::on_listWidget_users_itemClicked(QListWidgetItem *item)
             ui ->listWidget_users ->clearSelection();
         }
     }
+}
+
+bool MainWindow::filterMessageText(std::wstring &sMessage)
+{
+    // Delete empty new lines at the end.
+
+    for (int i = static_cast<int>(sMessage.size() - 1); i >= 0; i--)
+    {
+        if (sMessage[i] == L'\n')
+        {
+            sMessage.pop_back();
+        }
+        else
+        {
+            break;
+        }
+    }
+
+
+
+    // Check if the first char is '\n'.
+
+    if (sMessage[0] == L'\n')
+    {
+        sMessage.erase( sMessage.begin() );
+    }
+
+
+
+    // Delete empty new lines in a row.
+
+    bool bWasNewLine = false;
+
+    for (size_t i = 0; i < sMessage.size(); i++)
+    {
+        if (sMessage[i] == L'\n')
+        {
+            if (bWasNewLine)
+            {
+                sMessage.erase( sMessage.begin() + i );
+                i--;
+            }
+            else
+            {
+                bWasNewLine = true;
+            }
+        }
+        else if (bWasNewLine)
+        {
+            bWasNewLine = false;
+        }
+    }
+
+
+
+    // Count how much new lines there are.
+
+    int iNewLineCount = 0;
+
+    for (size_t i = 0; i < sMessage.size(); i++)
+    {
+        if (sMessage[i] == L'\n')
+        {
+            iNewLineCount++;
+        }
+    }
+
+    if (iNewLineCount > MAX_NEW_LINE_COUNT_IN_MESSAGE)
+    {
+        return true;
+    }
+
+
+
+    // Check if the message contains more than one line.
+
+    bool bIsMultiline = false;
+
+    for (size_t i = 0; i < sMessage.size(); i++)
+    {
+        if (sMessage[i] == L'\n')
+        {
+            bIsMultiline = true;
+            break;
+        }
+    }
+
+    if (bIsMultiline)
+    {
+        sMessage.insert(sMessage.begin(), '\n');
+    }
+
+    return false;
 }
 
 

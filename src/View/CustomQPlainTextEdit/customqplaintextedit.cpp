@@ -18,7 +18,14 @@ void CustomQPlainTextEdit::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Return)
     {
-        emit signalReturnPressed();
+        if (event->modifiers() != Qt::ShiftModifier)
+        {
+            emit signalReturnPressed();
+        }
+        else
+        {
+            QPlainTextEdit::keyPressEvent(event);
+        }
     }
     else
     {

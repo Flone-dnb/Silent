@@ -1453,7 +1453,7 @@ void NetworkService::receiveServerMessage()
 
 void NetworkService::sendMessage(std::wstring message)
 {
-    if (message.size() > MAX_MESSAGE_LENGTH)
+    if (message.length() * 2 > MAX_MESSAGE_LENGTH)
     {
         pMainWindow ->showMessageBox(true, "Your message is too big!");
 
@@ -1465,10 +1465,10 @@ void NetworkService::sendMessage(std::wstring message)
 
     // Prepare send buffer.
 
-    char* pSendBuffer = new char[ 3 + (message.size() * 2) + 2 ];
-    memset(pSendBuffer, 0, 3 + (message .size() * 2) + 2);
+    char* pSendBuffer = new char[ 3 + (message .length() * 2) + 2 ];
+    memset(pSendBuffer, 0, 3 + (message .length() * 2) + 2);
 
-    unsigned short int iPacketSize = static_cast <unsigned short> ( message .size() * 2 );
+    unsigned short int iPacketSize = static_cast <unsigned short> ( message .length() * 2 );
 
 
 
@@ -1479,14 +1479,14 @@ void NetworkService::sendMessage(std::wstring message)
 
     std::memcpy( pSendBuffer,      &commandType,      1                  );
     std::memcpy( pSendBuffer + 1,  &iPacketSize,      2                  );
-    std::memcpy( pSendBuffer + 3,  message .c_str(),  message.size() * 2 );
+    std::memcpy( pSendBuffer + 3,  message .c_str(),  message.length() * 2 );
 
 
 
 
     // Send buffer.
 
-    int iSendBufferSize = static_cast <int> ( sizeof(commandType) + sizeof(iPacketSize) + message.size() * 2 );
+    int iSendBufferSize = static_cast <int> ( sizeof(commandType) + sizeof(iPacketSize) + message.length() * 2 );
 
     int sendSize = send(  pThisUser ->sockUserTCP, pSendBuffer, iSendBufferSize, 0  );
 

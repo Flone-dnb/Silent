@@ -41,6 +41,8 @@ namespace Ui
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 
+#define MAX_NEW_LINE_COUNT_IN_MESSAGE 10
+
 
 class MainWindow : public QMainWindow
 {
@@ -218,6 +220,7 @@ private slots:
 
 private:
 
+    bool filterMessageText  (std::wstring& sMessage);
     void showSettingsWindow ();
     void closeApp           ();
     void applyDefaultTheme  ();
