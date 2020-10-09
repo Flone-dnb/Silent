@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>843</width>
+    <width>887</width>
     <height>618</height>
    </rect>
   </property>
@@ -697,7 +697,7 @@
        <attribute name="title">
         <string>Interface</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="10,90">
+       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="10,10,80">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="50,50">
           <item>
@@ -732,6 +732,39 @@
             </property>
             <property name="styleSheet">
              <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_21">
+          <item>
+           <widget class="QLabel" name="label_14">
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Someone's Connected/Disconnected Message</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_connectDisconnectMessage">
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Enable</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -819,7 +852,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>843</width>
+     <width>887</width>
      <height>25</height>
     </rect>
    </property>

@@ -31,7 +31,8 @@ public:
                  int iVoiceStartRecValueInDBFS    = -30,
                  bool bHearVoiceInSettings        = true,
                  bool bPlayTextMessageSound       = true,
-                 bool bPlayConnectDisconnectSound = true)
+                 bool bPlayConnectDisconnectSound = true,
+                 bool bShowConnectDisconnectMessage = true)
     {
         this ->iPushToTalkButton    = iPushToTalkButton;
         this ->iMasterVolume        = iMasterVolume;
@@ -48,6 +49,7 @@ public:
         this ->bHearVoiceInSettings = bHearVoiceInSettings;
         this ->bPlayTextMessageSound = bPlayTextMessageSound;
         this ->bPlayConnectDisconnectSound = bPlayConnectDisconnectSound;
+        this ->bShowConnectDisconnectMessage = bShowConnectDisconnectMessage;
     }
 
 
@@ -108,4 +110,5 @@ public:
     bool               bHearVoiceInSettings;
     bool               bPlayTextMessageSound;
     bool               bPlayConnectDisconnectSound;
+    bool               bShowConnectDisconnectMessage;
 };

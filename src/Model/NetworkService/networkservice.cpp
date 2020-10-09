@@ -208,7 +208,10 @@ void NetworkService::eraseDisconnectedUser(std::string sUserName, char cDisconne
 
         pMainWindow   ->deleteUserFromList  (pItem);
 
-        pMainWindow   ->showUserDisconnectNotice(sUserName, SilentMessageColor(true), cDisconnectType);
+        if (pSettingsManager ->getCurrentSettings() ->bShowConnectDisconnectMessage)
+        {
+            pMainWindow   ->showUserDisconnectNotice(sUserName, SilentMessageColor(true), cDisconnectType);
+        }
     }
 
     mtxOtherUsers. unlock();
@@ -1245,7 +1248,10 @@ void NetworkService::receiveInfoAboutNewUser()
 
     // Show new user notice.
 
-    pMainWindow  ->showUserConnectNotice(std::string(readBuffer + 5), SilentMessageColor(true));
+    if (pSettingsManager ->getCurrentSettings() ->bShowConnectDisconnectMessage)
+    {
+        pMainWindow  ->showUserConnectNotice(std::string(readBuffer + 5), SilentMessageColor(true));
+    }
 }
 
 void NetworkService::receiveMessage()
