@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1114</width>
-    <height>664</height>
+    <height>663</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="7,90,3">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="7,90">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="65,35">
         <item>
@@ -80,20 +80,52 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="65,35">
         <item>
-         <widget class="QPlainTextEdit" name="plainTextEdit">
-          <property name="font">
-           <font>
-            <family>Segoe UI</family>
-            <pointsize>10</pointsize>
-           </font>
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="90,10">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
           </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEdit">
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="CustomQPlainTextEdit" name="plainTextEdit_input">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="locale">
+             <locale language="Russian" country="Russia"/>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_3" stretch="45">
@@ -113,29 +145,6 @@
            </widget>
           </item>
          </layout>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="85">
-        <item>
-         <widget class="CustomQPlainTextEdit" name="plainTextEdit_input">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="font">
-           <font>
-            <family>Segoe UI</family>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="locale">
-           <locale language="Russian" country="Russia"/>
-          </property>
-         </widget>
         </item>
        </layout>
       </item>
