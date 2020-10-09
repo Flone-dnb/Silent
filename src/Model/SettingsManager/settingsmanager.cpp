@@ -212,6 +212,10 @@ void SettingsManager::saveCurrentSettings()
     newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->bPlayTextMessageSound), sizeof(pCurrentSettingsFile ->bPlayTextMessageSound));
 
 
+    // Write play connect/disconnect sound.
+    newSettingsFile .write( reinterpret_cast<char*>(&pCurrentSettingsFile ->bPlayConnectDisconnectSound), sizeof(pCurrentSettingsFile ->bPlayConnectDisconnectSound));
+
+
     // NEW SETTINGS GO HERE
     // Don't forget to update "readSettings()".
 
@@ -449,6 +453,10 @@ SettingsFile *SettingsManager::readSettings()
 
         // Read play text message sound.
         settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->bPlayTextMessageSound), sizeof(pSettingsFile ->bPlayTextMessageSound));
+
+
+        // Read play connect/disconnect sound.
+        settingsFile .read( reinterpret_cast<char*>(&pSettingsFile ->bPlayConnectDisconnectSound), sizeof(pSettingsFile ->bPlayConnectDisconnectSound));
 
 
         // ----------------------------------------------------------------

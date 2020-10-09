@@ -220,6 +220,7 @@ void SettingsWindow::on_pushButton_apply_clicked()
 
     pSettingsFile ->bHearVoiceInSettings  = ui ->checkBox_hear_voice ->isChecked();
     pSettingsFile ->bPlayTextMessageSound = ui ->checkBox_textMessageSound ->isChecked();
+    pSettingsFile ->bPlayConnectDisconnectSound = ui ->checkBox_connectDisconnectSound ->isChecked();
 
     pSettingsManager ->saveCurrentSettings();
 
@@ -282,6 +283,8 @@ void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
     ui ->checkBox_hear_voice ->setChecked(pSettingsFile ->bHearVoiceInSettings);
 
     ui ->checkBox_textMessageSound ->setChecked(pSettingsFile ->bPlayTextMessageSound);
+
+    ui ->checkBox_connectDisconnectSound ->setChecked(pSettingsFile ->bPlayConnectDisconnectSound);
 }
 
 void SettingsWindow::showThemes()

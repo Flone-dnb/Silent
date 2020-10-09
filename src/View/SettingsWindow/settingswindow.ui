@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>693</width>
+    <width>843</width>
     <height>618</height>
    </rect>
   </property>
@@ -414,7 +414,7 @@
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_15">
+              <layout class="QHBoxLayout" name="horizontalLayout_15" stretch="80,20">
                <item>
                 <widget class="SVoiceMeterWidget" name="voiceVolumeMeter">
                  <property name="enabled">
@@ -447,6 +447,9 @@
                  </property>
                  <property name="text">
                   <string>-60 dBFS</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
                  </property>
                 </widget>
                </item>
@@ -520,7 +523,7 @@
        <attribute name="title">
         <string>Sound</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="10,10,80">
+       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="10,10,10,70">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="50,50">
           <item>
@@ -620,6 +623,43 @@
            <layout class="QHBoxLayout" name="horizontalLayout_18" stretch="0">
             <item>
              <widget class="QCheckBox" name="checkBox_textMessageSound">
+              <property name="font">
+               <font>
+                <family>Segoe UI</family>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Enable</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_19">
+          <item>
+           <widget class="QLabel" name="label_13">
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Someone's Connected/Disconnected Sound</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <item>
+             <widget class="QCheckBox" name="checkBox_connectDisconnectSound">
               <property name="font">
                <font>
                 <family>Segoe UI</family>
@@ -779,7 +819,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>693</width>
+     <width>843</width>
      <height>25</height>
     </rect>
    </property>

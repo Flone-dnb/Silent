@@ -366,13 +366,16 @@ void AudioService::startTestWaveOut()
 
 void AudioService::playConnectDisconnectSound(bool bConnectSound)
 {
-    if (bConnectSound)
+    if (pSettingsManager ->getCurrentSettings() ->bPlayConnectDisconnectSound)
     {
-        PlaySoundW( AUDIO_CONNECT_PATH,    nullptr, SND_FILENAME | SND_ASYNC );
-    }
-    else
-    {
-        PlaySoundW( AUDIO_DISCONNECT_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+        if (bConnectSound)
+        {
+            PlaySoundW( AUDIO_CONNECT_PATH,    nullptr, SND_FILENAME | SND_ASYNC );
+        }
+        else
+        {
+            PlaySoundW( AUDIO_DISCONNECT_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+        }
     }
 }
 
