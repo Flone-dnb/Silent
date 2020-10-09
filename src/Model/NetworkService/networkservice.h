@@ -21,7 +21,7 @@ class User;
 class SListItemRoom;
 
 
-#define  CLIENT_VERSION                "3.2.1"
+#define  CLIENT_VERSION                "3.3.0"
 
 
 
