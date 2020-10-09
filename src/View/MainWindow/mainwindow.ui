@@ -117,7 +117,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="85,15">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="85">
         <item>
          <widget class="CustomQPlainTextEdit" name="plainTextEdit_input">
           <property name="enabled">
@@ -137,31 +137,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <family>Segoe UI</family>
-            <pointsize>15</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Send</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
      </layout>
@@ -174,7 +149,7 @@
      <x>0</x>
      <y>0</y>
      <width>1114</width>
-     <height>33</height>
+     <height>28</height>
     </rect>
    </property>
    <property name="font">

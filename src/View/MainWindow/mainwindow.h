@@ -255,4 +255,7 @@ private:
 
 
     QPoint           dragPosition;
+
+
+    bool             bAbleToSend;
 };

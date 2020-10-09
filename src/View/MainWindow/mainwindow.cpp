@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui ->setupUi(this);
 
+    bAbleToSend = false;
+
     // Set CSS classes
     ui ->label_chatRoom          ->setProperty("cssClass", "mainwindowLabel");
     ui ->label_connectedCount    ->setProperty("cssClass", "mainwindowLabel");
@@ -157,12 +159,12 @@ void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
 
     if (bTypeAndSend)
     {
-        ui ->pushButton          ->setEnabled(true);
+        bAbleToSend = true;
         ui ->plainTextEdit_input ->setEnabled(true);
     }
     else
     {
-        ui ->pushButton          ->setEnabled(false);
+        bAbleToSend = false;
         ui ->plainTextEdit_input ->setEnabled(false);
     }
 }
@@ -751,7 +753,7 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::customqplaintextedit_return_pressed()
 {
-    if ( (ui ->pushButton ->isEnabled()) && (ui ->plainTextEdit_input ->toPlainText() != "") )
+    if ( bAbleToSend && (ui ->plainTextEdit_input ->toPlainText() != "") )
     {
         if (ui ->plainTextEdit_input ->toPlainText()[ ui ->plainTextEdit_input ->toPlainText() .size() - 1 ] == "\n")
         {
