@@ -27,7 +27,7 @@ class SListItemRoom;
 class AES;
 
 
-#define  CLIENT_VERSION                "3.3.0"
+#define  CLIENT_VERSION                "3.4.0"
 
 
 
