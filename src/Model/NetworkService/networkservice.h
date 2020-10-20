@@ -11,6 +11,10 @@
 #include <vector>
 #include <ctime>
 #include <mutex>
+#include <random>
+
+// Other
+#include "basetsd.h"
 
 
 class MainWindow;
@@ -19,6 +23,8 @@ class SettingsManager;
 
 class User;
 class SListItemRoom;
+
+class AES;
 
 
 #define  CLIENT_VERSION                "3.3.0"
@@ -37,6 +43,7 @@ class NetworkService
 public:
 
     NetworkService(MainWindow* pMainWindow, AudioService* pAudioService, SettingsManager* pSettingsManager);
+    ~NetworkService();
 
 
 
@@ -78,8 +85,6 @@ public:
 
         std::string    getClientVersion        () const;
         std::string    getUserName             () const;
-        unsigned short getPingNormalBelow      () const;
-        unsigned short getPingWarningBelow     () const;
         SListItemRoom* getUserRoom             () const;
 
         size_t         getOtherUsersVectorSize () const;
@@ -89,6 +94,11 @@ public:
 
 
 private:
+
+    // Startup
+
+        void  generateKeys                     ();
+
 
     // Receive
 
@@ -139,16 +149,11 @@ private:
     AudioService*      pAudioService;
     SettingsManager*   pSettingsManager;
     User*              pThisUser;
+    AES*               pAES;
+    std::mt19937_64*   pRndGen;
 
 
-
-    // Users
     std::vector<User*> vOtherUsers;
-
-
-    // Ping
-    unsigned short     iPingNormalBelow;
-    unsigned short     iPingWarningBelow;
 
 
     std::mutex         mtxOtherUsers;
@@ -161,6 +166,7 @@ private:
 
 
     std::string        clientVersion;
+    char               vSecretAESKey[16];
 
 
     bool               bWinSockLaunched;

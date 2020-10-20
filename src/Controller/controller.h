@@ -64,8 +64,6 @@ public:
         float          getUserCurrentVolume       (std::string sUserName);
         std::string    getClientVersion           ();
         std::string    getUserName                ();
-        unsigned short getPingNormalBelow         ();
-        unsigned short getPingWarningBelow        ();
         SettingsFile*  getCurrentSettingsFile     ();
         bool           isSettingsCreatedFirstTime ();
         bool           isSettingsFileInOldFormat  ();

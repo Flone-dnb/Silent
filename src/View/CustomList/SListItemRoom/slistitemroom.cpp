@@ -13,6 +13,11 @@
 
 SListItemRoom::SListItemRoom(QString sName, SListWidget* pList, QString sPassword, size_t iMaxUsers)
 {
+    pRoomNameLabel = nullptr;
+    pRoomPropsLabel = nullptr;
+
+    pUIWidget = nullptr;
+
     setupUI();
 
     bIsWelcomeRoom = false;
@@ -87,6 +92,21 @@ void SListItemRoom::deleteUser(SListItemUser *pUser)
 
 void SListItemRoom::setupUI()
 {
+    if (pRoomNameLabel)
+    {
+        delete pRoomNameLabel;
+    }
+
+    if (pRoomPropsLabel)
+    {
+       delete pRoomPropsLabel;
+    }
+
+    if (pUIWidget)
+    {
+        delete pUIWidget;
+    }
+
     pUIWidget = new QWidget();
     QHBoxLayout* pLayout = new QHBoxLayout(pUIWidget);
 

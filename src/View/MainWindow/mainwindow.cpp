@@ -54,17 +54,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui ->plainTextEdit_input     ->setProperty("cssClass", "userInput");
     ui ->plainTextEdit           ->setProperty("cssClass", "chatOutput");
 
-    qRegisterMetaType<std::promise<int>*>("std::promise<int>*");
-
     WindowControlWidget* pControlWindowWidget = new WindowControlWidget(this);
-    connect(pControlWindowWidget, &WindowControlWidget::signalClose, this, &MainWindow::close);
-    connect(pControlWindowWidget, &WindowControlWidget::signalHide, this, &MainWindow::slotHideWindow);
+    connect(pControlWindowWidget, &WindowControlWidget::signalClose,    this, &MainWindow::close);
+    connect(pControlWindowWidget, &WindowControlWidget::signalHide,     this, &MainWindow::slotHideWindow);
     connect(pControlWindowWidget, &WindowControlWidget::signalMaximize, this, &MainWindow::slotMaxWindow);
 
-    connect(this, &MainWindow::signalAddRoom, this, &MainWindow::slotAddRoom);
-    connect(this, &MainWindow::signalDeleteRoom, this, &MainWindow::slotDeleteRoom);
-    connect(this, &MainWindow::signalMoveUserToRoom, this, &MainWindow::slotMoveUserToRoom);
+    connect(this, &MainWindow::signalAddRoom,            this, &MainWindow::slotAddRoom);
+    connect(this, &MainWindow::signalDeleteRoom,         this, &MainWindow::slotDeleteRoom);
+    connect(this, &MainWindow::signalMoveUserToRoom,     this, &MainWindow::slotMoveUserToRoom);
     connect(this, &MainWindow::signalDeleteUserFromList, this, &MainWindow::slotDeleteUserFromList);
+    connect(this, &MainWindow::signalMoveRoom,           this, &MainWindow::slotMoveRoom);
+    connect(this, &MainWindow::signalAddUserToRoomIndex, this, &MainWindow::slotAddUserToRoomIndex);
+    connect(this, &MainWindow::signalAddNewUserToList,   this, &MainWindow::slotAddNewUserToList);
 
     ui->menuBar->setCornerWidget(pControlWindowWidget, Qt::Corner::TopRightCorner);
 }
@@ -181,9 +182,11 @@ void MainWindow::slotSetConnectDisconnectButton(bool bConnect)
     }
 }
 
-void MainWindow::slotCreateRoom(QString sName, QString sPassword, size_t iMaxUsers)
+void MainWindow::slotCreateRoom(QString sName, QString sPassword, size_t iMaxUsers, std::promise<bool>* resultPromise)
 {
     ui ->listWidget_users ->addRoom(sName, sPassword, iMaxUsers);
+
+    resultPromise->set_value(false);
 }
 
 void MainWindow::slotTrayIconActivated()
@@ -374,6 +377,49 @@ void MainWindow::slotMoveUserToRoom(SListItemUser *pUser, QString sRoomName, std
     promiseResult->set_value(false);
 }
 
+void MainWindow::slotMoveRoom(QString sRoomName, bool bMoveUp, std::promise<bool> *promiseResult)
+{
+    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+
+    for (size_t i = 0; i < vRooms.size(); i++)
+    {
+        if (vRooms[i]->getRoomName() == sRoomName)
+        {
+            if (bMoveUp)
+            {
+                ui ->listWidget_users ->moveRoomUp(vRooms[i]);
+            }
+            else
+            {
+                ui ->listWidget_users ->moveRoomDown(vRooms[i]);
+            }
+
+            break;
+        }
+    }
+
+    promiseResult->set_value(false);
+}
+
+void MainWindow::slotAddUserToRoomIndex(QString sName, size_t iRoomIndex, std::promise<SListItemUser*> *promiseResult)
+{
+    if (iRoomIndex == 0)
+    {
+        ui ->label_chatRoom ->setText(ui->listWidget_users->getRoomNames()[0]);
+    }
+
+    SListItemUser* pUser = ui->listWidget_users->addUser(sName, ui->listWidget_users->getRooms()[iRoomIndex]);
+
+    promiseResult ->set_value(pUser);
+}
+
+void MainWindow::slotAddNewUserToList(QString sName, std::promise<SListItemUser *> *promiseResult)
+{
+    SListItemUser* pUser = ui ->listWidget_users ->addUser(sName, nullptr);
+
+    promiseResult ->set_value(pUser);
+}
+
 void MainWindow::slotMaxWindow()
 {
     if (windowState() == Qt::WindowState::WindowMaximized)
@@ -541,7 +587,18 @@ void MainWindow::setPingAndTalkingToUser(SListItemUser* pListWidgetItem, int iPi
 
 SListItemUser* MainWindow::addNewUserToList(std::string name)
 {
-    return ui ->listWidget_users ->addUser(QString::fromStdString(name), nullptr);
+    mtxList.lock();
+
+    std::promise<SListItemUser*> resultPromise;
+    std::future<SListItemUser*> resultFuture = resultPromise.get_future();
+
+    emit signalAddNewUserToList(QString::fromStdString(name), &resultPromise);
+
+    SListItemUser* pUser = resultFuture.get();
+
+    mtxList.unlock();
+
+    return pUser;
 }
 
 void MainWindow::addRoom(std::string sRoomName, std::wstring sPassword, size_t iMaxUsers, bool bFirstRoom)
@@ -556,8 +613,6 @@ void MainWindow::addRoom(std::string sRoomName, std::wstring sPassword, size_t i
     roomCountFuture.get();
 
     mtxList.unlock();
-
-    //ui->listWidget_users->addRoom(QString::fromStdString(sRoomName), QString::fromStdWString(sPassword), iMaxUsers, bFirstRoom);
 }
 
 size_t MainWindow::getRoomCount()
@@ -567,17 +622,24 @@ size_t MainWindow::getRoomCount()
 
 SListItemUser* MainWindow::addUserToRoomIndex(std::string sName, size_t iRoomIndex)
 {
-    if (iRoomIndex == 0)
-    {
-        ui ->label_chatRoom ->setText(ui->listWidget_users->getRoomNames()[0]);
-    }
+    mtxList.lock();
 
-    return ui->listWidget_users->addUser(QString::fromStdString(sName), ui->listWidget_users->getRooms()[iRoomIndex]);
+    std::promise<SListItemUser*> resultPromise;
+    std::future<SListItemUser*> resultFuture = resultPromise.get_future();
+
+    emit signalAddUserToRoomIndex(QString::fromStdString(sName), iRoomIndex, &resultPromise);
+
+    SListItemUser* pUser = resultFuture.get();
+
+    mtxList.unlock();
+
+    return pUser;
 }
 
 void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
 {
     mtxList.lock();
+
 
     std::promise<bool> resultPromise;
     std::future<bool> resultFuture = resultPromise.get_future();
@@ -586,12 +648,7 @@ void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
 
     resultFuture.get();
 
-    if (pController->getUserName() == pUser->getName().toStdString())
-    {
-        ui ->label_chatRoom ->setText(QString::fromStdString(sRoomName));
 
-        emit signalClearTextChatOutput();
-    }
 
     mtxList.unlock();
 }
@@ -600,27 +657,12 @@ void MainWindow::moveRoom(std::string sRoomName, bool bMoveUp)
 {
     mtxList.lock();
 
-    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+    std::promise<bool> resultPromise;
+    std::future<bool> resultFuture = resultPromise.get_future();
 
-    QString sRoomToMoveName = QString::fromStdString(sRoomName);
+    emit signalMoveRoom(QString::fromStdString(sRoomName), bMoveUp, &resultPromise);
 
-
-    for (size_t i = 0; i < vRooms.size(); i++)
-    {
-        if (vRooms[i]->getRoomName() == sRoomToMoveName)
-        {
-            if (bMoveUp)
-            {
-                ui ->listWidget_users ->moveRoomUp(vRooms[i]);
-            }
-            else
-            {
-                ui ->listWidget_users ->moveRoomDown(vRooms[i]);
-            }
-
-            break;
-        }
-    }
+    resultFuture.get();
 
     mtxList.unlock();
 }
@@ -641,7 +683,16 @@ void MainWindow::deleteRoom(std::string sRoomName)
 
 void MainWindow::createRoom(std::string sName, std::u16string sPassword, size_t iMaxUsers)
 {
-    emit signalCreateRoom(QString::fromStdString(sName), QString::fromStdU16String(sPassword), iMaxUsers);
+    mtxList.lock();
+
+    std::promise<bool> resultPromise;
+    std::future<bool> resultFuture = resultPromise.get_future();
+
+    emit signalCreateRoom(QString::fromStdString(sName), QString::fromStdU16String(sPassword), iMaxUsers, &resultPromise);
+
+    resultFuture.get();
+
+    mtxList.unlock();
 }
 
 void MainWindow::changeRoomSettings(std::string sOldName, std::string sNewName, size_t iMaxUsers)

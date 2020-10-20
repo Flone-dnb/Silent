@@ -106,6 +106,7 @@ public:
 
         float  getUserCurrentVolume          (const std::string& sUserName);
         std::vector<std::wstring> getInputDevices();
+        int    getAudioPacketSizeInSamples   () const;
 
 
 
@@ -203,6 +204,7 @@ private:
     // Do not set 'sampleCout' to more than ~700 (700 * 2 = 1400) (~MTU)
     // we '*2" because audio data in PCM16, 1 sample = 16 bits.
     // Of course, we can send 2 packets, but it's just more headache.
+    //            !also change in server's ServerService!
     const int        sampleCount = 679;   // 35 ms (= 'sampleRate' (19400) * 0.035)
     unsigned long    sampleRate  = 19400; // 19400 hz (samples per second)
 

@@ -67,7 +67,7 @@ public:
 
         void              setPingAndTalkingToUser    (SListItemUser* pListWidgetItem, int iPing, bool bTalking);
         void              deleteUserFromList         (SListItemUser* pListWidgetItem,  bool bDeleteAll = false);
-        void              enableInteractiveElements  (bool bMenu,                        bool bTypeAndSend);
+        void              enableInteractiveElements  (bool bMenu, bool bTypeAndSend);
         void              setOnlineUsersCount        (int onlineCount);
         void              setConnectDisconnectButton (bool bConnect);
         SListItemUser*    addNewUserToList           (std::string name);
@@ -114,7 +114,7 @@ signals:
         void signalPingAndTalkingToUser              (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
         void signalEnableInteractiveElements         (bool bMenu,                       bool bTypeAndSend);
         void signalSetConnectDisconnectButton        (bool bConnect);
-        void signalCreateRoom                        (QString sName, QString sPassword, size_t iMaxUsers);
+        void signalCreateRoom                        (QString sName, QString sPassword, size_t iMaxUsers, std::promise<bool>* resultPromise);
         void signalDeleteUserFromList                (SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise);
         void signalMoveUserToRoom                    (SListItemUser *pUser, QString sRoomName, std::promise<bool>* promiseResult);
         void signalAddRoom                           (QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom, std::promise<int>* promiseRoomCount);
@@ -127,6 +127,9 @@ signals:
         void signalShowPasswordInputWindow           (std::string sRoomName);
         void signalShowServerMessage                 (QString sMessage);
         void signalDeleteRoom                        (QString sRoomName, std::promise<int>* promiseRoomCount);
+        void signalMoveRoom                          (QString sRoomName, bool bMoveUp, std::promise<bool>* promiseResult);
+        void signalAddUserToRoomIndex                (QString sName, size_t iRoomIndex, std::promise<SListItemUser*>* promiseResult);
+        void signalAddNewUserToList                  (QString sName, std::promise<SListItemUser*>* promiseResult);
         void signalApplyTheme                        ();
 
 
@@ -164,7 +167,7 @@ private slots:
         void  slotDeleteUserFromList            (SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise);
         void  slotEnableInteractiveElements     (bool bMenu,                       bool bTypeAndSend);
         void  slotSetConnectDisconnectButton    (bool bConnect);
-        void  slotCreateRoom                    (QString sName, QString sPassword, size_t iMaxUsers);
+        void  slotCreateRoom                    (QString sName, QString sPassword, size_t iMaxUsers, std::promise<bool>* resultPromise);
 
 
     // Print on Chat Room QPlainTextEdit
@@ -206,6 +209,9 @@ private slots:
         void  slotAddRoom                       (QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom, std::promise<int>* promiseRoomCount);
         void  slotDeleteRoom                    (QString sRoomName, std::promise<int>* promiseRoomCount);
         void  slotMoveUserToRoom                (SListItemUser *pUser, QString sRoomName, std::promise<bool>* promiseResult);
+        void  slotMoveRoom                      (QString sRoomName, bool bMoveUp, std::promise<bool>* promiseResult);
+        void  slotAddUserToRoomIndex            (QString sName, size_t iRoomIndex, std::promise<SListItemUser*>* promiseResult);
+        void  slotAddNewUserToList              (QString sName, std::promise<SListItemUser*>* promiseResult);
 
         void  slotMaxWindow                     ();
         void  slotHideWindow                    ();

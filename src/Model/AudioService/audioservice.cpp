@@ -123,6 +123,11 @@ std::vector<std::wstring> AudioService::getInputDevices()
     return vSupportedDevices;
 }
 
+int AudioService::getAudioPacketSizeInSamples() const
+{
+    return sampleCount;
+}
+
 void AudioService::setNewMasterVolume(unsigned short int iVolume)
 {
     pNetworkService ->getOtherUsersMutex() ->lock();
@@ -1234,7 +1239,7 @@ void AudioService::sendAudioDataOnTalk(short *pAudio)
         {
             double sampleInRange = static_cast<double>(iNewValue) / SHRT_MAX;
 
-            double sampleInDBFS = 20 * std::log10(abs(sampleInRange));
+            double sampleInDBFS = 20 * log10(abs(sampleInRange));
 
             if (sampleInDBFS > maxDBFS)
             {
@@ -1353,7 +1358,7 @@ void AudioService::sendAudioDataVolume(short *pAudio)
         {
             double sampleInRange = static_cast<double>(pAudio[i]) / SHRT_MAX;
 
-            double sampleInDBFS = 20 * std::log10(abs(sampleInRange));
+            double sampleInDBFS = 20 * log10(abs(sampleInRange));
 
             if (sampleInDBFS > maxDBFS)
             {

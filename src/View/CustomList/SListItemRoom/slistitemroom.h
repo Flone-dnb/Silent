@@ -42,6 +42,8 @@ public:
 
     void    eraseUserFromRoom(SListItemUser* pUser);
 
+    void    updateText();
+
 
     std::vector<SListItemUser*> getUsers();
     size_t  getUsersCount();
@@ -57,8 +59,9 @@ public:
 
 private:
 
+    friend class SListWidget;
+
     void setupUI();
-    void updateText();
 
 
 

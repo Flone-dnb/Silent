@@ -30,6 +30,10 @@
 #include "View/CustomList/SListItemRoom/slistitemroom.h"
 #include "Model/User.h"
 
+// External
+#include "AES/AES.h"
+#include "integer/integer.h"
+
 
 enum CONNECT_MESSAGE  {
     CM_USERNAME_INUSE       = 0,
@@ -97,12 +101,11 @@ NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioServ
     this ->pSettingsManager = pSettingsManager;
     pThisUser               = nullptr;
 
+    pAES = new AES(128);
+    pRndGen = new std::mt19937_64( std::random_device{}() );
+
 
     clientVersion = CLIENT_VERSION;
-
-
-    iPingNormalBelow  = PING_NORMAL_BELOW;
-    iPingWarningBelow = PING_WARNING_BELOW;
 
 
     bWinSockLaunched = false;
@@ -110,6 +113,11 @@ NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioServ
     bVoiceListen     = false;
 }
 
+NetworkService::~NetworkService()
+{
+    delete pAES;
+    delete pRndGen;
+}
 
 
 
@@ -129,16 +137,6 @@ std::string NetworkService::getUserName() const
     {
         return "";
     }
-}
-
-unsigned short NetworkService::getPingNormalBelow() const
-{
-    return iPingNormalBelow;
-}
-
-unsigned short NetworkService::getPingWarningBelow() const
-{
-    return iPingWarningBelow;
 }
 
 SListItemRoom *NetworkService::getUserRoom() const
@@ -328,7 +326,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
 
 
-    pMainWindow->printOutput(std::string("Connecting... (time out after 20 sec.)"), SilentMessageColor(false), true);
+    pMainWindow->printOutput(std::string("Connecting...\n"
+                                         "Please wait, the server might be busy if a lot of people is entering the server right now.\n"), SilentMessageColor(false), true);
 
 
 
@@ -532,15 +531,181 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                 // Receive data
 
                 iReceivedSize = recv(pThisUser ->sockUserTCP, readBuffer, iPacketSize, 0);
-                pMainWindow   ->printOutput("Received " + std::to_string(iReceivedSize + 3) + " bytes of data from the server.\n",
+
+
+
+                pMainWindow   ->printOutput("Connected.\n"
+                                            "You are queued to enter the server, first, the server will process everyone who entered before you.\n"
+                                            "Waiting to establish a secure connection, please wait...\n",
                                          SilentMessageColor(false), true);
 
+                // Don't process this data now.
+
+                // Generate secret key.
+
+                std::uniform_int_distribution<> uid(100, 500); // also change in server
+
+                int b = uid(*pRndGen);
+
+                // Receive p, g values.
+
+                char vKeyPGBuffer[sizeof(integer) * 2];
+                memset(vKeyPGBuffer, 0, sizeof(integer) * 2);
+
+                recv(pThisUser ->sockUserTCP, vKeyPGBuffer, sizeof(int) * 2, 0);
+
+                int p, g;
+
+                std::memcpy(&p, vKeyPGBuffer, sizeof(p));
+                std::memcpy(&g, vKeyPGBuffer + sizeof(p), sizeof(g));
+
+                integer B = pow(integer(g), b) % p;
+
+
+                size_t iMaxKeyLength = 1000;
+                short iStringSize = 0;
+                char* pOpenKeyString = new char[sizeof(iStringSize) + iMaxKeyLength + 1];
+                memset(pOpenKeyString, 0, sizeof(iStringSize) + iMaxKeyLength + 1);
+
+                // Receive A.
+
+                int iResult = recv(pThisUser ->sockUserTCP, reinterpret_cast<char*>(&iStringSize), sizeof(iStringSize), 0);
+                if (iResult <= 0)
+                {
+                    // Something went wrong.
+
+                    if ( recv(pThisUser ->sockUserTCP, readBuffer, 1, 0) == 0 )
+                    {
+                        shutdown(pThisUser ->sockUserTCP, SD_SEND);
+                    }
+
+                    pMainWindow ->printOutput("\nSomething went wrong on the server side.\n"
+                                              "Try connecting again.",
+                                              SilentMessageColor(false),
+                                              true);
+
+                    pMainWindow ->enableInteractiveElements(true, false);
+                    closesocket(pThisUser ->sockUserTCP);
+                    clearWinsockAndThisUser();
+
+                    delete[] pOpenKeyString;
+
+                    return;
+                }
+
+                recv(pThisUser ->sockUserTCP, pOpenKeyString, iStringSize, 0);
+
+
+                integer A(pOpenKeyString, 10);
+
+                // Send B.
+
+                if (B.str().size() > iMaxKeyLength) // should not happen
+                {
+                    pMainWindow ->printOutput("Failed to establish a secure connection (client error).\nTry again.\n",
+                                             SilentMessageColor(false),
+                                             true);
+
+                    closesocket(pThisUser ->sockUserTCP);
+                    clearWinsockAndThisUser();
+                    pMainWindow ->enableInteractiveElements(true, false);
+
+                    delete[] pOpenKeyString;
+
+                    return;
+                }
+
+                iStringSize = static_cast<short>(B.str().size());
+
+                memset(pOpenKeyString, 0, sizeof(iStringSize) + iMaxKeyLength + 1);
+
+                std::memcpy(pOpenKeyString, &iStringSize, sizeof(iStringSize));
+                std::memcpy(pOpenKeyString + sizeof(iStringSize), B.str().c_str(), B.str().size());
+
+                send(pThisUser ->sockUserTCP, pOpenKeyString, sizeof(iStringSize) + B.str().size(), 0);
+
+                integer secret = pow(integer(A), b) % p;
+
+                if (secret.str().size() >= 16)
+                {
+                    std::memcpy(vSecretAESKey, secret.str().c_str(), 16);
+                }
+                else
+                {
+                    std::string sSecret = secret.str();
+
+                    size_t iFilledCount = 0;
+                    size_t iCurrentIndex = 0;
+
+                    while (iFilledCount != 16)
+                    {
+                        vSecretAESKey[iFilledCount] = sSecret[iCurrentIndex];
+
+                        iFilledCount++;
+
+                        if (iCurrentIndex == sSecret.size() - 1)
+                        {
+                            iCurrentIndex = 0;
+                        }
+                        else
+                        {
+                            iCurrentIndex++;
+                        }
+                    }
+                }
+
+                delete[] pOpenKeyString;
+
+
+
+                // Sync with the server.
+
+                // Translate socket to blocking mode
+
+                u_long arg = false;
+                ioctlsocket(pThisUser ->sockUserTCP, static_cast <long> (FIONBIO), &arg);
+
+                // send "finished connecting" message.
+                char message = 99;
+                if (send(pThisUser ->sockUserTCP, &message, sizeof(message), 0) <= 0)
+                {
+                    pMainWindow ->printOutput("NetworkService::connectTo()::ioctsocket() (non-blocking mode) failed and returned: "
+                                              + std::to_string(WSAGetLastError()) + ".\n",
+                                              SilentMessageColor(false), true);
+
+                    closesocket(pThisUser ->sockUserTCP);
+                    clearWinsockAndThisUser();
+                    pMainWindow ->enableInteractiveElements(true, false);
+
+                    return;
+                }
+
+                // receive "finished connecting" message.
+                if (recv(pThisUser ->sockUserTCP, &message, sizeof(message), 0) == 0)
+                {
+                    pMainWindow ->printOutput("NetworkService::connectTo()::recv(): "
+                                              "the server waits too long for our response and therefore closes the connection.\n",
+                                              SilentMessageColor(false), true);
+
+                    closesocket(pThisUser ->sockUserTCP);
+                    clearWinsockAndThisUser();
+                    pMainWindow ->enableInteractiveElements(true, false);
+
+                    return;
+                }
+
+
+
+                pMainWindow   ->printOutput("A secure connection has been established, the data transmitted over the network is encrypted.\n"
+                                            "Received " + std::to_string(iReceivedSize + 3) + " bytes of data from the server.\n"
+                                            "Waiting to connect to the text chat...\n",
+                                         SilentMessageColor(false), true);
 
 
 
                 // Translate socket to non-blocking mode
 
-                u_long arg = true;
+                arg = true;
 
                 if ( ioctlsocket(pThisUser ->sockUserTCP, static_cast <long> (FIONBIO), &arg) == SOCKET_ERROR )
                 {
@@ -551,8 +716,9 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
                     closesocket(pThisUser ->sockUserTCP);
                     clearWinsockAndThisUser();
                     pMainWindow ->enableInteractiveElements(true, false);
-                }
 
+                    return;
+                }
 
 
                 // Prepare AudioService
@@ -657,7 +823,8 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
                 // Start listen thread
 
-                pMainWindow ->printOutput("WARNING:\nThe data transmitted over the network is not encrypted.\n\nConnected to text chat.",
+                pMainWindow ->printOutput("Connected to the text chat.\n"
+                                          "Waiting to connect to the voice chat. Please wait...\n",
                                          SilentMessageColor(false),
                                          true);
 
@@ -1048,7 +1215,7 @@ void NetworkService::listenUDPFromServer()
 
     if ( pAudioService ->start() )
     {
-        pMainWindow->printOutput( "Connected to voice chat.\n",
+        pMainWindow->printOutput( "Connected to the voice chat.\n",
                                   SilentMessageColor(false),
                                   true );
         bVoiceListen = true;
@@ -1108,11 +1275,11 @@ void NetworkService::listenUDPFromServer()
 
     // Listen to the server.
 
-    char readBuffer[MAX_BUFFER_SIZE];
+    char readBuffer[MAX_BUFFER_SIZE + 60];
 
     while (bVoiceListen)
     {
-        int iSize = recv(pThisUser ->sockUserUDP, readBuffer, MAX_BUFFER_SIZE, 0);
+        int iSize = recv(pThisUser ->sockUserUDP, readBuffer, MAX_BUFFER_SIZE + 60, 0);
 
         while (iSize > 0)
         {
@@ -1141,25 +1308,53 @@ void NetworkService::listenUDPFromServer()
             }
             else if (bVoiceListen)
             {
+                // Copy user name.
                 char userNameBuffer[MAX_NAME_LENGTH + 1];
                 memset(userNameBuffer, 0, MAX_NAME_LENGTH + 1);
+
                 std::memcpy(userNameBuffer, readBuffer + 1, static_cast <size_t> (readBuffer[0]));
 
                 if ( readBuffer[ 1 + readBuffer[0] ] == 1 )
                 {
-                    // Last audio packet
+                    // Last audio packet.
+
                     std::thread lastVoiceThread(&AudioService::playAudioData, pAudioService, nullptr,
                                                 std::string(userNameBuffer), true);
                     lastVoiceThread .detach();
                 }
                 else
                 {
-                    short int* pAudio = new short int[ static_cast<size_t>( (iSize - 2 - readBuffer[0]) / 2 ) ];
-                    std::memcpy( pAudio, readBuffer + 2 + readBuffer[0], static_cast<size_t>(iSize - 2 - readBuffer[0]) );
+                    // Not the last audio packet.
+
+
+                    // Decrypt message.
+
+                    unsigned short iEncryptedMessageSize = 0;
+
+                    int iCurrentReadIndex = 1 + readBuffer[0] + 1;
+
+                    std::memcpy(&iEncryptedMessageSize, readBuffer + iCurrentReadIndex, sizeof(iEncryptedMessageSize));
+                    iCurrentReadIndex += sizeof(iEncryptedMessageSize);
+
+
+                    char* pEncryptedMessageBytes = new char[iEncryptedMessageSize];
+                    memset(pEncryptedMessageBytes, 0, iEncryptedMessageSize);
+
+                    std::memcpy(pEncryptedMessageBytes, readBuffer + iCurrentReadIndex, iEncryptedMessageSize);
+
+                    unsigned char* pDecryptedMessageBytes = pAES->DecryptECB(reinterpret_cast<unsigned char*>(pEncryptedMessageBytes), iEncryptedMessageSize,
+                                                                             reinterpret_cast<unsigned char*>(vSecretAESKey));
+
+
+                    short int* pAudio = new short int[ static_cast<size_t>(pAudioService ->getAudioPacketSizeInSamples()) ];
+                    std::memcpy( pAudio, pDecryptedMessageBytes, static_cast<size_t>(pAudioService ->getAudioPacketSizeInSamples()) * 2 );
 
                     std::thread voiceThread(&AudioService::playAudioData, pAudioService, pAudio,
                                             std::string(userNameBuffer), false);
                     voiceThread .detach();
+
+                    delete[] pEncryptedMessageBytes;
+                    delete[] pDecryptedMessageBytes;
                 }
             }
 
@@ -1275,7 +1470,7 @@ void NetworkService::receiveMessage()
 
     // Read time data:
 
-    int iFirstWCharPos  = 0;
+    int iMessagePos  = 0;
     bool bFirstColonWas = false;
     for (int j = 0; j < receivedAmount; j++)
     {
@@ -1285,7 +1480,7 @@ void NetworkService::receiveMessage()
         }
         else if ( (pReadBuffer[j] == ':') && (bFirstColonWas) )
         {
-            iFirstWCharPos = j + 2;
+            iMessagePos = j + 2;
             break;
         }
     }
@@ -1295,26 +1490,40 @@ void NetworkService::receiveMessage()
     // Max user name size = 20 + ~ max 7 chars before user name
     char timeText[MAX_NAME_LENGTH + 11];
     memset(timeText, 0, MAX_NAME_LENGTH + 11);
-    std::memcpy(timeText, pReadBuffer, static_cast<unsigned long long>(iFirstWCharPos));
+    std::memcpy(timeText, pReadBuffer, static_cast<unsigned long long>(iMessagePos));
 
-    // Copy message to pWChatText
-    wchar_t* pWCharText = new wchar_t[static_cast<unsigned long long>(receivedAmount - iFirstWCharPos + 2)];
-    memset(pWCharText, 0, static_cast<unsigned long long>(receivedAmount - iFirstWCharPos + 2));
-    std::memcpy(pWCharText, pReadBuffer + iFirstWCharPos, static_cast<unsigned long long>(receivedAmount - iFirstWCharPos));
 
+    // Copy encrypted message size.
+
+    unsigned short iEncryptedMessageSize = 0;
+    std::memcpy(&iEncryptedMessageSize, pReadBuffer + iMessagePos, sizeof(iEncryptedMessageSize));
+
+
+    // Decrypt message.
+
+    char* pEncryptedMessageBytes = new char[iEncryptedMessageSize + 2];
+    memset(pEncryptedMessageBytes, 0, iEncryptedMessageSize + 2);
+
+    std::memcpy(pEncryptedMessageBytes, pReadBuffer + iMessagePos + sizeof(iEncryptedMessageSize), iEncryptedMessageSize);
+
+    unsigned char* pDecryptedMessageBytes = pAES->DecryptECB(reinterpret_cast<unsigned char*>(pEncryptedMessageBytes), iEncryptedMessageSize,
+                                                             reinterpret_cast<unsigned char*>(vSecretAESKey));
 
 
 
     // Show data on screen & play audio sound
-    pMainWindow   ->printUserMessage    (std::string(timeText), std::wstring(pWCharText), SilentMessageColor(true), true);
+    pMainWindow   ->printUserMessage    (std::string(timeText),
+                                         std::wstring(reinterpret_cast<wchar_t*>(pDecryptedMessageBytes)), SilentMessageColor(true), true);
     pAudioService ->playNewMessageSound ();
 
 
 
     // Clear buffers.
 
-    delete[] pWCharText;
+    //delete[] pWCharText;
     delete[] pReadBuffer;
+    delete[] pEncryptedMessageBytes;
+    delete[] pDecryptedMessageBytes;
 }
 
 void NetworkService::deleteDisconnectedUserFromList()
@@ -1468,13 +1677,25 @@ void NetworkService::sendMessage(std::wstring message)
 
 
 
+    // Encrypt message.
+
+    char* pRawMessage = new char[message.length() * 2 + 1];
+    memset(pRawMessage, 0, message.length() * 2 + 1);
+
+    std::memcpy(pRawMessage, message.c_str(), message.length() * 2);
+
+    unsigned int iEncryptedMessageSize = 0;
+    unsigned char* pEncryptedMessageBytes = pAES->EncryptECB(reinterpret_cast<unsigned char*>(pRawMessage), static_cast<unsigned int>(message.length() * 2 + 1),
+                                                             reinterpret_cast<unsigned char*>(vSecretAESKey), iEncryptedMessageSize);
+
+
 
     // Prepare send buffer.
 
-    char* pSendBuffer = new char[ 3 + (message .length() * 2) + 2 ];
-    memset(pSendBuffer, 0, 3 + (message .length() * 2) + 2);
+    char* pSendBuffer = new char[ 3 + iEncryptedMessageSize + 2 ];
+    memset(pSendBuffer, 0, 3 + iEncryptedMessageSize + 2);
 
-    unsigned short int iPacketSize = static_cast <unsigned short> ( message .length() * 2 );
+    unsigned short int iPacketSize = static_cast <unsigned short> ( iEncryptedMessageSize );
 
 
 
@@ -1485,14 +1706,14 @@ void NetworkService::sendMessage(std::wstring message)
 
     std::memcpy( pSendBuffer,      &commandType,      1                  );
     std::memcpy( pSendBuffer + 1,  &iPacketSize,      2                  );
-    std::memcpy( pSendBuffer + 3,  message .c_str(),  message.length() * 2 );
+    std::memcpy( pSendBuffer + 3,  pEncryptedMessageBytes,  iEncryptedMessageSize );
 
 
 
 
     // Send buffer.
 
-    int iSendBufferSize = static_cast <int> ( sizeof(commandType) + sizeof(iPacketSize) + message.length() * 2 );
+    int iSendBufferSize = static_cast <int> ( sizeof(commandType) + sizeof(iPacketSize) + iEncryptedMessageSize );
 
     int sendSize = send(  pThisUser ->sockUserTCP, pSendBuffer, iSendBufferSize, 0  );
 
@@ -1534,6 +1755,8 @@ void NetworkService::sendMessage(std::wstring message)
     }
 
     delete[] pSendBuffer;
+    delete[] pEncryptedMessageBytes;
+    delete[] pRawMessage;
 }
 
 void NetworkService::enterRoom(std::string sName)
@@ -1586,24 +1809,43 @@ void NetworkService::sendVoiceMessage(char *pVoiceMessage, int iMessageSize, boo
 
         if (bLast)
         {
+            // '1' means it's the last voice packet.
             char lastVoice = 1;
+
             iSize = sendto( pThisUser ->sockUserUDP, &lastVoice, iMessageSize, 0,
                             reinterpret_cast <sockaddr*> (&pThisUser ->addrServer), sizeof(pThisUser ->addrServer) );
         }
         else
         {
-            char* pSend = new char [ static_cast <size_t> (iMessageSize + 1) ];
-            // '2' means that it's not the last packet
-            pSend[0] = 2;
+            char vSend[MAX_BUFFER_SIZE + 70];
+            memset(vSend, 0, MAX_BUFFER_SIZE + 70);
 
-            std::memcpy(pSend + 1, pVoiceMessage, static_cast<size_t>(iMessageSize));
+            // '2' means that it's not the last packet.
+            vSend[0] = 2;
 
-            iSize = sendto(pThisUser ->sockUserUDP, pSend, iMessageSize + 1, 0,
+
+
+            // Encrypt voice message.
+
+            unsigned int iEncryptedMessageSize = 0;
+            unsigned char* pEncryptedMessageBytes = pAES->EncryptECB(reinterpret_cast<unsigned char*>(pVoiceMessage), static_cast<unsigned int>(iMessageSize),
+                                                                     reinterpret_cast<unsigned char*>(vSecretAESKey), iEncryptedMessageSize);
+
+            unsigned short iEncryptedDataSize = static_cast<unsigned short>(iEncryptedMessageSize);
+
+
+
+            // Send to the server.
+
+            std::memcpy(vSend + 1, &iEncryptedDataSize, sizeof(iEncryptedDataSize));
+            std::memcpy(vSend + 1 + sizeof(iEncryptedDataSize), pEncryptedMessageBytes, iEncryptedDataSize);
+
+            iMessageSize = 1 + sizeof(iEncryptedDataSize) + iEncryptedDataSize;
+
+            iSize = sendto(pThisUser ->sockUserUDP, vSend, iMessageSize, 0,
                            reinterpret_cast<sockaddr*>(&pThisUser ->addrServer), sizeof(pThisUser ->addrServer));
 
-            iMessageSize += 1;
-
-            delete[] pSend;
+            delete[] pEncryptedMessageBytes;
         }
 
         if (iSize != iMessageSize)

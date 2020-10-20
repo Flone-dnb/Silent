@@ -37,6 +37,8 @@ FORMS += \
     ../src/View/WindowControlWidget/windowcontrolwidget.ui
 
 HEADERS += \
+    ../ext/AES/AES.h \
+    ../ext/integer/integer.h \
     ../src/Controller/controller.h \
     ../src/Model/AudioService/audioservice.h \
     ../src/Model/NetworkService/networkservice.h \
@@ -62,6 +64,8 @@ HEADERS += \
     ../src/View/WindowControlWidget/windowcontrolwidget.h
 
 SOURCES += \
+    ../ext/AES/AES.cpp \
+    ../ext/integer/integer.cpp \
     ../src/Controller/controller.cpp \
     ../src/Model/AudioService/audioservice.cpp \
     ../src/Model/NetworkService/networkservice.cpp \
@@ -87,6 +91,7 @@ RC_ICONS = ../res/icons/appMainIcon.ico
 RESOURCES += ../res/qt_rec_file.qrc
 
 INCLUDEPATH += "../src"
+INCLUDEPATH += "../ext"
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

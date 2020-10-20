@@ -8,9 +8,11 @@
 #include "View/StyleAndInfoPaths.h"
 #include <QFont>
 
+#define SPACE_STRING_BEFORE_NAME "      ";
+
 SListItemUser::SListItemUser(QString sName)
 {
-    QString sFormatedName = "    ";
+    QString sFormatedName = SPACE_STRING_BEFORE_NAME;
     sFormatedName += sName;
 
     bTalking = false;
@@ -29,7 +31,7 @@ void SListItemUser::setRoom(SListItemRoom *pRoom)
 
 void SListItemUser::setPing(int iPing)
 {
-    QString sFormatedName = "      ";
+    QString sFormatedName = SPACE_STRING_BEFORE_NAME;
     sFormatedName += this->sName;
     sFormatedName += "  [" + QString::number(iPing) + " ms]";
 

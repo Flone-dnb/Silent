@@ -65,16 +65,6 @@ std::string Controller::getUserName()
     return pNetworkService ->getUserName();
 }
 
-unsigned short Controller::getPingNormalBelow()
-{
-    return pNetworkService ->getPingNormalBelow();
-}
-
-unsigned short Controller::getPingWarningBelow()
-{
-    return pNetworkService ->getPingWarningBelow();
-}
-
 SettingsFile *Controller::getCurrentSettingsFile()
 {
     mtxSettings.lock();

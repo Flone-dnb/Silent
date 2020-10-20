@@ -164,6 +164,11 @@ void SListWidget::moveRoomUp(SListItemRoom *pRoom)
     vRooms.erase( vRooms.begin() + iPosInVec);
 
     vRooms.insert( vRooms.begin() + iPosInVec - 1, pRoom );
+
+    pRoom->setupUI();
+    pRoom->updateText();
+
+    setItemWidget(pRoom, pRoom->getUIWidget());
 }
 
 void SListWidget::moveRoomDown(SListItemRoom *pRoom)
@@ -217,6 +222,12 @@ void SListWidget::moveRoomDown(SListItemRoom *pRoom)
     vRooms.erase( vRooms.begin() + iPosInVec);
 
     vRooms.insert( vRooms.begin() + iPosInVec + 1, pRoom );
+
+
+    pRoom->setupUI();
+    pRoom->updateText();
+
+    setItemWidget(pRoom, pRoom->getUIWidget());
 }
 
 std::vector<SListItemRoom *> SListWidget::getRooms()

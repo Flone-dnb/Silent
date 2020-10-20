@@ -24,5 +24,3 @@
 
 // Ping
 #define  PING_CHECK_INTERVAL_SEC        50
-#define  PING_NORMAL_BELOW              300
-#define  PING_WARNING_BELOW             500
