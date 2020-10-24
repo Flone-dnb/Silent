@@ -16,7 +16,7 @@ RoomPassInputWindow::RoomPassInputWindow(QString sRoomName, QWidget *parent) :
 
 void RoomPassInputWindow::keyPressEvent(QKeyEvent *event)
 {
-    if ( event ->key() == Qt::Key_Return )
+    if ( event->key() == Qt::Key_Return )
     {
         on_pushButton_clicked();
     }

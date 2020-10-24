@@ -26,7 +26,7 @@
 
 SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<QString> vInputDevices, QWidget *parent) : QMainWindow(parent), ui(new Ui::SettingsWindow)
 {
-    ui ->setupUi(this);
+    ui->setupUi(this);
     setFixedSize( width(), height() );
 
     bInit = true;
@@ -54,23 +54,23 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event)
     {
         int key = -1;
 
-        if ( (event ->key() >= 0x41)
+        if ( (event->key() >= 0x41)
              &&
-             (event ->key() <= 0x5a) )
+             (event->key() <= 0x5a) )
         {
             // From A to Z
 
-            key = event ->key();
+            key = event->key();
 
-            ui ->pushButton_pushtotalk ->setText( event ->text() .toUpper() );
+            ui->pushButton_pushtotalk->setText( event->text().toUpper() );
         }
-        else if ( event ->key() == Qt::Key_Alt )
+        else if ( event->key() == Qt::Key_Alt )
         {
             // 0x12 Virtual Code for GetAsyncKeyState
 
             key = 0x12;
 
-            ui ->pushButton_pushtotalk ->setText("Alt");
+            ui->pushButton_pushtotalk->setText("Alt");
         }
 
         if (key != -1)
@@ -88,21 +88,21 @@ void SettingsWindow::mousePressEvent(QMouseEvent *event)
     {
         int key = -1;
 
-        if      ( event ->button() == Qt::XButton1 )
+        if      ( event->button() == Qt::XButton1 )
         {
             // 0x05 Virtual Code for GetAsyncKeyState
 
             key = 0x05;
 
-            ui ->pushButton_pushtotalk ->setText("X1");
+            ui->pushButton_pushtotalk->setText("X1");
         }
-        else if ( event ->button() == Qt::XButton2 )
+        else if ( event->button() == Qt::XButton2 )
         {
             // 0x06 Virtual Code for GetAsyncKeyState
 
             key = 0x06;
 
-            ui ->pushButton_pushtotalk ->setText("X2");
+            ui->pushButton_pushtotalk->setText("X2");
         }
 
         if (key != -1)
@@ -120,14 +120,14 @@ void SettingsWindow::closeEvent(QCloseEvent *event)
 
     emit closedSettingsWindow();
 
-    if (pSettingsManager ->getCurrentSettings() ->iInputVolumeMultiplier != iInputVolumeMult)
+    if (pSettingsManager->getCurrentSettings()->iInputVolumeMultiplier != iInputVolumeMult)
     {
-        emit signalSetAudioInputVolume(pSettingsManager ->getCurrentSettings() ->iInputVolumeMultiplier);
+        emit signalSetAudioInputVolume(pSettingsManager->getCurrentSettings()->iInputVolumeMultiplier);
     }
 
-    if (pSettingsManager ->getCurrentSettings() ->iVoiceStartRecValueInDBFS != ui ->horizontalSlider_start_voice_rec ->value())
+    if (pSettingsManager->getCurrentSettings()->iVoiceStartRecValueInDBFS != ui->horizontalSlider_start_voice_rec->value())
     {
-        emit signalSetVoiceStartValue(pSettingsManager ->getCurrentSettings() ->iVoiceStartRecValueInDBFS);
+        emit signalSetVoiceStartValue(pSettingsManager->getCurrentSettings()->iVoiceStartRecValueInDBFS);
     }
 
     deleteLater();
@@ -135,27 +135,27 @@ void SettingsWindow::closeEvent(QCloseEvent *event)
 
 void SettingsWindow::slotSetVoiceVolume(int iVolume)
 {
-    ui ->voiceVolumeMeter ->setValue(iVolume);
+    ui->voiceVolumeMeter->setValue(iVolume);
 }
 
 void SettingsWindow::on_pushButton_pushtotalk_clicked()
 {
-    ui ->pushButton_pushtotalk ->setText("Waiting for button");
+    ui->pushButton_pushtotalk->setText("Waiting for button");
 
     bWaitingForPushToTalkButtonInput = true;
 }
 
 void SettingsWindow::refreshVolumeSliderText()
 {
-    // 0%    -  ui ->horizontalSlider ->minimum()
-    // 100%  -  ui ->horizontalSlider ->maximum()
+    // 0%    -  ui->horizontalSlider->minimum()
+    // 100%  -  ui->horizontalSlider->maximum()
 
-    int iInterval = ui ->horizontalSlider_volume ->maximum()  -  ui ->horizontalSlider_volume ->minimum();
-    int iCurrent  = ui ->horizontalSlider_volume ->value();
+    int iInterval = ui->horizontalSlider_volume->maximum()  -  ui->horizontalSlider_volume->minimum();
+    int iCurrent  = ui->horizontalSlider_volume->value();
 
     iMasterVolume = static_cast <unsigned short int> (iCurrent);
 
-    ui ->label_4 ->setText ( QString::number( (iCurrent / static_cast<double>(iInterval) * 100), 'f', 0 ) + "%" );
+    ui->label_4->setText ( QString::number( (iCurrent / static_cast<double>(iInterval) * 100), 'f', 0 ) + "%" );
 }
 
 void SettingsWindow::on_horizontalSlider_volume_valueChanged(int value)
@@ -171,59 +171,59 @@ void SettingsWindow::on_horizontalSlider_volume_valueChanged(int value)
 
 SettingsWindow::~SettingsWindow()
 {
-    delete ui ->voiceVolumeMeter;
+    delete ui->voiceVolumeMeter;
 
     delete ui;
 }
 
 void SettingsWindow::on_pushButton_apply_clicked()
 {
-    SettingsFile* pSettingsFile = pSettingsManager ->getCurrentSettings();
+    SettingsFile* pSettingsFile = pSettingsManager->getCurrentSettings();
 
     if (bPushToTalkChanged)
     {
-        pSettingsFile ->iPushToTalkButton = iPushToTalkKey;
+        pSettingsFile->iPushToTalkButton = iPushToTalkKey;
     }
 
     if (bMasterVolumeChanged)
     {
-        pSettingsFile ->iMasterVolume = iMasterVolume;
+        pSettingsFile->iMasterVolume = iMasterVolume;
     }
 
-    pSettingsFile ->sThemeName = ui ->comboBox_themes ->currentText() .toStdString();
+    pSettingsFile->sThemeName = ui->comboBox_themes->currentText().toStdString();
 
-    pSettingsFile ->bPlayPushToTalkSound = ui ->checkBox_pushToTalkSound ->isChecked();
+    pSettingsFile->bPlayPushToTalkSound = ui->checkBox_pushToTalkSound->isChecked();
 
-    if (ui ->comboBox_input ->currentIndex() != 0)
+    if (ui->comboBox_input->currentIndex() != 0)
     {
-        pSettingsFile ->sInputDeviceName = ui ->comboBox_input ->currentText() .toStdWString();
+        pSettingsFile->sInputDeviceName = ui->comboBox_input->currentText().toStdWString();
     }
     else
     {
-        pSettingsFile ->sInputDeviceName = L"";
+        pSettingsFile->sInputDeviceName = L"";
     }
 
-    pSettingsFile ->iInputVolumeMultiplier = ui ->horizontalSlider_input_volume_mult ->value();
+    pSettingsFile->iInputVolumeMultiplier = ui->horizontalSlider_input_volume_mult->value();
 
-    if (ui ->comboBox_voice_mode ->currentIndex() == 0)
+    if (ui->comboBox_voice_mode->currentIndex() == 0)
     {
-        pSettingsFile ->bPushToTalkVoiceMode = true;
+        pSettingsFile->bPushToTalkVoiceMode = true;
         emit signalSetShouldHearTestVoice(false);
     }
     else
     {
-        pSettingsFile ->bPushToTalkVoiceMode = false;
+        pSettingsFile->bPushToTalkVoiceMode = false;
         emit signalSetShouldHearTestVoice(true);
     }
 
-    pSettingsFile ->iVoiceStartRecValueInDBFS = ui ->horizontalSlider_start_voice_rec ->value();
+    pSettingsFile->iVoiceStartRecValueInDBFS = ui->horizontalSlider_start_voice_rec->value();
 
-    pSettingsFile ->bHearVoiceInSettings  = ui ->checkBox_hear_voice ->isChecked();
-    pSettingsFile ->bPlayTextMessageSound = ui ->checkBox_textMessageSound ->isChecked();
-    pSettingsFile ->bPlayConnectDisconnectSound = ui ->checkBox_connectDisconnectSound ->isChecked();
-    pSettingsFile ->bShowConnectDisconnectMessage = ui ->checkBox_connectDisconnectMessage ->isChecked();
+    pSettingsFile->bHearVoiceInSettings  = ui->checkBox_hear_voice->isChecked();
+    pSettingsFile->bPlayTextMessageSound = ui->checkBox_textMessageSound->isChecked();
+    pSettingsFile->bPlayConnectDisconnectSound = ui->checkBox_connectDisconnectSound->isChecked();
+    pSettingsFile->bShowConnectDisconnectMessage = ui->checkBox_connectDisconnectMessage->isChecked();
 
-    pSettingsManager ->saveCurrentSettings();
+    pSettingsManager->saveCurrentSettings();
 
     emit applyNewMasterVolume();
 
@@ -232,73 +232,73 @@ void SettingsWindow::on_pushButton_apply_clicked()
 
 void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
 {
-    SettingsFile* pSettingsFile = pSettingsManager ->getCurrentSettings();
+    SettingsFile* pSettingsFile = pSettingsManager->getCurrentSettings();
 
-    iInputVolumeMult = pSettingsFile ->iInputVolumeMultiplier;
+    iInputVolumeMult = pSettingsFile->iInputVolumeMultiplier;
 
-    ui ->label_input_voice_mult ->setText(QString::number(iInputVolumeMult) + "%");
-    ui ->horizontalSlider_input_volume_mult ->setValue(iInputVolumeMult);
+    ui->label_input_voice_mult->setText(QString::number(iInputVolumeMult) + "%");
+    ui->horizontalSlider_input_volume_mult->setValue(iInputVolumeMult);
 
-    ui ->pushButton_pushtotalk   ->setText  ( QString::fromStdString( pSettingsFile ->getPushToTalkButtonName() ) );
-    ui ->horizontalSlider_volume ->setValue ( pSettingsFile ->iMasterVolume );
+    ui->pushButton_pushtotalk  ->setText  ( QString::fromStdString( pSettingsFile->getPushToTalkButtonName() ) );
+    ui->horizontalSlider_volume->setValue ( pSettingsFile->iMasterVolume );
 
     showThemes();
 
-    ui ->comboBox_themes ->setCurrentText( QString::fromStdString(pSettingsFile ->sThemeName) );
+    ui->comboBox_themes->setCurrentText( QString::fromStdString(pSettingsFile->sThemeName) );
 
-    ui ->checkBox_pushToTalkSound ->setChecked( pSettingsFile ->bPlayPushToTalkSound );
+    ui->checkBox_pushToTalkSound->setChecked( pSettingsFile->bPlayPushToTalkSound );
 
 
-    ui ->comboBox_input ->addItem("Auto-select");
+    ui->comboBox_input->addItem("Auto-select");
 
     for (size_t i = 0; i < vInputDevices.size(); i++)
     {
-        ui ->comboBox_input ->addItem(vInputDevices[i]);
+        ui->comboBox_input->addItem(vInputDevices[i]);
     }
 
-    ui ->comboBox_input ->setCurrentIndex(0);
+    ui->comboBox_input->setCurrentIndex(0);
 
     for (size_t i = 0; i < vInputDevices.size(); i++)
     {
         if (vInputDevices[i] == pSettingsFile->sInputDeviceName)
         {
-            ui ->comboBox_input ->setCurrentIndex(1 + i);
+            ui->comboBox_input->setCurrentIndex(1 + i);
             break;
         }
     }
 
-    ui ->comboBox_voice_mode ->addItem("Push Button to Record Voice");
-    ui ->comboBox_voice_mode ->addItem("Talk to Record Voice");
+    ui->comboBox_voice_mode->addItem("Push Button to Record Voice");
+    ui->comboBox_voice_mode->addItem("Talk to Record Voice");
 
-    if (pSettingsFile ->bPushToTalkVoiceMode)
+    if (pSettingsFile->bPushToTalkVoiceMode)
     {
-        ui ->comboBox_voice_mode ->setCurrentIndex(0);
+        ui->comboBox_voice_mode->setCurrentIndex(0);
     }
     else
     {
-        ui ->comboBox_voice_mode ->setCurrentIndex(1);
+        ui->comboBox_voice_mode->setCurrentIndex(1);
     }
 
-    ui ->horizontalSlider_start_voice_rec ->setValue(pSettingsFile ->iVoiceStartRecValueInDBFS);
+    ui->horizontalSlider_start_voice_rec->setValue(pSettingsFile->iVoiceStartRecValueInDBFS);
 
-    ui ->checkBox_hear_voice ->setChecked(pSettingsFile ->bHearVoiceInSettings);
+    ui->checkBox_hear_voice->setChecked(pSettingsFile->bHearVoiceInSettings);
 
-    ui ->checkBox_textMessageSound ->setChecked(pSettingsFile ->bPlayTextMessageSound);
+    ui->checkBox_textMessageSound->setChecked(pSettingsFile->bPlayTextMessageSound);
 
-    ui ->checkBox_connectDisconnectSound ->setChecked(pSettingsFile ->bPlayConnectDisconnectSound);
+    ui->checkBox_connectDisconnectSound->setChecked(pSettingsFile->bPlayConnectDisconnectSound);
 
-    ui ->checkBox_connectDisconnectMessage ->setChecked(pSettingsFile ->bShowConnectDisconnectMessage);
+    ui->checkBox_connectDisconnectMessage->setChecked(pSettingsFile->bShowConnectDisconnectMessage);
 }
 
 void SettingsWindow::showThemes()
 {
     QDir directory(STYLE_THEMES_PATH_FROM_EXE);
-    QStringList themes = directory .entryList(QDir::Files);
+    QStringList themes = directory.entryList(QDir::Files);
 
-    for (int i = 0;   i < themes .size();   i++)
+    for (int i = 0;   i < themes.size();   i++)
     {
         int pos = themes[i].lastIndexOf(QChar('.'));
-        ui ->comboBox_themes ->addItem(themes[i].left(pos));
+        ui->comboBox_themes->addItem(themes[i].left(pos));
     }
 }
 
@@ -315,7 +315,7 @@ void SettingsWindow::on_comboBox_input_currentIndexChanged(int index)
 
 void SettingsWindow::on_horizontalSlider_input_volume_mult_valueChanged(int position)
 {
-    ui ->label_input_voice_mult ->setText(QString::number(position) + "%");
+    ui->label_input_voice_mult->setText(QString::number(position) + "%");
 
     emit signalSetAudioInputVolume(position);
 }
@@ -334,14 +334,14 @@ void SettingsWindow::on_horizontalSlider_start_voice_rec_valueChanged(int value)
 
     emit signalSetVoiceStartValue(value);
 
-    ui ->label_start_voice_dbfs ->setText(QString::number(value) + " dBFS");
+    ui->label_start_voice_dbfs->setText(QString::number(value) + " dBFS");
 
-    ui ->voiceVolumeMeter ->setStartValueInDBFS(value);
+    ui->voiceVolumeMeter->setStartValueInDBFS(value);
 }
 
 void SettingsWindow::on_voiceVolumeMeter_valueChanged(int value)
 {
-    ui ->label_voice_output_dbfs ->setText(QString::number(value) + " dBFS");
+    ui->label_voice_output_dbfs->setText(QString::number(value) + " dBFS");
 }
 
 void SettingsWindow::on_comboBox_voice_mode_currentIndexChanged(int index)

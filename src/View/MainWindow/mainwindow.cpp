@@ -44,15 +44,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui ->setupUi(this);
+    ui->setupUi(this);
 
     bAbleToSend = false;
 
     // Set CSS classes
-    ui ->label_chatRoom          ->setProperty("cssClass", "mainwindowLabel");
-    ui ->label_connectedCount    ->setProperty("cssClass", "mainwindowLabel");
-    ui ->plainTextEdit_input     ->setProperty("cssClass", "userInput");
-    ui ->plainTextEdit           ->setProperty("cssClass", "chatOutput");
+    ui->label_chatRoom         ->setProperty("cssClass", "mainwindowLabel");
+    ui->label_connectedCount   ->setProperty("cssClass", "mainwindowLabel");
+    ui->plainTextEdit_input    ->setProperty("cssClass", "userInput");
+    ui->plainTextEdit          ->setProperty("cssClass", "chatOutput");
 
     WindowControlWidget* pControlWindowWidget = new WindowControlWidget(this);
     connect(pControlWindowWidget, &WindowControlWidget::signalClose,    this, &MainWindow::close);
@@ -129,44 +129,44 @@ void MainWindow::slotApplyShouldHearTestVoice(bool bHear)
 
 void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage)
 {
-    mtxPrintOutput .lock   ();
+    mtxPrintOutput.lock();
 
     if (bUserMessage)
     {
-        ui ->plainTextEdit ->appendHtml ( text );
+        ui->plainTextEdit->appendHtml ( text );
     }
     else
     {
         text.replace("\n", "<br>");
         QString color = QString::fromStdString(messageColor.sMessage);
 
-        ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + text + outputHTMLmessageEnd );
+        ui->plainTextEdit->appendHtml ( outputHTMLmessageStart + color + "\">" + text + outputHTMLmessageEnd );
     }
 
 
-    mtxPrintOutput .unlock ();
+    mtxPrintOutput.unlock();
 }
 
 void MainWindow::slotEnableInteractiveElements(bool bMenu, bool bTypeAndSend)
 {
     if (bMenu)
     {
-        ui ->actionConnect       ->setEnabled(true);
+        ui->actionConnect      ->setEnabled(true);
     }
     else
     {
-        ui ->actionConnect       ->setEnabled(false);
+        ui->actionConnect      ->setEnabled(false);
     }
 
     if (bTypeAndSend)
     {
         bAbleToSend = true;
-        ui ->plainTextEdit_input ->setEnabled(true);
+        ui->plainTextEdit_input->setEnabled(true);
     }
     else
     {
         bAbleToSend = false;
-        ui ->plainTextEdit_input ->setEnabled(false);
+        ui->plainTextEdit_input->setEnabled(false);
     }
 }
 
@@ -174,24 +174,24 @@ void MainWindow::slotSetConnectDisconnectButton(bool bConnect)
 {
     if (bConnect)
     {
-        ui ->actionConnect ->setText("Connect");
+        ui->actionConnect->setText("Connect");
     }
     else
     {
-        ui ->actionConnect ->setText("Disconnect");
+        ui->actionConnect->setText("Disconnect");
     }
 }
 
 void MainWindow::slotCreateRoom(QString sName, QString sPassword, size_t iMaxUsers, std::promise<bool>* resultPromise)
 {
-    ui ->listWidget_users ->addRoom(sName, sPassword, iMaxUsers);
+    ui->listWidget_users->addRoom(sName, sPassword, iMaxUsers);
 
     resultPromise->set_value(false);
 }
 
 void MainWindow::slotTrayIconActivated()
 {
-    pTrayIcon ->hide();
+    pTrayIcon->hide();
 
     raise           ();
     activateWindow  ();
@@ -200,7 +200,7 @@ void MainWindow::slotTrayIconActivated()
 
 void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, char cUserLost)
 {
-    mtxPrintOutput .lock   ();
+    mtxPrintOutput.lock   ();
 
 
 
@@ -221,29 +221,29 @@ void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageCol
 
     QString color = QString::fromStdString(messageColor.sTime);
 
-    ui ->plainTextEdit ->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
+    ui->plainTextEdit->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
 
 
 
-    mtxPrintOutput .unlock ();
+    mtxPrintOutput.unlock ();
 }
 
 void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessageColor messageColor)
 {
-    mtxPrintOutput .lock   ();
+    mtxPrintOutput.lock   ();
 
     QString message = QString::fromStdString(name) + " just connected to the chat.<br>";
 
     QString color = QString::fromStdString(messageColor.sTime);
 
-    ui ->plainTextEdit ->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
+    ui->plainTextEdit->appendHtml ( "<font style=\"color: " + color + "\">" + message + outputHTMLmessageEnd );
 
-    mtxPrintOutput .unlock ();
+    mtxPrintOutput.unlock ();
 }
 
 void MainWindow::slotShowOldText(wchar_t *pText)
 {
-    mtxPrintOutput .lock();
+    mtxPrintOutput.lock();
 
 
     std::wstring sText(pText);
@@ -254,76 +254,76 @@ void MainWindow::slotShowOldText(wchar_t *pText)
     QString sNewText = "";
     sNewText += QString::fromStdWString(sText);
 
-    sNewText += ui ->plainTextEdit ->toPlainText() .right( ui ->plainTextEdit ->toPlainText() .size() - 10 ); // 10: ".........."
+    sNewText += ui->plainTextEdit->toPlainText().right( ui->plainTextEdit->toPlainText().size() - 10 ); // 10: ".........."
 
 
-    ui ->plainTextEdit ->clear();
+    ui->plainTextEdit->clear();
 
-    ui ->plainTextEdit ->appendHtml(sNewText);
+    ui->plainTextEdit->appendHtml(sNewText);
 
 
-    mtxPrintOutput .unlock();
+    mtxPrintOutput.unlock();
 }
 
 void MainWindow::slotClearTextEdit()
 {
-    ui ->plainTextEdit_input ->clear();
+    ui->plainTextEdit_input->clear();
 }
 
 void MainWindow::slotClearTextChatOutput()
 {
-    ui ->plainTextEdit ->clear();
+    ui->plainTextEdit->clear();
 }
 
 void MainWindow::slotApplyTheme()
 {
-    if ( pController ->getCurrentSettingsFile() )
+    if ( pController->getCurrentSettingsFile() )
     {
         // Apply style
 
         QFile File(QString(STYLE_THEMES_PATH_FROM_EXE)
-                   + QString::fromStdString(pController ->getCurrentSettingsFile() ->sThemeName)
+                   + QString::fromStdString(pController->getCurrentSettingsFile()->sThemeName)
                    + ".css");
 
-        if( File .exists()
+        if( File.exists()
             &&
-            File .open(QFile::ReadOnly) )
+            File.open(QFile::ReadOnly) )
         {
-            QString StyleSheet = QLatin1String( File .readAll() );
+            QString StyleSheet = QLatin1String( File.readAll() );
 
             qApp->setStyleSheet(StyleSheet);
 
-            File .close();
+            File.close();
         }
         else
         {
-            if ( pController ->getCurrentSettingsFile() ->sThemeName == STYLE_THEME_DEFAULT_NAME )
+            if ( pController->getCurrentSettingsFile()->sThemeName == STYLE_THEME_DEFAULT_NAME )
             {
-                QMessageBox::warning(this, "Error", "Could not open theme file \"" + QString::fromStdString(pController ->getCurrentSettingsFile() ->sThemeName) + ".css\".");
+                QMessageBox::warning(this, "Error", "Could not open theme file \"" + QString::fromStdString(pController->getCurrentSettingsFile()->sThemeName) + ".css\".");
             }
             else
             {
                 // Set the default theme
 
-                File .setFileName(QString(STYLE_THEMES_PATH_FROM_EXE)
+                File.setFileName(QString(STYLE_THEMES_PATH_FROM_EXE)
                                   + QString(STYLE_THEME_DEFAULT_NAME)
                                   + ".css");
 
-                if( File .exists()
+                if( File.exists()
                     &&
-                    File .open(QFile::ReadOnly) )
+                    File.open(QFile::ReadOnly) )
                 {
-                    QString StyleSheet = QLatin1String( File .readAll() );
+                    QString StyleSheet = QLatin1String( File.readAll() );
 
                     qApp->setStyleSheet(StyleSheet);
 
-                    File .close();
+                    File.close();
 
 
-                    SettingsFile* pSettings = pController ->getSettingsManager() ->getCurrentSettings();
-                    pSettings ->sThemeName        = STYLE_THEME_DEFAULT_NAME;
+                    SettingsFile* pSettings = pController->getSettingsManager()->getCurrentSettings();
+                    pSettings->sThemeName        = STYLE_THEME_DEFAULT_NAME;
 
-                    pController ->getSettingsManager() ->saveCurrentSettings();
+                    pController->getSettingsManager()->saveCurrentSettings();
                 }
                 else
                 {
@@ -336,32 +336,32 @@ void MainWindow::slotApplyTheme()
 
 void MainWindow::slotApplyMasterVolume()
 {
-    pController ->pauseTestRecording();
+    pController->pauseTestRecording();
 
-    pController ->applyNewMasterVolumeFromSettings();
+    pController->applyNewMasterVolumeFromSettings();
 }
 
 void MainWindow::slotSettingsWindowClosed()
 {
-    pController ->pauseTestRecording();
+    pController->pauseTestRecording();
 }
 
 void MainWindow::slotAddRoom(QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom, std::promise<int>* promiseRoomCount)
 {
-    ui ->listWidget_users ->addRoom(sRoomName, sPassword, iMaxUsers, bFirstRoom);
+    ui->listWidget_users->addRoom(sRoomName, sPassword, iMaxUsers, bFirstRoom);
 
-    promiseRoomCount->set_value(static_cast<int>(ui ->listWidget_users->getRooms().size()));
+    promiseRoomCount->set_value(static_cast<int>(ui->listWidget_users->getRooms().size()));
 }
 
 void MainWindow::slotDeleteRoom(QString sRoomName, std::promise<int>* promiseRoomCount)
 {
-    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+    std::vector<SListItemRoom*> vRooms = ui->listWidget_users->getRooms();
 
     for (size_t i = 0; i < vRooms.size(); i++)
     {
         if (vRooms[i]->getRoomName() == sRoomName)
         {
-            ui ->listWidget_users ->deleteRoom(vRooms[i]);
+            ui->listWidget_users->deleteRoom(vRooms[i]);
 
             break;
         }
@@ -372,14 +372,14 @@ void MainWindow::slotDeleteRoom(QString sRoomName, std::promise<int>* promiseRoo
 
 void MainWindow::slotMoveUserToRoom(SListItemUser *pUser, QString sRoomName, std::promise<bool>* promiseResult)
 {
-    ui ->listWidget_users ->moveUser(pUser, sRoomName);
+    ui->listWidget_users->moveUser(pUser, sRoomName);
 
     promiseResult->set_value(false);
 }
 
 void MainWindow::slotMoveRoom(QString sRoomName, bool bMoveUp, std::promise<bool> *promiseResult)
 {
-    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+    std::vector<SListItemRoom*> vRooms = ui->listWidget_users->getRooms();
 
     for (size_t i = 0; i < vRooms.size(); i++)
     {
@@ -387,11 +387,11 @@ void MainWindow::slotMoveRoom(QString sRoomName, bool bMoveUp, std::promise<bool
         {
             if (bMoveUp)
             {
-                ui ->listWidget_users ->moveRoomUp(vRooms[i]);
+                ui->listWidget_users->moveRoomUp(vRooms[i]);
             }
             else
             {
-                ui ->listWidget_users ->moveRoomDown(vRooms[i]);
+                ui->listWidget_users->moveRoomDown(vRooms[i]);
             }
 
             break;
@@ -405,19 +405,19 @@ void MainWindow::slotAddUserToRoomIndex(QString sName, size_t iRoomIndex, std::p
 {
     if (iRoomIndex == 0)
     {
-        ui ->label_chatRoom ->setText(ui->listWidget_users->getRoomNames()[0]);
+        ui->label_chatRoom->setText(ui->listWidget_users->getRoomNames()[0]);
     }
 
     SListItemUser* pUser = ui->listWidget_users->addUser(sName, ui->listWidget_users->getRooms()[iRoomIndex]);
 
-    promiseResult ->set_value(pUser);
+    promiseResult->set_value(pUser);
 }
 
 void MainWindow::slotAddNewUserToList(QString sName, std::promise<SListItemUser *> *promiseResult)
 {
-    SListItemUser* pUser = ui ->listWidget_users ->addUser(sName, nullptr);
+    SListItemUser* pUser = ui->listWidget_users->addUser(sName, nullptr);
 
-    promiseResult ->set_value(pUser);
+    promiseResult->set_value(pUser);
 }
 
 void MainWindow::slotMaxWindow()
@@ -439,9 +439,9 @@ void MainWindow::slotHideWindow()
 
 void MainWindow::connectTo(std::string adress, std::string port, std::string userName, std::wstring sPass)
 {
-    ui ->plainTextEdit ->clear();
+    ui->plainTextEdit->clear();
 
-    pController ->connectTo(adress, port, userName, sPass);
+    pController->connectTo(adress, port, userName, sPass);
 }
 
 void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, bool bEmitSignal)
@@ -452,15 +452,15 @@ void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, 
     }
     else
     {
-        mtxPrintOutput .lock   ();
+        mtxPrintOutput.lock   ();
 
         QString message = QString::fromStdString(text);
         message.replace("\n", "<br>");
         QString color = QString::fromStdString(messageColor.sMessage);
 
-        ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
+        ui->plainTextEdit->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
 
-        mtxPrintOutput .unlock ();
+        mtxPrintOutput.unlock ();
     }
 }
 
@@ -472,15 +472,15 @@ void MainWindow::printOutputW(std::wstring text, SilentMessageColor messageColor
     }
     else
     {
-        mtxPrintOutput .lock   ();
+        mtxPrintOutput.lock   ();
 
         QString message = QString::fromStdWString(text);
         message.replace("\n", "<br>");
         QString color = QString::fromStdString(messageColor.sMessage);
 
-        ui ->plainTextEdit ->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
+        ui->plainTextEdit->appendHtml ( outputHTMLmessageStart + color + "\">" + message + outputHTMLmessageEnd );
 
-        mtxPrintOutput .unlock ();
+        mtxPrintOutput.unlock ();
     }
 }
 
@@ -494,7 +494,7 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
     QString sTime    = "";
     size_t  iNameStartPos = 0;
 
-    for (size_t i = 0;   i < timeInfo .size();   i++)
+    for (size_t i = 0;   i < timeInfo.size();   i++)
     {
         if (timeInfo[i] == ' ')
         {
@@ -515,7 +515,7 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
 
     QString sNameWithMessage = "";
 
-    for (size_t i = iNameStartPos;   i < timeInfo .size();   i++)
+    for (size_t i = iNameStartPos;   i < timeInfo.size();   i++)
     {
         sNameWithMessage += timeInfo[i];
     }
@@ -524,9 +524,9 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
 
 
     // Replace any '\n' to '<br>' because we will use "appendHtml()" function.
-    sNameWithMessage .replace("\n", "<br>");
+    sNameWithMessage.replace("\n", "<br>");
     // Replace any ' ' to '&nbsp;'
-    sNameWithMessage .replace(" ", "&nbsp;");
+    sNameWithMessage.replace(" ", "&nbsp;");
 
 
     // Add <br> in the end of the message.
@@ -537,8 +537,8 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
 
     // Prepare colors.
 
-    QString sMessageColor = QString::fromStdString(messageColor .sMessage);
-    QString sTimeColor    = QString::fromStdString(messageColor .sTime);
+    QString sMessageColor = QString::fromStdString(messageColor.sMessage);
+    QString sTimeColor    = QString::fromStdString(messageColor.sTime);
 
 
 
@@ -559,7 +559,7 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
     }
     else
     {
-        ui ->plainTextEdit ->appendHtml ( sFinalMessage );
+        ui->plainTextEdit->appendHtml ( sFinalMessage );
     }
 }
 
@@ -570,7 +570,7 @@ void MainWindow::enableInteractiveElements(bool bMenu, bool bTypeAndSend)
 
 void MainWindow::setOnlineUsersCount(int onlineCount)
 {
-    ui ->label_connectedCount ->setText( "Connected: " + QString::number(onlineCount) );
+    ui->label_connectedCount->setText( "Connected: " + QString::number(onlineCount) );
 }
 
 void MainWindow::setConnectDisconnectButton(bool bConnect)
@@ -699,7 +699,7 @@ void MainWindow::changeRoomSettings(std::string sOldName, std::string sNewName, 
 {
     mtxList.lock();
 
-    std::vector<SListItemRoom*> vRooms = ui ->listWidget_users ->getRooms();
+    std::vector<SListItemRoom*> vRooms = ui->listWidget_users->getRooms();
 
     QString sOldRoomName = QString::fromStdString(sOldName);
     QString sNewRoomName = QString::fromStdString(sNewName);
@@ -711,10 +711,10 @@ void MainWindow::changeRoomSettings(std::string sOldName, std::string sNewName, 
         {
             if (sOldRoomName != sNewRoomName)
             {
-                ui ->listWidget_users ->renameRoom(vRooms[i], sNewRoomName);
+                ui->listWidget_users->renameRoom(vRooms[i], sNewRoomName);
             }
 
-            vRooms[i] ->setRoomMaxUsers(iMaxUsers);
+            vRooms[i]->setRoomMaxUsers(iMaxUsers);
 
             break;
         }
@@ -784,12 +784,12 @@ void MainWindow::applyTheme()
 
 void MainWindow::on_actionConnect_triggered()
 {
-    if ( ui ->actionConnect ->text() == "Connect" )
+    if ( ui->actionConnect->text() == "Connect" )
     {
-        pConnectWindow ->setUserName( pController ->getCurrentSettingsFile() ->sUsername );
-        pConnectWindow ->setConnectString( pController ->getCurrentSettingsFile() ->sConnectString );
-        pConnectWindow ->setPort( std::to_string(pController ->getCurrentSettingsFile() ->iPort) );
-        pConnectWindow ->setPassword( pController ->getCurrentSettingsFile() ->sPassword );
+        pConnectWindow->setUserName( pController->getCurrentSettingsFile()->sUsername );
+        pConnectWindow->setConnectString( pController->getCurrentSettingsFile()->sConnectString );
+        pConnectWindow->setPort( std::to_string(pController->getCurrentSettingsFile()->iPort) );
+        pConnectWindow->setPassword( pController->getCurrentSettingsFile()->sPassword );
 
         pConnectWindow->show();
     }
@@ -801,17 +801,17 @@ void MainWindow::on_actionConnect_triggered()
 
 void MainWindow::on_pushButton_clicked()
 {
-    if (ui ->plainTextEdit_input ->toPlainText() .size() != 0)
+    if (ui->plainTextEdit_input->toPlainText().size() != 0)
     {
-       pController ->sendMessage( ui ->plainTextEdit_input ->toPlainText() .toStdWString() );
+       pController->sendMessage( ui->plainTextEdit_input->toPlainText().toStdWString() );
     }
 }
 
 void MainWindow::customqplaintextedit_return_pressed()
 {
-    if ( bAbleToSend && (ui ->plainTextEdit_input ->toPlainText() != "") )
+    if ( bAbleToSend && (ui->plainTextEdit_input->toPlainText() != "") )
     {
-        std::wstring sMessage = ui ->plainTextEdit_input ->toPlainText() .toStdWString();
+        std::wstring sMessage = ui->plainTextEdit_input->toPlainText().toStdWString();
         if (filterMessageText(sMessage))
         {
             showMessageBox(true, "Your message is too big!");
@@ -820,7 +820,7 @@ void MainWindow::customqplaintextedit_return_pressed()
 
         if (sMessage != L"")
         {
-            pController ->sendMessage( sMessage );
+            pController->sendMessage( sMessage );
         }
         else
         {
@@ -846,7 +846,7 @@ void MainWindow::showSettingsWindow()
 
     // Show SettingsWindow
 
-    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getSettingsManager(), vAudioInputDevices, this);
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController->getSettingsManager(), vAudioInputDevices, this);
     connect(pSettingsWindow, &SettingsWindow::applyNewMasterVolume, this, &MainWindow::slotApplyMasterVolume);
     connect(this, &MainWindow::signalShowVoiceVolumeValueInSettings, pSettingsWindow, &SettingsWindow::slotSetVoiceVolume);
     connect(pSettingsWindow, &SettingsWindow::closedSettingsWindow, this, &MainWindow::slotSettingsWindowClosed);
@@ -854,9 +854,9 @@ void MainWindow::showSettingsWindow()
     connect(pSettingsWindow, &SettingsWindow::signalSetVoiceStartValue, this, &MainWindow::slotApplyVoiceStartValue);
     connect(pSettingsWindow, &SettingsWindow::signalSetShouldHearTestVoice, this, &MainWindow::slotApplyShouldHearTestVoice);
     pController->unpauseTestRecording();
-    pSettingsWindow ->setWindowModality(Qt::ApplicationModal);
-    pSettingsWindow ->setWindowOpacity(0);
-    pSettingsWindow ->show();
+    pSettingsWindow->setWindowModality(Qt::ApplicationModal);
+    pSettingsWindow->setWindowOpacity(0);
+    pSettingsWindow->show();
 
 
 
@@ -866,7 +866,7 @@ void MainWindow::showSettingsWindow()
 
     for (int i = 1; i < 11; i++)
     {
-        pSettingsWindow ->setWindowOpacity( opacity * i );
+        pSettingsWindow->setWindowOpacity( opacity * i );
 
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
@@ -881,15 +881,15 @@ void MainWindow::applyDefaultTheme()
                       + QString(STYLE_THEME_DEFAULT_NAME)
                       + ".css");
 
-    if( File .exists()
+    if( File.exists()
         &&
-        File .open(QFile::ReadOnly) )
+        File.open(QFile::ReadOnly) )
     {
-        QString StyleSheet = QLatin1String( File .readAll() );
+        QString StyleSheet = QLatin1String( File.readAll() );
 
         qApp->setStyleSheet(StyleSheet);
 
-        File .close();
+        File.close();
     }
     else
     {
@@ -916,7 +916,7 @@ void MainWindow::on_actionSettings_triggered()
     }
 
     // Show SettingsWindow
-    SettingsWindow* pSettingsWindow = new SettingsWindow(pController ->getSettingsManager(), vAudioInputDevices, this);
+    SettingsWindow* pSettingsWindow = new SettingsWindow(pController->getSettingsManager(), vAudioInputDevices, this);
     connect(pSettingsWindow, &SettingsWindow::applyNewMasterVolume, this, &MainWindow::slotApplyMasterVolume);
     connect(this, &MainWindow::signalShowVoiceVolumeValueInSettings, pSettingsWindow, &SettingsWindow::slotSetVoiceVolume);
     connect(pSettingsWindow, &SettingsWindow::closedSettingsWindow, this, &MainWindow::slotSettingsWindowClosed);
@@ -930,7 +930,7 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::slotOnMenuClose()
 {
-    ui ->listWidget_users ->clearSelection();
+    ui->listWidget_users->clearSelection();
 }
 
 void MainWindow::onExecCalled()
@@ -940,7 +940,7 @@ void MainWindow::onExecCalled()
     pTrayIcon      = new QSystemTrayIcon(this);
 
     QIcon icon     = QIcon(RES_ICONS_MAIN_PATH);
-    pTrayIcon      ->setIcon(icon);
+    pTrayIcon     ->setIcon(icon);
 
     connect(pTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::slotTrayIconActivated);
 
@@ -973,8 +973,8 @@ void MainWindow::onExecCalled()
 
     // Setup context menu for 'connected users' list
 
-    ui ->listWidget_users ->setContextMenuPolicy (Qt::CustomContextMenu);
-    ui ->listWidget_users ->setViewMode          (QListView::ListMode);
+    ui->listWidget_users->setContextMenuPolicy (Qt::CustomContextMenu);
+    ui->listWidget_users->setViewMode          (QListView::ListMode);
 
     pMenuContextMenu    = new QMenu(this);
     connect(pMenuContextMenu, &QMenu::aboutToHide, this, &MainWindow::slotOnMenuClose);
@@ -982,8 +982,8 @@ void MainWindow::onExecCalled()
     pActionChangeVolume = new QAction("Change User Volume");
     pActionEnterRoom    = new QAction("Enter Room");
 
-    pMenuContextMenu ->addAction(pActionChangeVolume);
-    pMenuContextMenu ->addAction(pActionEnterRoom);
+    pMenuContextMenu->addAction(pActionChangeVolume);
+    pMenuContextMenu->addAction(pActionEnterRoom);
 
     connect(pActionChangeVolume, &QAction::triggered, this, &MainWindow::slotChangeUserVolume);
     connect(pActionEnterRoom, &QAction::triggered, this, &MainWindow::slotEnterRoom);
@@ -1006,13 +1006,13 @@ void MainWindow::onExecCalled()
     // Setup Connect window
 
     pConnectWindow = new connectWindow(this);
-    pConnectWindow ->setWindowModality(Qt::WindowModality::WindowModal);
+    pConnectWindow->setWindowModality(Qt::WindowModality::WindowModal);
 
     connect(pConnectWindow, &connectWindow::connectTo,      this, &MainWindow::connectTo);
     connect(pConnectWindow, &connectWindow::showMainWindow, this, &MainWindow::show);
 
 
-    connect(ui ->plainTextEdit_input, &CustomQPlainTextEdit::signalReturnPressed, this, &MainWindow::customqplaintextedit_return_pressed);
+    connect(ui->plainTextEdit_input, &CustomQPlainTextEdit::signalReturnPressed, this, &MainWindow::customqplaintextedit_return_pressed);
 
     applyDefaultTheme();
 
@@ -1022,14 +1022,14 @@ void MainWindow::onExecCalled()
 
     slotApplyTheme();
 
-    if ( pController ->isSettingsCreatedFirstTime() || pController ->isSettingsFileInOldFormat() )
+    if ( pController->isSettingsCreatedFirstTime() || pController->isSettingsFileInOldFormat() )
     {
         // Show SettingsWindow to the user.
 
         pTimer = new QTimer();
-        pTimer ->setInterval(500);
+        pTimer->setInterval(500);
         connect(pTimer, &QTimer::timeout, this, &MainWindow::showSettingsWindow);
-        pTimer ->start();
+        pTimer->start();
     }
     else
     {
@@ -1049,7 +1049,7 @@ void MainWindow::slotEnterRoom()
 
             if (pRoom == pController->getCurrentUserRoom())
             {
-                ui ->listWidget_users ->clearSelection();
+                ui->listWidget_users->clearSelection();
             }
             else
             {
@@ -1110,13 +1110,13 @@ void MainWindow::slotChangeUserVolume()
 {
     if (ui->listWidget_users->currentRow() >= 0)
     {
-        SListItem* pItem = dynamic_cast<SListItem*>(ui ->listWidget_users ->currentItem());
+        SListItem* pItem = dynamic_cast<SListItem*>(ui->listWidget_users->currentItem());
 
         if (pItem->isRoom() == false)
         {
             SListItemUser* pUser = dynamic_cast<SListItemUser*>(pItem);
 
-            SingleUserSettings* pUserSettings = new SingleUserSettings(pUser->getName(), pController ->getUserCurrentVolume(pUser->getName().toStdString()), this);
+            SingleUserSettings* pUserSettings = new SingleUserSettings(pUser->getName(), pController->getUserCurrentVolume(pUser->getName().toStdString()), this);
             connect(pUserSettings, &SingleUserSettings::signalChangeUserVolume, this, &MainWindow::slotSetNewUserVolume);
             pUserSettings->setWindowModality(Qt::WindowModality::WindowModal);
             pUserSettings->show();
@@ -1146,8 +1146,8 @@ void MainWindow::slotDeleteUserFromList(SListItemUser* pListWidgetItem, bool bDe
 void MainWindow::on_actionAbout_2_triggered()
 {
     AboutWindow* pAboutWindow = new AboutWindow ( QString::fromStdString(pController->getClientVersion()), this );
-    pAboutWindow ->setWindowModality (Qt::WindowModality::WindowModal);
-    pAboutWindow ->show();
+    pAboutWindow->setWindowModality (Qt::WindowModality::WindowModal);
+    pAboutWindow->show();
 }
 
 
@@ -1179,7 +1179,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 
 void MainWindow::on_listWidget_users_itemDoubleClicked(QListWidgetItem *item)
 {
-    if (ui ->listWidget_users ->currentRow() >= 0)
+    if (ui->listWidget_users->currentRow() >= 0)
     {
         SListItem* pItem = dynamic_cast<SListItem*>(item);
 
@@ -1189,30 +1189,30 @@ void MainWindow::on_listWidget_users_itemDoubleClicked(QListWidgetItem *item)
 
             if (pRoom == pController->getCurrentUserRoom())
             {
-                ui ->listWidget_users ->clearSelection();
+                ui->listWidget_users->clearSelection();
             }
             else
             {
                 pController->enterRoom(pRoom->getRoomName().toStdString());
-                ui ->listWidget_users ->clearSelection();
+                ui->listWidget_users->clearSelection();
             }
         }
         else
         {
-            ui ->listWidget_users ->clearSelection();
+            ui->listWidget_users->clearSelection();
         }
     }
 }
 
 void MainWindow::on_listWidget_users_itemClicked(QListWidgetItem *item)
 {
-    if (ui ->listWidget_users ->currentRow() >= 0)
+    if (ui->listWidget_users->currentRow() >= 0)
     {
         SListItem* pItem = dynamic_cast<SListItem*>(item);
 
         if (pItem->isRoom() == false)
         {
-            ui ->listWidget_users ->clearSelection();
+            ui->listWidget_users->clearSelection();
         }
     }
 }

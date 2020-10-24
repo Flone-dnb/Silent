@@ -16,7 +16,7 @@ SingleUserSettings::SingleUserSettings(QString userName, float fCurrentVolume, Q
     QMainWindow(parent),
     ui(new Ui::SingleUserSettings)
 {
-    ui ->setupUi(this);
+    ui->setupUi(this);
 
     setFixedSize( width(), height() );
 
@@ -44,7 +44,7 @@ SingleUserSettings::SingleUserSettings(QString userName, float fCurrentVolume, Q
 
 void SingleUserSettings::on_horizontalSlider_volume_valueChanged(int value)
 {
-    ui ->label_percent ->setText( QString::number(value) + "%" );
+    ui->label_percent->setText( QString::number(value) + "%" );
 }
 
 
@@ -55,7 +55,7 @@ SingleUserSettings::~SingleUserSettings()
 
 void SingleUserSettings::on_pushButton_clicked()
 {
-    float fNewVolume = ui ->horizontalSlider_volume ->value() / 100.0f;
+    float fNewVolume = ui->horizontalSlider_volume->value() / 100.0f;
 
     emit signalChangeUserVolume( userName, fNewVolume );
 

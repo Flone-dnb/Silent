@@ -36,7 +36,7 @@ void SVoiceMeterWidget::paintEvent(QPaintEvent *event)
 
     painter.setPen(pen);
 
-    painter.drawRect(QRect(0,0,width() * iWidthScale,height()));
+    painter.drawRect( QRect(0, 0, width() * iWidthScale, height()) );
 }
 
 SVoiceMeterWidget::~SVoiceMeterWidget()

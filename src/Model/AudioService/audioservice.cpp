@@ -25,8 +25,8 @@
 
 AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsManager)
 {
-    this ->pMainWindow      = pMainWindow;
-    this ->pSettingsManager = pSettingsManager;
+    this->pMainWindow      = pMainWindow;
+    this->pSettingsManager = pSettingsManager;
 
 
     // Do not record audio now
@@ -52,9 +52,9 @@ AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsMa
     // Because waveOutVolume() does not make it loud enough
     fMasterVolumeMult       = 1.45f;
 
-    iAudioInputVolume = pSettingsManager ->getCurrentSettings() ->iInputVolumeMultiplier;
-    iLowerVoiceStartRecValueInDBFS = pSettingsManager ->getCurrentSettings() ->iVoiceStartRecValueInDBFS;
-    bOutputTestVoice = !pSettingsManager ->getCurrentSettings() ->bPushToTalkVoiceMode;
+    iAudioInputVolume = pSettingsManager->getCurrentSettings()->iInputVolumeMultiplier;
+    iLowerVoiceStartRecValueInDBFS = pSettingsManager->getCurrentSettings()->iVoiceStartRecValueInDBFS;
+    bOutputTestVoice = !pSettingsManager->getCurrentSettings()->bPushToTalkVoiceMode;
 
     startTestWaveOut();
 }
@@ -64,21 +64,21 @@ AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsMa
 
 void AudioService::setNetworkService(NetworkService *pNetworkService)
 {
-    this ->pNetworkService = pNetworkService;
+    this->pNetworkService = pNetworkService;
 }
 
 float AudioService::getUserCurrentVolume(const std::string &sUserName)
 {
-    pNetworkService ->getOtherUsersMutex() ->lock();
+    pNetworkService->getOtherUsersMutex()->lock();
 
 
     float fUserVolume = 0.0f;
 
-    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
+    for (size_t i = 0;   i < pNetworkService->getOtherUsersVectorSize();   i++)
     {
-        if ( pNetworkService ->getOtherUser(i) ->sUserName == sUserName )
+        if ( pNetworkService->getOtherUser(i)->sUserName == sUserName )
         {
-            fUserVolume = pNetworkService ->getOtherUser(i) ->fUserDefinedVolume;
+            fUserVolume = pNetworkService->getOtherUser(i)->fUserDefinedVolume;
 
             break;
         }
@@ -86,7 +86,7 @@ float AudioService::getUserCurrentVolume(const std::string &sUserName)
 
 
 
-    pNetworkService ->getOtherUsersMutex() ->unlock();
+    pNetworkService->getOtherUsersMutex()->unlock();
 
 
     return fUserVolume;
@@ -109,7 +109,7 @@ std::vector<std::wstring> AudioService::getInputDevices()
             memset (fault, 0, 256);
 
             waveInGetErrorTextA (result, fault, 256);
-            pMainWindow ->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
+            pMainWindow->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
                                        SilentMessageColor(false),
                                        true);
            continue;
@@ -130,45 +130,45 @@ int AudioService::getAudioPacketSizeInSamples() const
 
 void AudioService::setNewMasterVolume(unsigned short int iVolume)
 {
-    pNetworkService ->getOtherUsersMutex() ->lock();
+    pNetworkService->getOtherUsersMutex()->lock();
 
 
-    for (size_t i = 0;  i < pNetworkService ->getOtherUsersVectorSize();  i++)
+    for (size_t i = 0;  i < pNetworkService->getOtherUsersVectorSize();  i++)
     {
-        waveOutSetVolume( pNetworkService ->getOtherUser(i) ->hWaveOut, MAKELONG(iVolume, iVolume) );
+        waveOutSetVolume( pNetworkService->getOtherUser(i)->hWaveOut, MAKELONG(iVolume, iVolume) );
     }
 
     waveOutSetVolume( hTestWaveOut, MAKELONG(iVolume, iVolume) );
 
 
-    pNetworkService ->getOtherUsersMutex() ->unlock();
+    pNetworkService->getOtherUsersMutex()->unlock();
 }
 
 void AudioService::setNewUserVolume(std::string sUserName, float fVolume)
 {
     User* pUser = nullptr;
 
-    pNetworkService ->getOtherUsersMutex() ->lock();
+    pNetworkService->getOtherUsersMutex()->lock();
 
 
 
-    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
+    for (size_t i = 0;   i < pNetworkService->getOtherUsersVectorSize();   i++)
     {
-        if (pNetworkService ->getOtherUser(i) ->sUserName == sUserName)
+        if (pNetworkService->getOtherUser(i)->sUserName == sUserName)
         {
-            pUser = pNetworkService ->getOtherUser(i);
+            pUser = pNetworkService->getOtherUser(i);
             break;
         }
     }
 
     if (pUser)
     {
-       pUser ->fUserDefinedVolume = fVolume;
+       pUser->fUserDefinedVolume = fVolume;
     }
 
 
 
-    pNetworkService ->getOtherUsersMutex() ->unlock();
+    pNetworkService->getOtherUsersMutex()->unlock();
 }
 
 void AudioService::prepareForStart()
@@ -180,39 +180,39 @@ void AudioService::prepareForStart()
 
 
     // Format
-    Format .wFormatTag      = WAVE_FORMAT_PCM;
-    Format .nChannels       = 1;    //  '1' - mono, '2' - stereo
-    Format .cbSize          = 0;
-    Format .wBitsPerSample  = 16;
-    Format .nSamplesPerSec  = sampleRate;
-    Format .nBlockAlign     = Format .nChannels      * Format .wBitsPerSample / 8;
-    Format .nAvgBytesPerSec = Format .nSamplesPerSec * Format .nChannels           * Format .wBitsPerSample / 8;
+    Format.wFormatTag      = WAVE_FORMAT_PCM;
+    Format.nChannels       = 1;    //  '1' - mono, '2' - stereo
+    Format.cbSize          = 0;
+    Format.wBitsPerSample  = 16;
+    Format.nSamplesPerSec  = sampleRate;
+    Format.nBlockAlign     = Format.nChannels      * Format.wBitsPerSample / 8;
+    Format.nAvgBytesPerSec = Format.nSamplesPerSec * Format.nChannels           * Format.wBitsPerSample / 8;
 
 
     // "In" buffers
 
     // Audio buffer 1
-    WaveInHdr1 .lpData          = reinterpret_cast <LPSTR>         (pWaveIn1);
-    WaveInHdr1 .dwBufferLength  = static_cast      <unsigned long> (sampleCount * 2);
-    WaveInHdr1 .dwBytesRecorded = 0;
-    WaveInHdr1 .dwUser          = 0L;
-    WaveInHdr1 .dwFlags         = 0L;
-    WaveInHdr1 .dwLoops         = 0L;
+    WaveInHdr1.lpData          = reinterpret_cast <LPSTR>         (pWaveIn1);
+    WaveInHdr1.dwBufferLength  = static_cast      <unsigned long> (sampleCount * 2);
+    WaveInHdr1.dwBytesRecorded = 0;
+    WaveInHdr1.dwUser          = 0L;
+    WaveInHdr1.dwFlags         = 0L;
+    WaveInHdr1.dwLoops         = 0L;
 
 
     // Audio buffer 2
     WaveInHdr2 = WaveInHdr1;
-    WaveInHdr2 .lpData = reinterpret_cast <LPSTR> (pWaveIn2);
+    WaveInHdr2.lpData = reinterpret_cast <LPSTR> (pWaveIn2);
 
 
     // Audio buffer 3
     WaveInHdr3 = WaveInHdr1;
-    WaveInHdr3 .lpData = reinterpret_cast <LPSTR> (pWaveIn3);
+    WaveInHdr3.lpData = reinterpret_cast <LPSTR> (pWaveIn3);
 
 
     // Audio buffer 4
     WaveInHdr4 = WaveInHdr1;
-    WaveInHdr4 .lpData = reinterpret_cast <LPSTR> (pWaveIn4);
+    WaveInHdr4.lpData = reinterpret_cast <LPSTR> (pWaveIn4);
 }
 
 bool AudioService::start()
@@ -221,7 +221,7 @@ bool AudioService::start()
 
     UINT iDeviceID = WAVE_MAPPER;
 
-    int iPreferredDeviceID = getInputDeviceID( pSettingsManager ->getCurrentSettings() ->sInputDeviceName );
+    int iPreferredDeviceID = getInputDeviceID( pSettingsManager->getCurrentSettings()->sInputDeviceName );
     if (iPreferredDeviceID != -1)
     {
         iDeviceID = static_cast<UINT>(iPreferredDeviceID);
@@ -237,7 +237,7 @@ bool AudioService::start()
 
 
         waveInGetErrorTextA (result, fault, 256);
-        pMainWindow ->printOutput (std::string("AudioService::start::waveInOpen() error: " + std::string(fault) + "."),
+        pMainWindow->printOutput (std::string("AudioService::start::waveInOpen() error: " + std::string(fault) + "."),
                                    SilentMessageColor(false),
                                    true);
 
@@ -266,12 +266,12 @@ bool AudioService::start()
     if (pSettingsManager->getCurrentSettings()->bPushToTalkVoiceMode)
     {
         std::thread recordThread (&AudioService::recordOnPush, this);
-        recordThread .detach ();
+        recordThread.detach ();
     }
     else
     {
         std::thread recordThread (&AudioService::recordOnTalk, this);
-        recordThread .detach ();
+        recordThread.detach ();
     }
 
     return true;
@@ -286,45 +286,45 @@ void AudioService::startTestWaveOut()
 
 
     // Format
-    Format .wFormatTag      = WAVE_FORMAT_PCM;
-    Format .nChannels       = 1;    //  '1' - mono, '2' - stereo
-    Format .cbSize          = 0;
-    Format .wBitsPerSample  = 16;
-    Format .nSamplesPerSec  = sampleRate;
-    Format .nBlockAlign     = Format .nChannels      * Format .wBitsPerSample / 8;
-    Format .nAvgBytesPerSec = Format .nSamplesPerSec * Format .nChannels           * Format .wBitsPerSample / 8;
+    Format.wFormatTag      = WAVE_FORMAT_PCM;
+    Format.nChannels       = 1;    //  '1' - mono, '2' - stereo
+    Format.cbSize          = 0;
+    Format.wBitsPerSample  = 16;
+    Format.nSamplesPerSec  = sampleRate;
+    Format.nBlockAlign     = Format.nChannels      * Format.wBitsPerSample / 8;
+    Format.nAvgBytesPerSec = Format.nSamplesPerSec * Format.nChannels           * Format.wBitsPerSample / 8;
 
 
     // "In" buffers
 
     // Audio buffer 1
-    TestWaveInHdr1 .lpData          = reinterpret_cast <LPSTR>         (pTestWaveIn1);
-    TestWaveInHdr1 .dwBufferLength  = static_cast      <unsigned long> (sampleCount * 2);
-    TestWaveInHdr1 .dwBytesRecorded = 0;
-    TestWaveInHdr1 .dwUser          = 0L;
-    TestWaveInHdr1 .dwFlags         = 0L;
-    TestWaveInHdr1 .dwLoops         = 0L;
+    TestWaveInHdr1.lpData          = reinterpret_cast <LPSTR>         (pTestWaveIn1);
+    TestWaveInHdr1.dwBufferLength  = static_cast      <unsigned long> (sampleCount * 2);
+    TestWaveInHdr1.dwBytesRecorded = 0;
+    TestWaveInHdr1.dwUser          = 0L;
+    TestWaveInHdr1.dwFlags         = 0L;
+    TestWaveInHdr1.dwLoops         = 0L;
 
 
     // Audio buffer 2
     TestWaveInHdr2 = TestWaveInHdr1;
-    TestWaveInHdr2 .lpData = reinterpret_cast <LPSTR> (pTestWaveIn2);
+    TestWaveInHdr2.lpData = reinterpret_cast <LPSTR> (pTestWaveIn2);
 
 
     // Audio buffer 3
     TestWaveInHdr3 = TestWaveInHdr1;
-    TestWaveInHdr3 .lpData = reinterpret_cast <LPSTR> (pTestWaveIn3);
+    TestWaveInHdr3.lpData = reinterpret_cast <LPSTR> (pTestWaveIn3);
 
 
     // Audio buffer 4
     TestWaveInHdr4 = TestWaveInHdr1;
-    TestWaveInHdr4 .lpData = reinterpret_cast <LPSTR> (pTestWaveIn4);
+    TestWaveInHdr4.lpData = reinterpret_cast <LPSTR> (pTestWaveIn4);
 
     MMRESULT result;
 
     UINT iDeviceID = WAVE_MAPPER;
 
-    int iPreferredDeviceID = getInputDeviceID( pSettingsManager ->getCurrentSettings() ->sInputDeviceName );
+    int iPreferredDeviceID = getInputDeviceID( pSettingsManager->getCurrentSettings()->sInputDeviceName );
     if (iPreferredDeviceID != -1)
     {
         iDeviceID = static_cast<UINT>(iPreferredDeviceID);
@@ -340,7 +340,7 @@ void AudioService::startTestWaveOut()
 
 
         waveInGetErrorTextA (result, fault, 256);
-        pMainWindow ->printOutput (std::string("AudioService::startTestWaveOut::waveInOpen() error: " + std::string(fault) + "."),
+        pMainWindow->printOutput (std::string("AudioService::startTestWaveOut::waveInOpen() error: " + std::string(fault) + "."),
                                    SilentMessageColor(false),
                                    true);
 
@@ -366,12 +366,12 @@ void AudioService::startTestWaveOut()
 
 
     std::thread recordThread (&AudioService::testRecord, this);
-    recordThread .detach ();
+    recordThread.detach ();
 }
 
 void AudioService::playConnectDisconnectSound(bool bConnectSound)
 {
-    if (pSettingsManager ->getCurrentSettings() ->bPlayConnectDisconnectSound)
+    if (pSettingsManager->getCurrentSettings()->bPlayConnectDisconnectSound)
     {
         if (bConnectSound)
         {
@@ -391,7 +391,7 @@ void AudioService::playServerMessageSound()
 
 void AudioService::playNewMessageSound()
 {
-    if (pSettingsManager ->getCurrentSettings() ->bPlayTextMessageSound)
+    if (pSettingsManager->getCurrentSettings()->bPlayTextMessageSound)
     {
        PlaySoundW( AUDIO_NEW_MESSAGE_PATH, nullptr, SND_FILENAME | SND_ASYNC );
     }
@@ -404,26 +404,26 @@ void AudioService::playLostConnectionSound()
 
 void AudioService::setupUserAudio(User *pUser)
 {
-    pUser ->bPacketsArePlaying   = false;
-    pUser ->bDeletePacketsAtLast = false;
-    pUser ->bLastPacketCame      = false;
-    pUser ->fUserDefinedVolume   = 1.0f;
+    pUser->bPacketsArePlaying   = false;
+    pUser->bDeletePacketsAtLast = false;
+    pUser->bLastPacketCame      = false;
+    pUser->fUserDefinedVolume   = 1.0f;
 
 
     // Audio buffer1
-    pUser ->WaveOutHdr1 .dwBufferLength  = static_cast <unsigned long> (sampleCount * 2);
-    pUser ->WaveOutHdr1 .dwBytesRecorded = 0;
-    pUser ->WaveOutHdr1 .dwUser          = 0L;
-    pUser ->WaveOutHdr1 .dwFlags         = 0L;
-    pUser ->WaveOutHdr1 .dwLoops         = 0L;
+    pUser->WaveOutHdr1.dwBufferLength  = static_cast <unsigned long> (sampleCount * 2);
+    pUser->WaveOutHdr1.dwBytesRecorded = 0;
+    pUser->WaveOutHdr1.dwUser          = 0L;
+    pUser->WaveOutHdr1.dwFlags         = 0L;
+    pUser->WaveOutHdr1.dwLoops         = 0L;
 
     // Audio buffer2
-    pUser ->WaveOutHdr2 = pUser ->WaveOutHdr1;
+    pUser->WaveOutHdr2 = pUser->WaveOutHdr1;
 
 
 
     // Start output device
-    MMRESULT result = waveOutOpen( &pUser ->hWaveOut,  WAVE_MAPPER,  &Format,  0L,  0L,  WAVE_FORMAT_DIRECT );
+    MMRESULT result = waveOutOpen( &pUser->hWaveOut,  WAVE_MAPPER,  &Format,  0L,  0L,  WAVE_FORMAT_DIRECT );
 
     if (result)
     {
@@ -431,32 +431,32 @@ void AudioService::setupUserAudio(User *pUser)
         memset (fault, 0, 256);
 
         waveInGetErrorTextA (result, fault, 256);
-        pMainWindow ->printOutput(std::string("AudioService::addNewUser::waveOutOpen() error: " + std::string(fault) + "."),
+        pMainWindow->printOutput(std::string("AudioService::addNewUser::waveOutOpen() error: " + std::string(fault) + "."),
                                   SilentMessageColor(false),
                                   true);
     }
 
-    waveOutSetVolume( pUser ->hWaveOut, MAKELONG(pSettingsManager ->getCurrentSettings() ->iMasterVolume,
-                                                 pSettingsManager ->getCurrentSettings() ->iMasterVolume) );
+    waveOutSetVolume( pUser->hWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                                 pSettingsManager->getCurrentSettings()->iMasterVolume) );
 }
 
 void AudioService::deleteUserAudio(User *pUser)
 {
-    pUser ->mtxUser. lock();
+    pUser->mtxUser. lock();
 
 
-    for (size_t j = 0;  j < pUser ->vAudioPackets .size();  j++)
+    for (size_t j = 0;  j < pUser->vAudioPackets.size();  j++)
     {
-        if (pUser ->vAudioPackets[j])
+        if (pUser->vAudioPackets[j])
         {
-            delete[] pUser ->vAudioPackets[j];
+            delete[] pUser->vAudioPackets[j];
         }
     }
 
-    waveOutClose (pUser ->hWaveOut);
+    waveOutClose (pUser->hWaveOut);
 
 
-    pUser ->mtxUser. unlock();
+    pUser->mtxUser. unlock();
 }
 
 void AudioService::setTestRecordingPause(bool bPause)
@@ -475,11 +475,11 @@ void AudioService::recordOnPush()
 
     while(bInputReady)
     {
-        while ( (GetAsyncKeyState(pSettingsManager ->getCurrentSettings() ->iPushToTalkButton) & 0x8000)
+        while ( (GetAsyncKeyState(pSettingsManager->getCurrentSettings()->iPushToTalkButton) & 0x8000)
                 && bInputReady )
         {
             // Button pressed
-            if ( (bButtonPressed == false) && (pSettingsManager ->getCurrentSettings() ->bPlayPushToTalkSound) )
+            if ( (bButtonPressed == false) && (pSettingsManager->getCurrentSettings()->bPlayPushToTalkSound) )
             {
                 PlaySoundW( AUDIO_PRESS_PATH, nullptr, SND_FILENAME | SND_ASYNC );
             }
@@ -526,7 +526,7 @@ void AudioService::recordOnPush()
                     memset (fault, 0, 256);
 
                     waveInGetErrorTextA (result, fault, 256);
-                    pMainWindow ->printOutput(std::string("AudioService::recordOnPress::waveInStart() error: " + std::string(fault) + "."),
+                    pMainWindow->printOutput(std::string("AudioService::recordOnPress::waveInStart() error: " + std::string(fault) + "."),
                                               SilentMessageColor(false),
                                               true);
 
@@ -595,7 +595,7 @@ void AudioService::recordOnPush()
             // 4-1-2-(3).
             ///////////////////
 
-            if ( GetAsyncKeyState(pSettingsManager ->getCurrentSettings() ->iPushToTalkButton) & 0x8000 )
+            if ( GetAsyncKeyState(pSettingsManager->getCurrentSettings()->iPushToTalkButton) & 0x8000 )
             {
                 if ( addInBuffer(&WaveInHdr3) )
                 {
@@ -642,10 +642,10 @@ void AudioService::recordOnPush()
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 
-            pNetworkService ->sendVoiceMessage(nullptr, 1, true);
+            pNetworkService->sendVoiceMessage(nullptr, 1, true);
 
-            if ( pSettingsManager ->getCurrentSettings() ->bPushToTalkVoiceMode
-                 && pSettingsManager ->getCurrentSettings() ->bPlayPushToTalkSound )
+            if ( pSettingsManager->getCurrentSettings()->bPushToTalkVoiceMode
+                 && pSettingsManager->getCurrentSettings()->bPlayPushToTalkSound )
             {
                 PlaySoundW( AUDIO_UNPRESS_PATH, nullptr, SND_FILENAME | SND_ASYNC );
             }
@@ -707,7 +707,7 @@ void AudioService::recordOnTalk()
                 memset (fault, 0, 256);
 
                 waveInGetErrorTextA (result, fault, 256);
-                pMainWindow ->printOutput(std::string("AudioService::recordOnTalk::waveInStart() error: " + std::string(fault) + "."),
+                pMainWindow->printOutput(std::string("AudioService::recordOnTalk::waveInStart() error: " + std::string(fault) + "."),
                                           SilentMessageColor(false),
                                           true);
 
@@ -864,7 +864,7 @@ void AudioService::testRecord()
                 memset (fault, 0, 256);
 
                 waveInGetErrorTextA (result, fault, 256);
-                pMainWindow ->printOutput(std::string("AudioService::testRecord::waveInStart() error: " + std::string(fault) + "."),
+                pMainWindow->printOutput(std::string("AudioService::testRecord::waveInStart() error: " + std::string(fault) + "."),
                                           SilentMessageColor(false),
                                           true);
 
@@ -1022,7 +1022,7 @@ bool AudioService::addOutBuffer(HWAVEOUT hWaveOut, LPWAVEHDR buffer)
         memset (fault, 0, 256);
 
         waveInGetErrorTextA (result, fault, 256);
-        pMainWindow ->printOutput(std::string("AudioService::addOutBuffer::waveOutPrepareHeader() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
+        pMainWindow->printOutput(std::string("AudioService::addOutBuffer::waveOutPrepareHeader() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
                                   SilentMessageColor(false),
                                   true);
 
@@ -1052,12 +1052,12 @@ void AudioService::waitAndSendBuffer(WAVEHDR *WaveInHdr, short *pWaveIn, bool bO
     if (bOnTalk)
     {
         std::thread compressThread (&AudioService::sendAudioDataOnTalk, this, pAudioCopy);
-        compressThread .detach();
+        compressThread.detach();
     }
     else
     {
         std::thread compressThread (&AudioService::sendAudioData, this, pAudioCopy);
-        compressThread .detach();
+        compressThread.detach();
     }
 }
 
@@ -1078,7 +1078,7 @@ void AudioService::waitAndShowBufferVolume(WAVEHDR *WaveInHdr, short *pWaveIn)
 
     // Compress and send in other thread
     std::thread compressThread (&AudioService::sendAudioDataVolume, this, pAudioCopy);
-    compressThread .detach();
+    compressThread.detach();
 }
 
 void AudioService::waitForAllInBuffers()
@@ -1139,13 +1139,13 @@ void AudioService::waitForAllTestOutBuffers()
 void AudioService::waitForPlayToEnd(User *pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex)
 {
     // Wait until finished playing buffer
-    while (waveOutUnprepareHeader(pUser ->hWaveOut, pWaveOutHdr, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+    while (waveOutUnprepareHeader(pUser->hWaveOut, pWaveOutHdr, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
     }
 
-    delete[] pUser ->vAudioPackets[iLastPlayingPacketIndex];
-    pUser ->vAudioPackets[iLastPlayingPacketIndex] = nullptr;
+    delete[] pUser->vAudioPackets[iLastPlayingPacketIndex];
+    pUser->vAudioPackets[iLastPlayingPacketIndex] = nullptr;
 
     iLastPlayingPacketIndex++;
 }
@@ -1193,7 +1193,7 @@ void AudioService::sendAudioData(short *pAudio)
     delete[] pAudio;
 
 
-    pNetworkService ->sendVoiceMessage( pAudioSamples, sampleCount * 2, false );
+    pNetworkService->sendVoiceMessage( pAudioSamples, sampleCount * 2, false );
 }
 
 void AudioService::sendAudioDataOnTalk(short *pAudio)
@@ -1272,7 +1272,7 @@ void AudioService::sendAudioDataOnTalk(short *pAudio)
 
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-            pNetworkService ->sendVoiceMessage(nullptr, 1, true);
+            pNetworkService->sendVoiceMessage(nullptr, 1, true);
         }
     }
 
@@ -1286,7 +1286,7 @@ void AudioService::sendAudioDataOnTalk(short *pAudio)
         delete[] pAudio;
 
 
-        pNetworkService ->sendVoiceMessage( pAudioSamples, sampleCount * 2, false );
+        pNetworkService->sendVoiceMessage( pAudioSamples, sampleCount * 2, false );
     }
     else
     {
@@ -1376,15 +1376,15 @@ void AudioService::sendAudioDataVolume(short *pAudio)
 
     if (bInDBFS)
     {
-        pMainWindow ->showVoiceVolumeValueInSettings(static_cast<int>(maxDBFS));
+        pMainWindow->showVoiceVolumeValueInSettings(static_cast<int>(maxDBFS));
     }
     else
     {
-        pMainWindow ->showVoiceVolumeValueInSettings(static_cast<int>(static_cast<float>(maxVolume) / SHRT_MAX * 100));
+        pMainWindow->showVoiceVolumeValueInSettings(static_cast<int>(static_cast<float>(maxVolume) / SHRT_MAX * 100));
     }
 
 
-    if (pSettingsManager ->getCurrentSettings() ->bHearVoiceInSettings && bOutputTestVoice)
+    if (pSettingsManager->getCurrentSettings()->bHearVoiceInSettings && bOutputTestVoice)
     {
         if (iTestPacketsNeedToRecordLeft == 0)
         {
@@ -1409,11 +1409,11 @@ void AudioService::sendAudioDataVolume(short *pAudio)
 void AudioService::testOutputAudio()
 {
     // Audio buffer1
-    TestWaveOutHdr1 .dwBufferLength  = static_cast <unsigned long> (sampleCount * 2);
-    TestWaveOutHdr1 .dwBytesRecorded = 0;
-    TestWaveOutHdr1 .dwUser          = 0L;
-    TestWaveOutHdr1 .dwFlags         = 0L;
-    TestWaveOutHdr1 .dwLoops         = 0L;
+    TestWaveOutHdr1.dwBufferLength  = static_cast <unsigned long> (sampleCount * 2);
+    TestWaveOutHdr1.dwBytesRecorded = 0;
+    TestWaveOutHdr1.dwUser          = 0L;
+    TestWaveOutHdr1.dwFlags         = 0L;
+    TestWaveOutHdr1.dwLoops         = 0L;
 
     // Audio buffer2
     TestWaveOutHdr2 = TestWaveOutHdr1;
@@ -1427,13 +1427,13 @@ void AudioService::testOutputAudio()
         memset (fault, 0, 256);
 
         waveInGetErrorTextA (result, fault, 256);
-        pMainWindow ->printOutput(std::string("AudioService::testOutputAudio::waveOutOpen() error: " + std::string(fault) + "."),
+        pMainWindow->printOutput(std::string("AudioService::testOutputAudio::waveOutOpen() error: " + std::string(fault) + "."),
                                   SilentMessageColor(false),
                                   true);
     }
 
-    waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager ->getCurrentSettings() ->iMasterVolume,
-                                             pSettingsManager ->getCurrentSettings() ->iMasterVolume) );
+    waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                             pSettingsManager->getCurrentSettings()->iMasterVolume) );
 
 
 
@@ -1465,14 +1465,14 @@ void AudioService::testOutputAudio()
 
                 bWasStarted = false;
 
-                waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager ->getCurrentSettings() ->iMasterVolume,
-                                                         pSettingsManager ->getCurrentSettings() ->iMasterVolume) );
+                waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                                         pSettingsManager->getCurrentSettings()->iMasterVolume) );
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
-        while (iCurrentAudioPacketIndex + 3 >= vAudioPacketsForTest .size())
+        while (iCurrentAudioPacketIndex + 3 >= vAudioPacketsForTest.size())
         {
             if (vAudioPacketsForTest.size() >= 4)
             {
@@ -1493,8 +1493,8 @@ void AudioService::testOutputAudio()
 
                 mtxAudioPacketsForTest.unlock();
 
-                waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager ->getCurrentSettings() ->iMasterVolume,
-                                                         pSettingsManager ->getCurrentSettings() ->iMasterVolume) );
+                waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                                         pSettingsManager->getCurrentSettings()->iMasterVolume) );
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -1504,14 +1504,14 @@ void AudioService::testOutputAudio()
 
 
         // Add buffer1
-        TestWaveOutHdr1 .lpData = reinterpret_cast<LPSTR>( vAudioPacketsForTest[iCurrentAudioPacketIndex] );
+        TestWaveOutHdr1.lpData = reinterpret_cast<LPSTR>( vAudioPacketsForTest[iCurrentAudioPacketIndex] );
         if ( addOutBuffer(hTestWaveOut, &TestWaveOutHdr1) ) {break;}
         iCurrentAudioPacketIndex++;
 
 
 
         // Add buffer2
-        TestWaveOutHdr2 .lpData = reinterpret_cast<LPSTR>( vAudioPacketsForTest[iCurrentAudioPacketIndex] );
+        TestWaveOutHdr2.lpData = reinterpret_cast<LPSTR>( vAudioPacketsForTest[iCurrentAudioPacketIndex] );
         if ( addOutBuffer(hTestWaveOut, &TestWaveOutHdr2) ) {break;}
         iCurrentAudioPacketIndex++;
 
@@ -1567,7 +1567,7 @@ void AudioService::testOutputAudio()
                 // Wait until finished playing 2st buffer
                 while ( (waveOutUnprepareHeader(hTestWaveOut, &TestWaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
                         &&
-                        !(iCurrentAudioPacketIndex < vAudioPacketsForTest .size()) )
+                        !(iCurrentAudioPacketIndex < vAudioPacketsForTest.size()) )
                 {
                     std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
                 }
@@ -1577,14 +1577,14 @@ void AudioService::testOutputAudio()
                 // Wait until finished playing 1st buffer
                 while ( (waveOutUnprepareHeader(hTestWaveOut, &TestWaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
                         &&
-                        !(iCurrentAudioPacketIndex < vAudioPacketsForTest .size()) )
+                        !(iCurrentAudioPacketIndex < vAudioPacketsForTest.size()) )
                 {
                     std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
                 }
             }
 
 
-            if ( iCurrentAudioPacketIndex < vAudioPacketsForTest .size() )
+            if ( iCurrentAudioPacketIndex < vAudioPacketsForTest.size() )
             {
                 if (bWaitForSecondBuffer)
                 {
@@ -1652,7 +1652,7 @@ void AudioService::testOutputAudio()
                 bWaitForSecondBuffer = !bWaitForSecondBuffer;
             }
 
-        }while ( iCurrentAudioPacketIndex < vAudioPacketsForTest .size() );
+        }while ( iCurrentAudioPacketIndex < vAudioPacketsForTest.size() );
 
         if (bError)
         {
@@ -1682,19 +1682,19 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
         return;
     }
 
-    pNetworkService ->getOtherUsersMutex() ->lock();
+    pNetworkService->getOtherUsersMutex()->lock();
 
     User* pUser = nullptr;
 
-    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
+    for (size_t i = 0;   i < pNetworkService->getOtherUsersVectorSize();   i++)
     {
-        if (pNetworkService ->getOtherUser(i) ->sUserName == sUserName)
+        if (pNetworkService->getOtherUser(i)->sUserName == sUserName)
         {
-            pUser = pNetworkService ->getOtherUser(i);
+            pUser = pNetworkService->getOtherUser(i);
         }
     }
 
-    pNetworkService ->getOtherUsersMutex() ->unlock();
+    pNetworkService->getOtherUsersMutex()->unlock();
 
     if (pUser == nullptr)
     {
@@ -1707,37 +1707,37 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
 
     if (bLast)
     {
-        if (pUser ->bDeletePacketsAtLast)
+        if (pUser->bDeletePacketsAtLast)
         {
             // Something went wrong, delete all packets
 
-            for (size_t j = 0;  j < pUser ->vAudioPackets .size();  j++)
+            for (size_t j = 0;  j < pUser->vAudioPackets.size();  j++)
             {
-                if (pUser ->vAudioPackets[j])
+                if (pUser->vAudioPackets[j])
                 {
-                    delete[] pUser ->vAudioPackets[j];
+                    delete[] pUser->vAudioPackets[j];
                 }
             }
 
-            pUser ->vAudioPackets.clear();
+            pUser->vAudioPackets.clear();
 
-            pUser ->bDeletePacketsAtLast = false;
-            pUser ->bPacketsArePlaying   = false;
+            pUser->bDeletePacketsAtLast = false;
+            pUser->bPacketsArePlaying   = false;
 
             // Wait until finished playing
             waitForAllBuffers (pUser, false, nullptr);
         }
 
-        pUser ->bLastPacketCame = true;
+        pUser->bLastPacketCame = true;
     }
     else
     {
         // Set volume multiplier
         float fVolumeMult  = fMasterVolumeMult;
 
-        if (pUser ->fUserDefinedVolume != 1.0f)
+        if (pUser->fUserDefinedVolume != 1.0f)
         {
-            fVolumeMult += ( pUser ->fUserDefinedVolume - 1.0f );
+            fVolumeMult += ( pUser->fUserDefinedVolume - 1.0f );
         }
 
 
@@ -1763,29 +1763,29 @@ void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool 
 
 
 
-        pUser ->vAudioPackets.push_back(pAudio);
+        pUser->vAudioPackets.push_back(pAudio);
 
 
 
-        if ( (pUser ->vAudioPackets .size() > 1)
+        if ( (pUser->vAudioPackets.size() > 1)
              &&
-             (pUser ->bPacketsArePlaying == false) )
+             (pUser->bPacketsArePlaying == false) )
         {
-            pUser ->bPacketsArePlaying = true;
+            pUser->bPacketsArePlaying = true;
 
             std::thread playThread (&AudioService::play, this, pUser);
-            playThread .detach();
+            playThread.detach();
         }
-        else if (pUser ->vAudioPackets .size() == 1)
+        else if (pUser->vAudioPackets.size() == 1)
         {
-            pUser ->bLastPacketCame = false;
+            pUser->bLastPacketCame = false;
         }
     }
 }
 
 void AudioService::play(User* pUser)
 {
-    pUser ->mtxUser .lock();
+    pUser->mtxUser.lock();
 
 
     MMRESULT result;
@@ -1799,26 +1799,26 @@ void AudioService::play(User* pUser)
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
 
-    pUser       ->bTalking = true;
-    pMainWindow ->setPingAndTalkingToUser(pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+    pUser      ->bTalking = true;
+    pMainWindow->setPingAndTalkingToUser(pUser->pListWidgetItem, pUser->iPing, pUser->bTalking);
 
 
 
     // Add buffer1
-    pUser ->WaveOutHdr1 .lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
-    if ( addOutBuffer(pUser->hWaveOut, &pUser ->WaveOutHdr1) ) {pUser->bDeletePacketsAtLast = true;}
+    pUser->WaveOutHdr1.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
+    if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr1) ) {pUser->bDeletePacketsAtLast = true;}
     i++;
 
 
 
     // Add buffer2
-    pUser ->WaveOutHdr2 .lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
-    if ( addOutBuffer(pUser->hWaveOut, &pUser ->WaveOutHdr2) ) {pUser->bDeletePacketsAtLast = true;}
+    pUser->WaveOutHdr2.lpData = reinterpret_cast<LPSTR>( pUser->vAudioPackets[i] );
+    if ( addOutBuffer(pUser->hWaveOut, &pUser->WaveOutHdr2) ) {pUser->bDeletePacketsAtLast = true;}
     i++;
 
 
     // Play buffer1
-    result = waveOutWrite(pUser->hWaveOut, &pUser ->WaveOutHdr1, sizeof(WAVEHDR));
+    result = waveOutWrite(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
     if (result)
     {
         char fault[256];
@@ -1829,14 +1829,14 @@ void AudioService::play(User* pUser)
                                  SilentMessageColor(false),
                                  true);
 
-        waveOutUnprepareHeader(pUser->hWaveOut, &pUser ->WaveOutHdr1, sizeof(WAVEHDR));
+        waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
 
         pUser->bDeletePacketsAtLast = true;
     }
 
 
     // Play buffer2
-    result = waveOutWrite(pUser->hWaveOut, &pUser ->WaveOutHdr2, sizeof(WAVEHDR));
+    result = waveOutWrite(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
     if (result)
     {
         char fault[256];
@@ -1847,7 +1847,7 @@ void AudioService::play(User* pUser)
                                  SilentMessageColor(false),
                                  true);
 
-        waveOutUnprepareHeader(pUser->hWaveOut, &pUser ->WaveOutHdr2, sizeof(WAVEHDR));
+        waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
 
         pUser->bDeletePacketsAtLast = true;
     }
@@ -1866,9 +1866,9 @@ void AudioService::play(User* pUser)
         if (bWaitForSecondBuffer)
         {
             // Wait until finished playing 2st buffer
-            while ( (waveOutUnprepareHeader(pUser ->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+            while ( (waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
                     &&
-                    !(i < pUser ->vAudioPackets .size()) )
+                    !(i < pUser->vAudioPackets.size()) )
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
             }
@@ -1876,16 +1876,16 @@ void AudioService::play(User* pUser)
         else
         {
             // Wait until finished playing 1st buffer
-            while ( (waveOutUnprepareHeader(pUser ->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
+            while ( (waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING)
                     &&
-                    !(i < pUser ->vAudioPackets .size()) )
+                    !(i < pUser->vAudioPackets.size()) )
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS / 2));
             }
         }
 
 
-        if ( i < pUser ->vAudioPackets .size() )
+        if ( i < pUser->vAudioPackets.size() )
         {
             if (bWaitForSecondBuffer)
             {
@@ -1955,8 +1955,8 @@ void AudioService::play(User* pUser)
         }
         else
         {
-            delete[] pUser ->vAudioPackets[iLastPlayingPacketIndex];
-            pUser ->vAudioPackets[iLastPlayingPacketIndex] = nullptr;
+            delete[] pUser->vAudioPackets[iLastPlayingPacketIndex];
+            pUser->vAudioPackets[iLastPlayingPacketIndex] = nullptr;
 
             iLastPlayingPacketIndex++;
 
@@ -1972,82 +1972,82 @@ void AudioService::play(User* pUser)
         waitForAllBuffers (pUser, true, &iLastPlayingPacketIndex);
 
 
-        pUser       ->bTalking = false;
-        pMainWindow ->setPingAndTalkingToUser(pUser ->pListWidgetItem, pUser ->iPing, pUser ->bTalking);
+        pUser      ->bTalking = false;
+        pMainWindow->setPingAndTalkingToUser(pUser->pListWidgetItem, pUser->iPing, pUser->bTalking);
 
 
-        if (pUser ->bDeletePacketsAtLast == false)
+        if (pUser->bDeletePacketsAtLast == false)
         {
             // No errors, delete here.
 
-            for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
+            for (size_t i = 0;  i < pUser->vAudioPackets.size();  i++)
             {
-                if (pUser ->vAudioPackets[i])
+                if (pUser->vAudioPackets[i])
                 {
-                    delete[] pUser ->vAudioPackets[i];
+                    delete[] pUser->vAudioPackets[i];
                 }
             }
 
-            pUser ->vAudioPackets .clear ();
-            pUser ->bPacketsArePlaying = false;
+            pUser->vAudioPackets.clear ();
+            pUser->bPacketsArePlaying = false;
         }
         else if (pUser->bLastPacketCame)
         {
-            // An error occured but last packet already came -> delete here and not in playAudioData().
+            // An error occured but last packet already came-> delete here and not in playAudioData().
 
-            for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
+            for (size_t i = 0;  i < pUser->vAudioPackets.size();  i++)
             {
-                if (pUser ->vAudioPackets[i])
+                if (pUser->vAudioPackets[i])
                 {
-                    delete[] pUser ->vAudioPackets[i];
+                    delete[] pUser->vAudioPackets[i];
                 }
             }
 
-            pUser ->vAudioPackets .clear ();
-            pUser ->bPacketsArePlaying   = false;
-            pUser ->bDeletePacketsAtLast = false;
+            pUser->vAudioPackets.clear ();
+            pUser->bPacketsArePlaying   = false;
+            pUser->bDeletePacketsAtLast = false;
         }
     }
     else
     {
-        for (size_t i = 0;  i < pUser ->vAudioPackets .size();  i++)
+        for (size_t i = 0;  i < pUser->vAudioPackets.size();  i++)
         {
-            if (pUser ->vAudioPackets[i])
+            if (pUser->vAudioPackets[i])
             {
-                delete[] pUser ->vAudioPackets[i];
+                delete[] pUser->vAudioPackets[i];
             }
         }
 
-        pUser ->vAudioPackets .clear ();
-        pUser ->bPacketsArePlaying   = false;
-        pUser ->bDeletePacketsAtLast = false;
+        pUser->vAudioPackets.clear ();
+        pUser->bPacketsArePlaying   = false;
+        pUser->bDeletePacketsAtLast = false;
     }
 
 
 
-    pUser ->mtxUser .unlock();
+    pUser->mtxUser.unlock();
 }
 
 void AudioService::waitForAllBuffers(User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex)
 {
     // Wait until finished playing 1
-    while ( waveOutUnprepareHeader(pUser ->hWaveOut, &pUser ->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+    while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
     }
 
     // Wait until finished playing 2
-    while ( waveOutUnprepareHeader(pUser ->hWaveOut, &pUser ->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
+    while ( waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR)) == WAVERR_STILLPLAYING )
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(BUFFER_UPDATE_CHECK_MS));
     }
 
     if (bClearPackets)
     {
-        for (size_t i = *iLastPlayingPacketIndex;   i < pUser ->vAudioPackets .size();   i++)
+        for (size_t i = *iLastPlayingPacketIndex;   i < pUser->vAudioPackets.size();   i++)
         {
-            delete[] pUser ->vAudioPackets[i];
-            pUser ->vAudioPackets[i] = nullptr;
+            delete[] pUser->vAudioPackets[i];
+            pUser->vAudioPackets[i] = nullptr;
         }
     }
 }
@@ -2067,7 +2067,7 @@ int AudioService::getInputDeviceID(std::wstring sDeviceName)
             memset (fault, 0, 256);
 
             waveInGetErrorTextA (result, fault, 256);
-            pMainWindow ->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
+            pMainWindow->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
                                        SilentMessageColor(false),
                                        true);
            continue;
@@ -2124,9 +2124,9 @@ void AudioService::stop()
     }
 
 
-    for (size_t i = 0;   i < pNetworkService ->getOtherUsersVectorSize();   i++)
+    for (size_t i = 0;   i < pNetworkService->getOtherUsersVectorSize();   i++)
     {
-        deleteUserAudio( pNetworkService ->getOtherUser(i) );
+        deleteUserAudio( pNetworkService->getOtherUser(i) );
     }
 }
 
