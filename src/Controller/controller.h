@@ -35,7 +35,7 @@ public:
 
     // Start/stop
 
-        void           connectTo                  (std::string sAdress,    std::string sPort,  std::string sUserName,  std::wstring sPass = L"");
+        void           connectTo                  (std::string sAddress,    std::string sPort,  std::string sUserName,  std::wstring sPass = L"");
         void           disconnect                 ();
         void           stop                       ();
         void           unpauseTestRecording       ();

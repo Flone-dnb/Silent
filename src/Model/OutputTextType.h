@@ -13,12 +13,12 @@
 // ------------------------------------------------------------------------------------------------
 
 
-class SilentMessageColor
+class SilentMessage
 {
 public:
-    SilentMessageColor() = default;
+    SilentMessage() = default;
 
-    SilentMessageColor(bool bUserMessage)
+    SilentMessage(bool bUserMessage)
     {
         if (bUserMessage)
         {

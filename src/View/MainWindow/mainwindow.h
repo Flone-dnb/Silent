@@ -55,11 +55,11 @@ public:
 
     // Print on Chat Room QPlainTextEdit
 
-        void              printUserMessage           (std::string timeInfo,  std::wstring message,             SilentMessageColor messageColor, bool bEmitSignal = false);
-        void              printOutput                (std::string text,      SilentMessageColor messageColor,  bool bEmitSignal = false);
-        void              printOutputW               (std::wstring text,     SilentMessageColor messageColor,  bool bEmitSignal = false);
-        void              showUserDisconnectNotice   (std::string name,      SilentMessageColor messageColor,  char cUserLost);
-        void              showUserConnectNotice      (std::string name,      SilentMessageColor messageColor);
+        void              printUserMessage           (std::string timeInfo,  std::wstring message,             SilentMessage messageColor, bool bEmitSignal = false);
+        void              printOutput                (std::string text,      SilentMessage messageColor,  bool bEmitSignal = false);
+        void              printOutputW               (std::wstring text,     SilentMessage messageColor,  bool bEmitSignal = false);
+        void              showUserDisconnectNotice   (std::string name,      SilentMessage messageColor,  char cUserLost);
+        void              showUserConnectNotice      (std::string name,      SilentMessage messageColor);
         void              showOldText                (wchar_t* pText);
 
 
@@ -101,9 +101,9 @@ signals:
 
     // Print on Chat Room QPlainTextEdit
 
-        void signalTypeOnScreen                      (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
-        void signalShowUserDisconnectNotice          (std::string name, SilentMessageColor messageColor, char cUserLost);
-        void signalShowUserConnectNotice             (std::string name, SilentMessageColor messageColor);
+        void signalTypeOnScreen                      (QString text,     SilentMessage messageColor, bool bUserMessage = false);
+        void signalShowUserDisconnectNotice          (std::string name, SilentMessage messageColor, char cUserLost);
+        void signalShowUserConnectNotice             (std::string name, SilentMessage messageColor);
         void signalShowOldText                       (wchar_t* pText);
         void signalClearTextEdit                     ();
         void signalClearTextChatOutput               ();
@@ -172,9 +172,9 @@ private slots:
 
     // Print on Chat Room QPlainTextEdit
 
-        void  typeSomeOnScreen                  (QString text,     SilentMessageColor messageColor, bool bUserMessage = false);
-        void  slotShowUserDisconnectNotice      (std::string name, SilentMessageColor messageColor, char cUserLost);
-        void  slotShowUserConnectNotice         (std::string name, SilentMessageColor messageColor);
+        void  typeSomeOnScreen                  (QString text,     SilentMessage messageColor, bool bUserMessage = false);
+        void  slotShowUserDisconnectNotice      (std::string name, SilentMessage messageColor, char cUserLost);
+        void  slotShowUserConnectNotice         (std::string name, SilentMessage messageColor);
         void  slotShowOldText                   (wchar_t* pText);
         void  slotClearTextEdit                 ();
         void  slotClearTextChatOutput           ();

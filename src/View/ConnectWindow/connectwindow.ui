@@ -47,7 +47,7 @@
          <locale language="English" country="UnitedStates"/>
         </property>
         <property name="text">
-         <string>User name:</string>
+         <string>User Name</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -100,7 +100,7 @@
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>IPv4 adress or Domain name</string>
+         <string>IPv4 Address or Domain Name</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -144,7 +144,7 @@
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>Port:</string>
+         <string>Port</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -188,7 +188,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Password (optional):</string>
+         <string>Password (optional)</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -249,7 +249,7 @@
      <x>0</x>
      <y>0</y>
      <width>362</width>
-     <height>30</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

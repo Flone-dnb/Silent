@@ -110,8 +110,8 @@ std::vector<std::wstring> AudioService::getInputDevices()
 
             waveInGetErrorTextA (result, fault, 256);
             pMainWindow->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
-                                       SilentMessageColor(false),
-                                       true);
+                                      SilentMessage(false),
+                                      true);
            continue;
         }
         else
@@ -238,7 +238,7 @@ bool AudioService::start()
 
         waveInGetErrorTextA (result, fault, 256);
         pMainWindow->printOutput (std::string("AudioService::start::waveInOpen() error: " + std::string(fault) + "."),
-                                   SilentMessageColor(false),
+                                   SilentMessage(false),
                                    true);
 
 
@@ -341,7 +341,7 @@ void AudioService::startTestWaveOut()
 
         waveInGetErrorTextA (result, fault, 256);
         pMainWindow->printOutput (std::string("AudioService::startTestWaveOut::waveInOpen() error: " + std::string(fault) + "."),
-                                   SilentMessageColor(false),
+                                   SilentMessage(false),
                                    true);
 
 
@@ -432,7 +432,7 @@ void AudioService::setupUserAudio(User *pUser)
 
         waveInGetErrorTextA (result, fault, 256);
         pMainWindow->printOutput(std::string("AudioService::addNewUser::waveOutOpen() error: " + std::string(fault) + "."),
-                                  SilentMessageColor(false),
+                                  SilentMessage(false),
                                   true);
     }
 
@@ -527,7 +527,7 @@ void AudioService::recordOnPush()
 
                     waveInGetErrorTextA (result, fault, 256);
                     pMainWindow->printOutput(std::string("AudioService::recordOnPress::waveInStart() error: " + std::string(fault) + "."),
-                                              SilentMessageColor(false),
+                                              SilentMessage(false),
                                               true);
 
                     bError = true;
@@ -708,7 +708,7 @@ void AudioService::recordOnTalk()
 
                 waveInGetErrorTextA (result, fault, 256);
                 pMainWindow->printOutput(std::string("AudioService::recordOnTalk::waveInStart() error: " + std::string(fault) + "."),
-                                          SilentMessageColor(false),
+                                          SilentMessage(false),
                                           true);
 
                 bError = true;
@@ -865,7 +865,7 @@ void AudioService::testRecord()
 
                 waveInGetErrorTextA (result, fault, 256);
                 pMainWindow->printOutput(std::string("AudioService::testRecord::waveInStart() error: " + std::string(fault) + "."),
-                                          SilentMessageColor(false),
+                                          SilentMessage(false),
                                           true);
 
                 bError = true;
@@ -969,7 +969,7 @@ bool AudioService::addInBuffer(LPWAVEHDR buffer, bool bTestDevice)
 
         waveInGetErrorTextA(result, fault, 256);
         pMainWindow->printOutput(std::string("AudioService::addInBuffer::waveInPrepareHeader() error: " + std::string(fault) + "."),
-                                 SilentMessageColor(false), true);
+                                 SilentMessage(false), true);
 
         return true;
     }
@@ -992,7 +992,7 @@ bool AudioService::addInBuffer(LPWAVEHDR buffer, bool bTestDevice)
 
         waveInGetErrorTextA(result, fault, 256);
         pMainWindow->printOutput(std::string("AudioService::addInBuffer::waveInAddBuffer() error: " + std::string(fault) + "."),
-                                 SilentMessageColor(false), true);
+                                 SilentMessage(false), true);
 
         if (bTestDevice)
         {
@@ -1023,7 +1023,7 @@ bool AudioService::addOutBuffer(HWAVEOUT hWaveOut, LPWAVEHDR buffer)
 
         waveInGetErrorTextA (result, fault, 256);
         pMainWindow->printOutput(std::string("AudioService::addOutBuffer::waveOutPrepareHeader() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                  SilentMessageColor(false),
+                                  SilentMessage(false),
                                   true);
 
         return true;
@@ -1428,7 +1428,7 @@ void AudioService::testOutputAudio()
 
         waveInGetErrorTextA (result, fault, 256);
         pMainWindow->printOutput(std::string("AudioService::testOutputAudio::waveOutOpen() error: " + std::string(fault) + "."),
-                                  SilentMessageColor(false),
+                                  SilentMessage(false),
                                   true);
     }
 
@@ -1525,7 +1525,7 @@ void AudioService::testOutputAudio()
 
             waveInGetErrorTextA(result, fault, 256);
             pMainWindow->printOutput(std::string("AudioService::testOutputAudio::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                     SilentMessageColor(false),
+                                     SilentMessage(false),
                                      true);
 
             waveOutUnprepareHeader(hTestWaveOut, &TestWaveOutHdr1, sizeof(WAVEHDR));
@@ -1543,7 +1543,7 @@ void AudioService::testOutputAudio()
 
             waveInGetErrorTextA(result, fault, 256);
             pMainWindow->printOutput(std::string("AudioService::testOutputAudio::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                     SilentMessageColor(false),
+                                     SilentMessage(false),
                                      true);
 
             waveOutUnprepareHeader(hTestWaveOut, &TestWaveOutHdr2, sizeof(WAVEHDR));
@@ -1603,7 +1603,7 @@ void AudioService::testOutputAudio()
 
                         waveInGetErrorTextA(result, fault, 256);
                         pMainWindow->printOutput(std::string("AudioService::testOutputAudio::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                                 SilentMessageColor(false),
+                                                 SilentMessage(false),
                                                  true);
 
                         waveOutUnprepareHeader(hTestWaveOut, &TestWaveOutHdr1, sizeof(WAVEHDR));
@@ -1634,7 +1634,7 @@ void AudioService::testOutputAudio()
 
                         waveInGetErrorTextA(result, fault, 256);
                         pMainWindow->printOutput(std::string("AudioService::testOutputAudio::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                                 SilentMessageColor(false),
+                                                 SilentMessage(false),
                                                  true);
 
                         waveOutUnprepareHeader(hTestWaveOut, &TestWaveOutHdr2, sizeof(WAVEHDR));
@@ -1826,7 +1826,7 @@ void AudioService::play(User* pUser)
 
         waveInGetErrorTextA(result, fault, 256);
         pMainWindow->printOutput(std::string("AudioService::play::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                 SilentMessageColor(false),
+                                 SilentMessage(false),
                                  true);
 
         waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
@@ -1844,7 +1844,7 @@ void AudioService::play(User* pUser)
 
         waveInGetErrorTextA(result, fault, 256);
         pMainWindow->printOutput(std::string("AudioService::play::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                 SilentMessageColor(false),
+                                 SilentMessage(false),
                                  true);
 
         waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
@@ -1904,7 +1904,7 @@ void AudioService::play(User* pUser)
 
                     waveInGetErrorTextA(result, fault, 256);
                     pMainWindow->printOutput(std::string("AudioService::uncompressAndPlay::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                             SilentMessageColor(false),
+                                             SilentMessage(false),
                                              true);
 
                     waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr1, sizeof(WAVEHDR));
@@ -1935,7 +1935,7 @@ void AudioService::play(User* pUser)
 
                     waveInGetErrorTextA(result, fault, 256);
                     pMainWindow->printOutput(std::string("AudioService::uncompressAndPlay::waveOutWrite() error (" + std::to_string(result) + "): " + std::string(fault) + "."),
-                                             SilentMessageColor(false),
+                                             SilentMessage(false),
                                              true);
 
                     waveOutUnprepareHeader(pUser->hWaveOut, &pUser->WaveOutHdr2, sizeof(WAVEHDR));
@@ -2068,7 +2068,7 @@ int AudioService::getInputDeviceID(std::wstring sDeviceName)
 
             waveInGetErrorTextA (result, fault, 256);
             pMainWindow->printOutput (std::string("AudioService::getInputDevices::waveInGetDevCaps() error: " + std::string(fault) + "."),
-                                       SilentMessageColor(false),
+                                       SilentMessage(false),
                                        true);
            continue;
         }

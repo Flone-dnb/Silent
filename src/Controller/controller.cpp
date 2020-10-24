@@ -112,9 +112,9 @@ float Controller::getUserCurrentVolume(std::string sUserName)
     return pAudioService->getUserCurrentVolume(sUserName);
 }
 
-void Controller::connectTo(std::string sAdress, std::string sPort, std::string sUserName,  std::wstring sPass)
+void Controller::connectTo(std::string sAddress, std::string sPort, std::string sUserName,  std::wstring sPass)
 {
-    pNetworkService->start(sAdress, sPort, sUserName, sPass);
+    pNetworkService->start(sAddress, sPort, sUserName, sPass);
 }
 
 void Controller::setNewUserVolume(std::string sUserName, float fVolume)

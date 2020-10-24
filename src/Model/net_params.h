@@ -5,7 +5,11 @@
 
 #pragma once
 
-// Limits
+
+#define  CLIENT_VERSION "3.4.0"
+
+
+// Limits.
 #define  MAX_NAME_LENGTH                20
 #define  MAX_BUFFER_SIZE                1420
 #define  MAX_VERSION_STRING_LENGTH      20
@@ -22,5 +26,6 @@
 #define  INTERVAL_AUDIO_RECORD_MS       15
 #define  ATTEMPTS_TO_DISCONNECT_COUNT   5
 
-// Ping
+
+// Ping.
 #define  PING_CHECK_INTERVAL_SEC        50

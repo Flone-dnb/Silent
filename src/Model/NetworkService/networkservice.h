@@ -27,9 +27,6 @@ class SListItemRoom;
 class AES;
 
 
-#define  CLIENT_VERSION                "3.4.0"
-
-
 
 
 // ------------------------------------------------------------------------------------------------
@@ -49,8 +46,8 @@ public:
 
     // Start
 
-        void  start                            (std::string adress,   std::string port,   std::string userName,  std::wstring sPass = L"");
-        void  connectTo                        (std::string adress,   std::string port,   std::string userName,  std::wstring sPass = L"");
+        void  start                            (std::string address, std::string port, std::string userName, std::wstring sPass = L"");
+        void  connectTo                        (std::string address, std::string port, std::string userName, std::wstring sPass = L"");
 
 
     // Listen
@@ -61,7 +58,7 @@ public:
 
     // Send
 
-        void  sendVoiceMessage                 (char* pVoiceMessage,   int iMessageSize,    bool bLast);
+        void  sendVoiceMessage                 (char* pVoiceMessage, int iMessageSize, bool bLast);
         void  sendMessage                      (std::wstring message);
 
 
@@ -95,9 +92,11 @@ public:
 
 private:
 
-    // Startup
+    // Connect
 
-        void  generateKeys                     ();
+        void  setupChatConnection              (std::string address, std::string port, std::string userName, std::wstring sPass = L"");
+        bool  processChatInfo                  (char* pReadBuffer, int iPacketSize);
+        bool  establishSecureConnection        (char* pReadBuffer);
 
 
     // Receive
@@ -113,6 +112,7 @@ private:
         void  eraseDisconnectedUser            (std::string sUserName, char cDisconnectType);
         void  clearWinsockAndThisUser          ();
         void  cleanUp                          ();
+        void  forceStop                        (UINT_PTR socketToStop = 0);
 
 
     // Checks if the server is dead.
@@ -122,7 +122,7 @@ private:
 
     // Erases spaces at the borders of the address string.
 
-        std::string formatAdressString         (const std::string& sAdress);
+        std::string formatAddressString        (const std::string& sAddress);
 
 
     // Rooms

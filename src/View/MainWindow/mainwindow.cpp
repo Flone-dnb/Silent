@@ -127,7 +127,7 @@ void MainWindow::slotApplyShouldHearTestVoice(bool bHear)
 
 
 
-void MainWindow::typeSomeOnScreen(QString text, SilentMessageColor messageColor, bool bUserMessage)
+void MainWindow::typeSomeOnScreen(QString text, SilentMessage messageColor, bool bUserMessage)
 {
     mtxPrintOutput.lock();
 
@@ -198,7 +198,7 @@ void MainWindow::slotTrayIconActivated()
     showNormal      ();
 }
 
-void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageColor messageColor, char cUserLost)
+void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessage messageColor, char cUserLost)
 {
     mtxPrintOutput.lock   ();
 
@@ -228,7 +228,7 @@ void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessageCol
     mtxPrintOutput.unlock ();
 }
 
-void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessageColor messageColor)
+void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessage messageColor)
 {
     mtxPrintOutput.lock   ();
 
@@ -444,7 +444,7 @@ void MainWindow::connectTo(std::string adress, std::string port, std::string use
     pController->connectTo(adress, port, userName, sPass);
 }
 
-void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, bool bEmitSignal)
+void MainWindow::printOutput(std::string text, SilentMessage messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
@@ -464,7 +464,7 @@ void MainWindow::printOutput(std::string text, SilentMessageColor messageColor, 
     }
 }
 
-void MainWindow::printOutputW(std::wstring text, SilentMessageColor messageColor, bool bEmitSignal)
+void MainWindow::printOutputW(std::wstring text, SilentMessage messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
@@ -484,7 +484,7 @@ void MainWindow::printOutputW(std::wstring text, SilentMessageColor messageColor
     }
 }
 
-void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, SilentMessageColor messageColor, bool bEmitSignal)
+void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, SilentMessage messageColor, bool bEmitSignal)
 {
     // 'timeInfo' example: "18:58. Flone: "
 
@@ -737,12 +737,12 @@ void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDelete
     mtxList.unlock();
 }
 
-void MainWindow::showUserDisconnectNotice(std::string name, SilentMessageColor messageColor, char cUserLost)
+void MainWindow::showUserDisconnectNotice(std::string name, SilentMessage messageColor, char cUserLost)
 {
     emit signalShowUserDisconnectNotice(name, messageColor, cUserLost);
 }
 
-void MainWindow::showUserConnectNotice(std::string name, SilentMessageColor messageColor)
+void MainWindow::showUserConnectNotice(std::string name, SilentMessage messageColor)
 {
     emit signalShowUserConnectNotice(name, messageColor);
 }
@@ -993,7 +993,7 @@ void MainWindow::onExecCalled()
 
     // Register types
 
-    qRegisterMetaType <SilentMessageColor>   ("SilentMessageColor");
+    qRegisterMetaType <SilentMessage>        ("SilentMessage");
     qRegisterMetaType <std::string>          ("std::string");
     qRegisterMetaType <QTextBlock>           ("QTextBlock");
     qRegisterMetaType <QVector<int>>         ("QVector<int>");
