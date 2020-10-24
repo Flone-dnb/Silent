@@ -543,7 +543,7 @@ void NetworkService::connectTo(std::string adress, std::string port, std::string
 
                 // Generate secret key.
 
-                std::uniform_int_distribution<> uid(100, 500); // also change in server
+                std::uniform_int_distribution<> uid(500, 1000); // also change in server
 
                 int b = uid(*pRndGen);
 
