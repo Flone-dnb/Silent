@@ -38,6 +38,8 @@ SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<Q
     bWaitingForPushToTalkButtonInput = false;
     bPushToTalkChanged               = false;
     bMasterVolumeChanged             = false;
+    bWaitingForMuteMicButtonInput    = false;
+    bMuteMicButtonChanged            = false;
 
     updateUIToSettings(vInputDevices);
 
@@ -50,7 +52,7 @@ SettingsWindow::SettingsWindow(SettingsManager* pSettingsManager,  std::vector<Q
 
 void SettingsWindow::keyPressEvent(QKeyEvent *event)
 {
-    if ( bWaitingForPushToTalkButtonInput )
+    if ( bWaitingForPushToTalkButtonInput || bWaitingForMuteMicButtonInput )
     {
         int key = -1;
 
@@ -62,7 +64,14 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event)
 
             key = event->key();
 
-            ui->pushButton_pushtotalk->setText( event->text().toUpper() );
+            if (bWaitingForPushToTalkButtonInput)
+            {
+                ui->pushButton_pushtotalk->setText( event->text().toUpper() );
+            }
+            else
+            {
+                ui->pushButton_muteMic->setText( event->text().toUpper() );
+            }
         }
         else if ( event->key() == Qt::Key_Alt )
         {
@@ -70,21 +79,50 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event)
 
             key = 0x12;
 
-            ui->pushButton_pushtotalk->setText("Alt");
+            if (bWaitingForPushToTalkButtonInput)
+            {
+                ui->pushButton_pushtotalk->setText("Alt");
+            }
+            else
+            {
+                ui->pushButton_muteMic->setText("Alt");
+            }
+        }
+        else if ( event->key() == Qt::Key_Escape )
+        {
+            if (bWaitingForMuteMicButtonInput)
+            {
+                bWaitingForMuteMicButtonInput = false;
+
+                iMuteMicButton = 0;
+
+                ui->pushButton_muteMic->setText( "None" );
+
+                bMuteMicButtonChanged = true;
+            }
         }
 
         if (key != -1)
         {
-            iPushToTalkKey     = key;
-            bWaitingForPushToTalkButtonInput = false;
-            bPushToTalkChanged = true;
+            if (bWaitingForPushToTalkButtonInput)
+            {
+                iPushToTalkKey     = key;
+                bWaitingForPushToTalkButtonInput = false;
+                bPushToTalkChanged = true;
+            }
+            else
+            {
+                iMuteMicButton = key;
+                bWaitingForMuteMicButtonInput = false;
+                bMuteMicButtonChanged = true;
+            }
         }
     }
 }
 
 void SettingsWindow::mousePressEvent(QMouseEvent *event)
 {
-    if (bWaitingForPushToTalkButtonInput)
+    if (bWaitingForPushToTalkButtonInput || bWaitingForMuteMicButtonInput)
     {
         int key = -1;
 
@@ -94,7 +132,14 @@ void SettingsWindow::mousePressEvent(QMouseEvent *event)
 
             key = 0x05;
 
-            ui->pushButton_pushtotalk->setText("X1");
+            if (bWaitingForPushToTalkButtonInput)
+            {
+                ui->pushButton_pushtotalk->setText("X1");
+            }
+            else
+            {
+                ui->pushButton_muteMic->setText("X1");
+            }
         }
         else if ( event->button() == Qt::XButton2 )
         {
@@ -102,14 +147,30 @@ void SettingsWindow::mousePressEvent(QMouseEvent *event)
 
             key = 0x06;
 
-            ui->pushButton_pushtotalk->setText("X2");
+            if (bWaitingForPushToTalkButtonInput)
+            {
+                ui->pushButton_pushtotalk->setText("X2");
+            }
+            else
+            {
+                ui->pushButton_muteMic->setText("X2");
+            }
         }
 
         if (key != -1)
         {
-            iPushToTalkKey     = key;
-            bWaitingForPushToTalkButtonInput = false;
-            bPushToTalkChanged = true;
+            if (bWaitingForPushToTalkButtonInput)
+            {
+                iPushToTalkKey     = key;
+                bWaitingForPushToTalkButtonInput = false;
+                bPushToTalkChanged = true;
+            }
+            else
+            {
+                iMuteMicButton = key;
+                bWaitingForMuteMicButtonInput = false;
+                bMuteMicButtonChanged = true;
+            }
         }
     }
 }
@@ -147,9 +208,6 @@ void SettingsWindow::on_pushButton_pushtotalk_clicked()
 
 void SettingsWindow::refreshVolumeSliderText()
 {
-    // 0%    -  ui->horizontalSlider->minimum()
-    // 100%  -  ui->horizontalSlider->maximum()
-
     int iInterval = ui->horizontalSlider_volume->maximum()  -  ui->horizontalSlider_volume->minimum();
     int iCurrent  = ui->horizontalSlider_volume->value();
 
@@ -166,8 +224,6 @@ void SettingsWindow::on_horizontalSlider_volume_valueChanged(int value)
 
     bMasterVolumeChanged = true;
 }
-
-
 
 SettingsWindow::~SettingsWindow()
 {
@@ -188,6 +244,16 @@ void SettingsWindow::on_pushButton_apply_clicked()
     if (bMasterVolumeChanged)
     {
         pSettingsFile->iMasterVolume = iMasterVolume;
+    }
+
+
+    bool bRegisterNewMuteMicButton = false;
+
+    if (bMuteMicButtonChanged)
+    {
+        pSettingsFile->iMuteMicrophoneButton = iMuteMicButton;
+
+        bRegisterNewMuteMicButton = true;
     }
 
     pSettingsFile->sThemeName = ui->comboBox_themes->currentText().toStdString();
@@ -227,6 +293,8 @@ void SettingsWindow::on_pushButton_apply_clicked()
 
     emit applyNewMasterVolume();
 
+    emit signalRegisterMuteMicButton(iMuteMicButton);
+
     close();
 }
 
@@ -239,7 +307,17 @@ void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
     ui->label_input_voice_mult->setText(QString::number(iInputVolumeMult) + "%");
     ui->horizontalSlider_input_volume_mult->setValue(iInputVolumeMult);
 
-    ui->pushButton_pushtotalk  ->setText  ( QString::fromStdString( pSettingsFile->getPushToTalkButtonName() ) );
+    ui->pushButton_pushtotalk->setText( QString::fromStdString( pSettingsFile->getPushToTalkButtonName() ) );
+
+    if (pSettingsFile->iMuteMicrophoneButton == 0)
+    {
+        ui->pushButton_muteMic->setText( "None" );
+    }
+    else
+    {
+        ui->pushButton_muteMic->setText( QString::fromStdString( pSettingsFile->getMuteMicButtonName() ) );
+    }
+
     ui->horizontalSlider_volume->setValue ( pSettingsFile->iMasterVolume );
 
     showThemes();
@@ -359,4 +437,11 @@ void SettingsWindow::on_comboBox_voice_mode_currentIndexChanged(int index)
 
         QMessageBox::warning(this, "Warning", "The Voice Recording Mode will be changed only after the program is restarted!");
     }
+}
+
+void SettingsWindow::on_pushButton_muteMic_clicked()
+{
+    ui->pushButton_muteMic->setText("Waiting for button");
+
+    bWaitingForMuteMicButtonInput = true;
 }

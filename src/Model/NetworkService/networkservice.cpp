@@ -1385,7 +1385,7 @@ void NetworkService::listenUDPFromServer()
 
                 std::memcpy(userNameBuffer, readBuffer + 1, static_cast <size_t> (readBuffer[0]));
 
-                if ( readBuffer[ 1 + readBuffer[0] ] == 1 )
+                if ( readBuffer[ 1 + readBuffer[0] ] == VM_LAST_MESSAGE )
                 {
                     // Last audio packet.
 

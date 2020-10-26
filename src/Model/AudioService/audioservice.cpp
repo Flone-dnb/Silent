@@ -34,6 +34,7 @@ AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsMa
     bTestInputReady         = false;
     bPauseTestInput         = true;
     bRecordTalk             = false;
+    bMuteMic                = false;
 
 
     // "In" (record) buffers
@@ -65,6 +66,16 @@ AudioService::AudioService(MainWindow* pMainWindow, SettingsManager* pSettingsMa
 void AudioService::setNetworkService(NetworkService *pNetworkService)
 {
     this->pNetworkService = pNetworkService;
+}
+
+void AudioService::setMuteMic(bool bMute)
+{
+    bMuteMic = bMute;
+}
+
+bool AudioService::getMuteMic()
+{
+    return bMuteMic;
 }
 
 float AudioService::getUserCurrentVolume(const std::string &sUserName)
@@ -384,6 +395,18 @@ void AudioService::playConnectDisconnectSound(bool bConnectSound)
     }
 }
 
+void AudioService::playMuteMicSound(bool bMuteSound)
+{
+    if (bMuteSound)
+    {
+        PlaySoundW( AUDIO_MUTE_MIC_PATH,   nullptr, SND_FILENAME | SND_ASYNC );
+    }
+    else
+    {
+        PlaySoundW( AUDIO_UNMUTE_MIC_PATH, nullptr, SND_FILENAME | SND_ASYNC );
+    }
+}
+
 void AudioService::playServerMessageSound()
 {
     PlaySoundW( AUDIO_SERVER_MESSAGE_PATH, nullptr, SND_FILENAME | SND_ASYNC );
@@ -476,7 +499,8 @@ void AudioService::recordOnPush()
     while(bInputReady)
     {
         while ( (GetAsyncKeyState(pSettingsManager->getCurrentSettings()->iPushToTalkButton) & 0x8000)
-                && bInputReady )
+                && bInputReady
+                && bMuteMic == false)
         {
             // Button pressed
             if ( (bButtonPressed == false) && (pSettingsManager->getCurrentSettings()->bPlayPushToTalkSound) )
@@ -595,7 +619,8 @@ void AudioService::recordOnPush()
             // 4-1-2-(3).
             ///////////////////
 
-            if ( GetAsyncKeyState(pSettingsManager->getCurrentSettings()->iPushToTalkButton) & 0x8000 )
+            if ( (GetAsyncKeyState(pSettingsManager->getCurrentSettings()->iPushToTalkButton) & 0x8000)
+                 && bMuteMic == false)
             {
                 if ( addInBuffer(&WaveInHdr3) )
                 {
@@ -1254,9 +1279,13 @@ void AudioService::sendAudioDataOnTalk(short *pAudio)
         iPacketsNeedToRecordLeft = 4;
     }
 
-    if ( (static_cast<int>(maxDBFS) >= iLowerVoiceStartRecValueInDBFS)
-         ||
-         (iPacketsNeedToRecordLeft != 4) )
+    if ( iPacketsNeedToRecordLeft != 4 )
+    {
+        bRecordTalk = true;
+        bRecordedSome = true;
+        iPacketsNeedToRecordLeft--;
+    }
+    else if ( (static_cast<int>(maxDBFS) >= iLowerVoiceStartRecValueInDBFS) && bMuteMic == false )
     {
         bRecordTalk = true;
         bRecordedSome = true;

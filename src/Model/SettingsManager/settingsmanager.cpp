@@ -216,8 +216,12 @@ void SettingsManager::saveCurrentSettings()
     newSettingsFile.write( reinterpret_cast<char*>(&pCurrentSettingsFile->bPlayConnectDisconnectSound), sizeof(pCurrentSettingsFile->bPlayConnectDisconnectSound));
 
 
-    // Write show connect/disconnect message
+    // Write show connect/disconnect message.
     newSettingsFile.write( reinterpret_cast<char*>(&pCurrentSettingsFile->bShowConnectDisconnectMessage), sizeof(pCurrentSettingsFile->bShowConnectDisconnectMessage));
+
+
+    // Write mute mic button.
+    newSettingsFile.write( reinterpret_cast<char*>(&pCurrentSettingsFile->iMuteMicrophoneButton), sizeof(pCurrentSettingsFile->iMuteMicrophoneButton));
 
 
     // NEW SETTINGS GO HERE
@@ -465,6 +469,22 @@ SettingsFile *SettingsManager::readSettings()
 
         // Read show connect/disconnect message.
         settingsFile.read( reinterpret_cast<char*>(&pSettingsFile->bShowConnectDisconnectMessage), sizeof(pSettingsFile->bShowConnectDisconnectMessage));
+
+
+        if (iSettingsVersion == 1)
+        {
+            // End of file.
+            settingsFile.close();
+
+            // Used to show the Settings Window on start.
+            bReadOldSettingsFile = true;
+
+            goto link_read_end;
+        }
+
+
+        // Read mute mic button.
+        settingsFile.read( reinterpret_cast<char*>(&pSettingsFile->iMuteMicrophoneButton), sizeof(pSettingsFile->iMuteMicrophoneButton));
 
 
         // ----------------------------------------------------------------

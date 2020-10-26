@@ -135,6 +135,8 @@ signals:
 
 protected:
 
+    bool nativeEvent     (const QByteArray &eventType, void *message, long *result);
+
     void hideEvent       (QHideEvent  *event);
     void closeEvent      (QCloseEvent *event);
     void mouseMoveEvent  (QMouseEvent *event);
@@ -212,6 +214,7 @@ private slots:
         void  slotMoveRoom                      (QString sRoomName, bool bMoveUp, std::promise<bool>* promiseResult);
         void  slotAddUserToRoomIndex            (QString sName, size_t iRoomIndex, std::promise<SListItemUser*>* promiseResult);
         void  slotAddNewUserToList              (QString sName, std::promise<SListItemUser*>* promiseResult);
+        void  slotRegisterMuteMicButton         (int iButton);
 
         void  slotMaxWindow                     ();
         void  slotHideWindow                    ();
@@ -267,4 +270,5 @@ private:
 
 
     bool             bAbleToSend;
+    bool             bMuteMicButtonRegistered;
 };

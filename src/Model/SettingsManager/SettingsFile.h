@@ -10,7 +10,7 @@
 #include <string>
 
 #define SILENT_MAGIC_NUMBER 51337
-#define SILENT_SETTINGS_FILE_VERSION 1
+#define SILENT_SETTINGS_FILE_VERSION 2
 
 class SettingsFile
 {
@@ -32,24 +32,26 @@ public:
                  bool bHearVoiceInSettings        = true,
                  bool bPlayTextMessageSound       = true,
                  bool bPlayConnectDisconnectSound = true,
-                 bool bShowConnectDisconnectMessage = true)
+                 bool bShowConnectDisconnectMessage = true,
+                 int iMuteMicrophoneButton = 0)
     {
-        this ->iPushToTalkButton    = iPushToTalkButton;
-        this ->iMasterVolume        = iMasterVolume;
-        this ->sThemeName           = sThemeName;
-        this ->sUsername            = sUserName;
-        this ->bPlayPushToTalkSound = bPlayPushToTalkSound;
-        this ->sConnectString       = sConnectString;
-        this ->iPort                = iPort;
-        this ->sPassword            = sPassword;
-        this ->sInputDeviceName     = sInputDeviceName;
-        this ->iInputVolumeMultiplier = iInputVolumeMultiplier;
-        this ->bPushToTalkVoiceMode = bPushToTalkVoiceMode;
-        this ->iVoiceStartRecValueInDBFS = iVoiceStartRecValueInDBFS;
-        this ->bHearVoiceInSettings = bHearVoiceInSettings;
-        this ->bPlayTextMessageSound = bPlayTextMessageSound;
-        this ->bPlayConnectDisconnectSound = bPlayConnectDisconnectSound;
-        this ->bShowConnectDisconnectMessage = bShowConnectDisconnectMessage;
+        this->iPushToTalkButton    = iPushToTalkButton;
+        this->iMasterVolume        = iMasterVolume;
+        this->sThemeName           = sThemeName;
+        this->sUsername            = sUserName;
+        this->bPlayPushToTalkSound = bPlayPushToTalkSound;
+        this->sConnectString       = sConnectString;
+        this->iPort                = iPort;
+        this->sPassword            = sPassword;
+        this->sInputDeviceName     = sInputDeviceName;
+        this->iInputVolumeMultiplier = iInputVolumeMultiplier;
+        this->bPushToTalkVoiceMode = bPushToTalkVoiceMode;
+        this->iVoiceStartRecValueInDBFS = iVoiceStartRecValueInDBFS;
+        this->bHearVoiceInSettings = bHearVoiceInSettings;
+        this->bPlayTextMessageSound = bPlayTextMessageSound;
+        this->bPlayConnectDisconnectSound = bPlayConnectDisconnectSound;
+        this->bShowConnectDisconnectMessage = bShowConnectDisconnectMessage;
+        this->iMuteMicrophoneButton = iMuteMicrophoneButton;
     }
 
 
@@ -85,6 +87,38 @@ public:
         return sButtonText;
     }
 
+    std::string getMuteMicButtonName() const
+    {
+        std::string sButtonText = "";
+
+
+        if ( (iMuteMicrophoneButton >= 0x41)
+             &&
+             (iMuteMicrophoneButton <= 0x5a) )
+        {
+            // From A to Z
+            sButtonText += static_cast <char> (iMuteMicrophoneButton);
+        }
+        else if ( iMuteMicrophoneButton == 0x12 )
+        {
+            // Alt
+            sButtonText += "Alt";
+        }
+        else if ( iMuteMicrophoneButton == 0x05 )
+        {
+            // X1 (mouse button)
+            sButtonText += "X1";
+        }
+        else if ( iMuteMicrophoneButton == 0x06 )
+        {
+            // X2 (mouse button)
+            sButtonText += "X2";
+        }
+
+
+        return sButtonText;
+    }
+
 
     // ------------------------------------------------------------
 
@@ -99,6 +133,7 @@ public:
     int                iPushToTalkButton;
     int                iInputVolumeMultiplier;
     int                iVoiceStartRecValueInDBFS;
+    int                iMuteMicrophoneButton;
     unsigned short int iMasterVolume;
 
 

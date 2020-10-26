@@ -39,6 +39,9 @@
 #include "View/WindowControlWidget/windowcontrolwidget.h"
 #include "View/GlobalMessageWindow/globalmessagewindow.h"
 
+// Other
+#include "Windows.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -47,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     bAbleToSend = false;
+    bMuteMicButtonRegistered = false;
 
     // Set CSS classes
     ui->label_chatRoom         ->setProperty("cssClass", "mainwindowLabel");
@@ -418,6 +422,23 @@ void MainWindow::slotAddNewUserToList(QString sName, std::promise<SListItemUser 
     SListItemUser* pUser = ui->listWidget_users->addUser(sName, nullptr);
 
     promiseResult->set_value(pUser);
+}
+
+void MainWindow::slotRegisterMuteMicButton(int iButton)
+{
+    if (bMuteMicButtonRegistered)
+    {
+        UnregisterHotKey((HWND)MainWindow::winId(), 100);
+
+        bMuteMicButtonRegistered = false;
+    }
+
+    if (pController->getCurrentSettingsFile()->iMuteMicrophoneButton != 0)
+    {
+        RegisterHotKey((HWND)MainWindow::winId(), 100, MOD_NOREPEAT, pController->getCurrentSettingsFile()->iMuteMicrophoneButton);
+
+        bMuteMicButtonRegistered = true;
+    }
 }
 
 void MainWindow::slotMaxWindow()
@@ -853,6 +874,8 @@ void MainWindow::showSettingsWindow()
     connect(pSettingsWindow, &SettingsWindow::signalSetAudioInputVolume, this, &MainWindow::slotApplyAudioInputVolume);
     connect(pSettingsWindow, &SettingsWindow::signalSetVoiceStartValue, this, &MainWindow::slotApplyVoiceStartValue);
     connect(pSettingsWindow, &SettingsWindow::signalSetShouldHearTestVoice, this, &MainWindow::slotApplyShouldHearTestVoice);
+    connect(pSettingsWindow, &SettingsWindow::signalRegisterMuteMicButton, this, &MainWindow::slotRegisterMuteMicButton);
+
     pController->unpauseTestRecording();
     pSettingsWindow->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow->setWindowOpacity(0);
@@ -923,6 +946,7 @@ void MainWindow::on_actionSettings_triggered()
     connect(pSettingsWindow, &SettingsWindow::signalSetAudioInputVolume, this, &MainWindow::slotApplyAudioInputVolume);
     connect(pSettingsWindow, &SettingsWindow::signalSetVoiceStartValue, this, &MainWindow::slotApplyVoiceStartValue);
     connect(pSettingsWindow, &SettingsWindow::signalSetShouldHearTestVoice, this, &MainWindow::slotApplyShouldHearTestVoice);
+    connect(pSettingsWindow, &SettingsWindow::signalRegisterMuteMicButton, this, &MainWindow::slotRegisterMuteMicButton);
     pController->unpauseTestRecording();
     pSettingsWindow->setWindowModality(Qt::ApplicationModal);
     pSettingsWindow->show();
@@ -1034,6 +1058,14 @@ void MainWindow::onExecCalled()
     else
     {
         pTimer = nullptr;
+    }
+
+
+    if (pController->getCurrentSettingsFile()->iMuteMicrophoneButton != 0)
+    {
+        RegisterHotKey((HWND)MainWindow::winId(), 100, MOD_NOREPEAT, pController->getCurrentSettingsFile()->iMuteMicrophoneButton);
+
+        bMuteMicButtonRegistered = true;
     }
 }
 
@@ -1310,6 +1342,30 @@ bool MainWindow::filterMessageText(std::wstring &sMessage)
     return false;
 }
 
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+    Q_UNUSED(eventType)
+    Q_UNUSED(result)
+
+    MSG* msg = reinterpret_cast<MSG*>(message);
+
+    if(msg->message == WM_HOTKEY)
+    {
+        if(msg->wParam == 100)
+        {
+            if (pController->getCurrentSettingsFile()->iMuteMicrophoneButton != 0)
+            {
+                pController->setMuteMic( !pController->getMuteMic() );
+
+                pController->playMuteMicSound( pController->getMuteMic() );
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
 
 MainWindow::~MainWindow()
 {

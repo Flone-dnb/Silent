@@ -42,6 +42,7 @@ signals:
     void  signalSetAudioInputVolume                (int iVolume);
     void  signalSetVoiceStartValue                 (int iValue);
     void  signalSetShouldHearTestVoice             (bool bHear);
+    void  signalRegisterMuteMicButton              (int iButton);
 
 protected:
 
@@ -63,6 +64,7 @@ private slots:
     void  on_comboBox_voice_mode_currentIndexChanged         (int index);
     void  on_pushButton_pushtotalk_clicked                   ();
     void  on_pushButton_apply_clicked                        ();
+    void  on_pushButton_muteMic_clicked                      ();
 
 private:
 
@@ -86,6 +88,7 @@ private:
     // Changed settings
     bool                bPushToTalkChanged;
     bool                bMasterVolumeChanged;
+    bool                bMuteMicButtonChanged;
     int                 iInputVolumeMult;
 
 
@@ -94,9 +97,13 @@ private:
     unsigned short int  iOriginalMasterVolume;
 
 
+    int                 iMuteMicButton;
+
+
     Ui::SettingsWindow* ui;
 
 
+    bool                bWaitingForMuteMicButtonInput;
     bool                bShowedWarning;
     bool                bInit;
 };

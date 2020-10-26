@@ -122,6 +122,21 @@ void Controller::setNewUserVolume(std::string sUserName, float fVolume)
     pAudioService->setNewUserVolume(sUserName, fVolume);
 }
 
+void Controller::playMuteMicSound(bool bMuteSound)
+{
+    pAudioService->playMuteMicSound(bMuteSound);
+}
+
+void Controller::setMuteMic(bool bMute)
+{
+    pAudioService->setMuteMic(bMute);
+}
+
+bool Controller::getMuteMic()
+{
+    return pAudioService->getMuteMic();
+}
+
 SettingsManager *Controller::getSettingsManager()
 {
     mtxSettings.lock();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>887</width>
-    <height>618</height>
+    <height>646</height>
    </rect>
   </property>
   <property name="font">
@@ -57,7 +57,7 @@
        <attribute name="title">
         <string>Voice</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="10,10,10,25,45">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="10,10,10,10,20,40">
         <property name="spacing">
          <number>5</number>
         </property>
@@ -128,6 +128,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="80,20">
             <item>
              <widget class="QSlider" name="horizontalSlider_input_volume_mult">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="maximum">
                <number>300</number>
               </property>
@@ -159,6 +165,36 @@
              </widget>
             </item>
            </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_22" stretch="50,50">
+          <item>
+           <widget class="QLabel" name="label_15">
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Mute Microphone Button</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_muteMic">
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>None</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

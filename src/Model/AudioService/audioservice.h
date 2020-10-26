@@ -41,6 +41,8 @@ class User;
 #define  AUDIO_PRESS_PATH            L"sounds/press.wav"
 #define  AUDIO_UNPRESS_PATH          L"sounds/unpress.wav"
 #define  AUDIO_SERVER_MESSAGE_PATH   L"sounds/servermessage.wav"
+#define  AUDIO_MUTE_MIC_PATH         L"sounds/mutemic.wav"
+#define  AUDIO_UNMUTE_MIC_PATH       L"sounds/unmutemic.wav"
 
 
 
@@ -69,6 +71,7 @@ public:
     // Play sound
 
         void   playConnectDisconnectSound    (bool bConnectSound);
+        void   playMuteMicSound              (bool bMuteSound);
         void   playServerMessageSound        ();
         void   playNewMessageSound           ();
         void   playLostConnectionSound       ();
@@ -100,6 +103,8 @@ public:
         void   setNewUserVolume              (std::string sUserName,  float fVolume);
         void   setNewMasterVolume            (unsigned short int iVolume);
         void   setNetworkService             (NetworkService* pNetworkService);
+        void   setMuteMic                    (bool bMute);
+        bool   getMuteMic                    ();
 
 
     // GET functions
@@ -221,4 +226,6 @@ private:
     bool             bOutputTestVoice;
     bool             bRecordTalk;
     bool             bRecordedSome;
+
+    bool             bMuteMic;
 };

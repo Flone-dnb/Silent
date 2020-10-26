@@ -58,6 +58,13 @@ public:
         void           setNewUserVolume           (std::string sUserName,  float fVolume);
 
 
+    // Other
+
+        void           playMuteMicSound           (bool bMuteSound);
+        void           setMuteMic                 (bool bMute);
+        bool           getMuteMic                 ();
+
+
     // GET functions
 
         SettingsManager* getSettingsManager       ();
