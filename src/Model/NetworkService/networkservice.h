@@ -95,7 +95,7 @@ private:
     // Connect
 
         void  setupChatConnection              (std::string address, std::string port, std::string userName, std::wstring sPass = L"");
-        bool  processChatInfo                  (char* pReadBuffer, int iPacketSize);
+        bool  processChatInfo                  (char* pReadBuffer, int iPacketSize, wchar_t*& pWelcomeRoomMessage);
         bool  establishSecureConnection        (char* pReadBuffer);
 
 

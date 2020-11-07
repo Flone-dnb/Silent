@@ -344,12 +344,29 @@ void NetworkService::setupChatConnection(std::string address, std::string port, 
         iReceivedSize = recv(pThisUser->sockUserTCP, reinterpret_cast <char*> (&iPacketSize), sizeof(iPacketSize), 0);
 
 
-
-        if (processChatInfo(vReadBuffer, iPacketSize))
+        wchar_t* pWelcomeRoomMessage = nullptr;
+        if (processChatInfo(vReadBuffer, iPacketSize, pWelcomeRoomMessage))
         {
             return;
         }
 
+        if (pWelcomeRoomMessage != nullptr)
+        {
+            pMainWindow->printOutput("\n-----------------------------------------------------------------------------\n",
+                                     SilentMessage(false),
+                                     true);
+            pMainWindow->printOutput("Room Message:\n",
+                                     SilentMessage(false),
+                                     true);
+            pMainWindow->printOutputW(pWelcomeRoomMessage,
+                                      SilentMessage(false),
+                                      true);
+            pMainWindow->printOutput("\n-----------------------------------------------------------------------------\n",
+                                     SilentMessage(false),
+                                     true);
+
+            delete[] pWelcomeRoomMessage;
+        }
 
 
         // Save this user.
@@ -407,7 +424,7 @@ void NetworkService::setupChatConnection(std::string address, std::string port, 
     }
 }
 
-bool NetworkService::processChatInfo(char* pReadBuffer, int iPacketSize)
+bool NetworkService::processChatInfo(char* pReadBuffer, int iPacketSize, wchar_t*& pWelcomeRoomMessage)
 {
     memset(pReadBuffer, 0, MAX_TCP_BUFFER_SIZE);
 
@@ -543,6 +560,23 @@ bool NetworkService::processChatInfo(char* pReadBuffer, int iPacketSize)
             pAudioService->setupUserAudio( pNewUser );
         }
     }
+
+    unsigned short roomMessageSize = 0;
+    std::memcpy(&roomMessageSize, pReadBuffer + iReadBytes, sizeof(roomMessageSize));
+    iReadBytes += sizeof(roomMessageSize);
+
+    wchar_t* pRoomMessageString = nullptr;
+
+    if (roomMessageSize > 0)
+    {
+        pRoomMessageString = new wchar_t [MAX_MESSAGE_LENGTH];
+        memset(pRoomMessageString, 0, MAX_MESSAGE_LENGTH * sizeof(wchar_t));
+
+        std::memcpy(pRoomMessageString, pReadBuffer + iReadBytes, roomMessageSize);
+        iReadBytes += roomMessageSize;
+    }
+
+    pWelcomeRoomMessage = pRoomMessageString;
 
 
     pMainWindow->setOnlineUsersCount(iOnline);
@@ -914,6 +948,11 @@ void NetworkService::connectTo(std::string address, std::string port, std::strin
         if (returnCode == 10060)
         {
             pMainWindow->printOutput("Time out.\nTry again.\n",
+                                     SilentMessage(false), true);
+        }
+        else if (returnCode == 10061)
+        {
+            pMainWindow->printOutput("The server is offline.\n",
                                      SilentMessage(false), true);
         }
         else if (returnCode == 10051)
@@ -2254,18 +2293,45 @@ void NetworkService::forceStop(UINT_PTR socketToStop)
 
 void NetworkService::canMoveToRoom()
 {
-    char vBuffer[MAX_NAME_LENGTH + 1];
-    memset(vBuffer, 0, MAX_NAME_LENGTH + 1);
+    wchar_t vBuffer[MAX_TCP_BUFFER_SIZE / 2];
+    memset(vBuffer, 0, MAX_TCP_BUFFER_SIZE / 2);
 
     char cRoomNameSize = 0;
 
     recv(pThisUser->sockUserTCP, &cRoomNameSize, 1, 0);
 
-    recv(pThisUser->sockUserTCP, vBuffer, cRoomNameSize, 0);
+    char vRoomName[MAX_NAME_LENGTH + 10];
+    memset(vRoomName, 0, MAX_NAME_LENGTH + 10);
+
+    recv(pThisUser->sockUserTCP, vRoomName, cRoomNameSize, 0);
+
+
+    // Room message.
+
+    unsigned short iRoomMessageSize = 0;
+
+    recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(&iRoomMessageSize), sizeof(iRoomMessageSize), 0);
+
+    recv(pThisUser->sockUserTCP, reinterpret_cast<char*>(vBuffer), iRoomMessageSize, 0);
+
 
     mtxRooms.lock();
 
-    pMainWindow->moveUserToRoom(pThisUser->pListWidgetItem, vBuffer);
+    pMainWindow->moveUserToRoom(pThisUser->pListWidgetItem, vRoomName);
+
+    if (iRoomMessageSize != 0)
+    {
+        pMainWindow->printOutput("-----------------------------------------------------------------------------\n",
+                                 SilentMessage(false),
+                                 true);
+        pMainWindow->printOutput("Room Message:\n",
+                                 SilentMessage(false),
+                                 true);
+        pMainWindow->printOutputW(vBuffer, SilentMessage(false), true);
+        pMainWindow->printOutput("\n-----------------------------------------------------------------------------\n",
+                                 SilentMessage(false),
+                                 true);
+    }
 
     mtxRooms.unlock();
 }

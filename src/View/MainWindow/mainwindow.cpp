@@ -379,6 +379,8 @@ void MainWindow::slotMoveUserToRoom(SListItemUser *pUser, QString sRoomName, std
     ui->listWidget_users->moveUser(pUser, sRoomName);
 
     promiseResult->set_value(false);
+
+    ui->plainTextEdit->clear();
 }
 
 void MainWindow::slotMoveRoom(QString sRoomName, bool bMoveUp, std::promise<bool> *promiseResult)
