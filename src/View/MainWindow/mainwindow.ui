@@ -28,7 +28,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="7,90">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="7,93">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="65,35">
         <item>
@@ -80,7 +80,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="65,35">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="90,10">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="80,20">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
