@@ -3,7 +3,7 @@
   <img width="700" height="400" src="screenshot.png">
 </p>
 <br>
-Silent is an extremely lightweight, high quality - low latency voice chat made for gaming.<br>
+Silent is very lightweight, high quality - low latency voice chat made for gaming.<br>
 Must be used with the Silent Server application. <br>
 <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
@@ -14,7 +14,7 @@ Silent only works with the Silent Server, but if you don't want to set up your o
 Our server is located in Moscow, Russia and you can connect to it by typing in the IP "83.166.250.113" and the port "51337".
 
 # Hidden Features
-By pressing the right mouse button on the user/room in the 'online connected' list you can change the user's volume or 'Enter room'.
+By pressing the right mouse button on the user/room in the 'connected' list you can change the user's volume or enter room.
 
 # Add Your Style Theme
 The Silent has different style themes that you can change.<br>
@@ -29,6 +29,6 @@ Please note that starting from version 2.23.0 the Silent is releasing under the 
 All versions before 2.23.0 were released under the MIT license.
 
 # Build
-Silent is built with the MSVC 2017 64 bit compiler and Qt Framework (through Qt Creator).<br>
+Silent is built with the MSVC 2019 64 bit compiler and Qt Framework (through Qt Creator).<br>
 <br>
 After you've built the app don't forget to copy-paste the "sounds" and "themes" folders to the folder with the .exe file.
