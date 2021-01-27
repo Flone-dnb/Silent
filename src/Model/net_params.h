@@ -6,7 +6,7 @@
 #pragma once
 
 
-#define  CLIENT_VERSION "3.5.0"
+#define  CLIENT_VERSION "3.5.1"
 
 
 // Limits.
