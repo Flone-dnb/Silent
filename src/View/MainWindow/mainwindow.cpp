@@ -822,14 +822,6 @@ void MainWindow::on_actionConnect_triggered()
     }
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-    if (ui->plainTextEdit_input->toPlainText().size() != 0)
-    {
-       pController->sendMessage( ui->plainTextEdit_input->toPlainText().toStdWString() );
-    }
-}
-
 void MainWindow::customqplaintextedit_return_pressed()
 {
     if ( bAbleToSend && (ui->plainTextEdit_input->toPlainText() != "") )
