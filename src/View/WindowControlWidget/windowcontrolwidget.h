@@ -22,7 +22,10 @@ signals:
 
 public:
     explicit WindowControlWidget(QWidget *parent = nullptr);
-    ~WindowControlWidget();
+    ~WindowControlWidget() override;
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void on_pushButton_close_clicked();

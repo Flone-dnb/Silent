@@ -24,6 +24,13 @@ WindowControlWidget::~WindowControlWidget()
     delete ui;
 }
 
+void WindowControlWidget::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+
+    deleteLater();
+}
+
 void WindowControlWidget::on_pushButton_close_clicked()
 {
     emit signalClose();
