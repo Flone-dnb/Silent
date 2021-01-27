@@ -26,6 +26,7 @@ CONFIG += c++11
 
 
 FORMS += \
+    ../src/View/AboutQtWindow/aboutqtwindow.ui \
     ../src/View/AboutWindow/aboutwindow.ui \
     ../src/View/ConnectWindow/connectwindow.ui \
     ../src/View/GlobalMessageWindow/globalmessagewindow.ui \
@@ -46,6 +47,7 @@ HEADERS += \
     ../src/Model/SettingsManager/SettingsFile.h \
     ../src/Model/SettingsManager/settingsmanager.h \
     ../src/Model/User.h \
+    ../src/View/AboutQtWindow/aboutqtwindow.h \
     ../src/View/AboutWindow/aboutwindow.h \
     ../src/View/ConnectWindow/connectwindow.h \
     ../src/View/CustomList/SListItem/slistitem.h \
@@ -70,6 +72,7 @@ SOURCES += \
     ../src/Model/AudioService/audioservice.cpp \
     ../src/Model/NetworkService/networkservice.cpp \
     ../src/Model/SettingsManager/settingsmanager.cpp \
+    ../src/View/AboutQtWindow/aboutqtwindow.cpp \
     ../src/View/AboutWindow/aboutwindow.cpp \
     ../src/View/ConnectWindow/connectwindow.cpp \
     ../src/View/CustomList/SListItem/slistitem.cpp \

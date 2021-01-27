@@ -198,6 +198,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout_2"/>
+    <addaction name="actionAbout_Qt"/>
    </widget>
    <addaction name="menuChat"/>
    <addaction name="menuHelp"/>
@@ -245,6 +246,16 @@
   <action name="actionCheck_for_Updated">
    <property name="text">
     <string>Check for Updates</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
+  </action>
+  <action name="actionAbout_Qt">
+   <property name="text">
+    <string>About Qt</string>
    </property>
    <property name="font">
     <font>

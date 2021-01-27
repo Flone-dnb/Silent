@@ -38,6 +38,7 @@
 #include "View/RoomPassInputWindow/roompassinputwindow.h"
 #include "View/WindowControlWidget/windowcontrolwidget.h"
 #include "View/GlobalMessageWindow/globalmessagewindow.h"
+#include "View/AboutQtWindow/aboutqtwindow.h"
 
 // Other
 #include "Windows.h"
@@ -1359,6 +1360,14 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
     }
 
     return false;
+}
+
+void MainWindow::on_actionAbout_Qt_triggered()
+{
+    AboutQtWindow* pAboutQtWindow = new AboutQtWindow(this);
+    pAboutQtWindow->setWindowModality(Qt::WindowModality::WindowModal);
+
+    pAboutQtWindow->show();
 }
 
 MainWindow::~MainWindow()

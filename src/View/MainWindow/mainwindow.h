@@ -192,6 +192,7 @@ private slots:
         void  on_actionAbout_2_triggered        ();
         void  on_actionConnect_triggered        ();
         void  on_actionSettings_triggered       ();
+        void  on_actionAbout_Qt_triggered       ();
 
         void  slotOnMenuClose                   ();
 
@@ -223,8 +224,9 @@ private slots:
     // UI
 
         void  customqplaintextedit_return_pressed();
+        void  on_listWidget_users_itemClicked(QListWidgetItem *item);
 
-        void on_listWidget_users_itemClicked(QListWidgetItem *item);
+
 
 private:
 
