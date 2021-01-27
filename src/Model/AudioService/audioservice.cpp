@@ -1438,6 +1438,14 @@ void AudioService::sendAudioDataVolume(short *pAudio)
 
             mtxAudioPacketsForTest.unlock();
         }
+        else
+        {
+            delete[] pAudio;
+        }
+    }
+    else
+    {
+        delete[] pAudio;
     }
 }
 
