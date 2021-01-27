@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <future>
 
 // Other
 #define _WINSOCKAPI_    // stops windows.h from including winsock.h
@@ -178,6 +179,10 @@ private:
     WAVEHDR          TestWaveInHdr2;
     WAVEHDR          TestWaveInHdr3;
     WAVEHDR          TestWaveInHdr4;
+
+
+    std::promise<bool> promiseFinishTestRecord;
+    std::promise<bool> promiseFinishTestOutputAudio;
 
 
     // "In" buffers

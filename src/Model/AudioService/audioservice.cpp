@@ -846,7 +846,11 @@ void AudioService::testRecord()
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            if (bTestInputReady == false) break;
         }
+
+        if (bTestInputReady == false) break;
 
         bWasStarted = true;
 
@@ -971,6 +975,8 @@ void AudioService::testRecord()
     {
         pMainWindow->showMessageBox(true, "The voice volume meter in the settings window will not work.");
     }
+
+    promiseFinishTestRecord.set_value(false);
 }
 
 bool AudioService::addInBuffer(LPWAVEHDR buffer, bool bTestDevice)
@@ -1499,7 +1505,12 @@ void AudioService::testOutputAudio()
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            if (bTestInputReady == false) break;
         }
+
+        if (bTestInputReady == false) break;
+
 
         while (iCurrentAudioPacketIndex + 3 >= vAudioPacketsForTest.size())
         {
@@ -1701,6 +1712,9 @@ void AudioService::testOutputAudio()
     vAudioPacketsForTest.clear();
 
     mtxAudioPacketsForTest.unlock();
+
+
+    promiseFinishTestOutputAudio.set_value(false);
 }
 
 void AudioService::playAudioData(short int *pAudio, std::string sUserName, bool bLast)
@@ -2181,6 +2195,24 @@ void AudioService::setShouldHearTestVoice(bool bHear)
 AudioService::~AudioService()
 {
     stop ();
+
+    std::future<bool> f1 = promiseFinishTestRecord.get_future();
+    std::future<bool> f2 = promiseFinishTestOutputAudio.get_future();
+
+    if (bTestInputReady)
+    {
+        bTestInputReady = false;
+
+        f1.get(); // wait for testRecord() to finish.
+        f2.get(); // wait for testOutputAudio() to finish.
+
+
+        waitForAllTestInBuffers();
+
+        waveInStop(hTestWaveIn);
+
+        waveOutReset(hTestWaveOut);
+    }
 
     bTestInputReady = false;
     bPauseTestInput = false;
