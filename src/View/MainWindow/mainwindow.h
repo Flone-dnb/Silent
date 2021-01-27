@@ -246,7 +246,6 @@ private:
     // Context menu in list
     QMenu*           pMenuContextMenu;
     QAction*         pActionChangeVolume;
-
     QAction*         pActionEnterRoom;
 
 

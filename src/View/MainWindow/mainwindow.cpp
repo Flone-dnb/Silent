@@ -1364,6 +1364,7 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 MainWindow::~MainWindow()
 {
     delete pActionChangeVolume;
+    delete pActionEnterRoom;
     delete pMenuContextMenu;
 
     if (pTimer)
