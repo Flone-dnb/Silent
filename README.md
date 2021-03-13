@@ -9,9 +9,7 @@ Must be used with the Silent Server application. <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
 
 # Try Our Server
-Silent only works with the Silent Server, but if you don't want to set up your own server (which is very easy), you can just download Silent from the releases tab and connect to our server.<br>
-<br>
-Our server is located in Moscow, Russia and you can connect to it by typing in the IP "83.166.250.113" and the port "51337".
+Silent only works with the Silent Server.<br>
 
 # Hidden Features
 By pressing the right mouse button on the user/room in the 'connected' list you can change the user's volume or enter room.
