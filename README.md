@@ -8,7 +8,7 @@ Must be used with the Silent Server application. <br>
 <br>
 Made with Qt Framework, Winsock2 and Windows Multimedia System.
 
-# Try Our Server
+# Server
 Silent only works with the Silent Server.<br>
 
 # Hidden Features
