@@ -8,6 +8,7 @@
 
 // STL
 #include <thread>
+#include <string_view>
 
 
 // Sockets and stuff
@@ -100,7 +101,6 @@ enum UDP_SERVER_MESSAGE
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-
 NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioService, SettingsManager* pSettingsManager)
 {
     this->pMainWindow      = pMainWindow;
@@ -110,6 +110,9 @@ NetworkService::NetworkService(MainWindow* pMainWindow, AudioService* pAudioServ
 
     pAES    = new AES(128);
     pRndGen = new std::mt19937_64( std::random_device{}() );
+
+    static_assert(std::string_view(CLIENT_VERSION).size() < MAX_VERSION_STRING_LENGTH,
+            "The client version defined in CLIENT_VERSION macro is too long, see MAX_VERSION_STRING_LENGTH macro.");
 
     clientVersion = CLIENT_VERSION;
 
