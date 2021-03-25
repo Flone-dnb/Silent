@@ -146,10 +146,10 @@ void AudioService::setNewMasterVolume(unsigned short int iVolume)
 
     for (size_t i = 0;  i < pNetworkService->getOtherUsersVectorSize();  i++)
     {
-        waveOutSetVolume( pNetworkService->getOtherUser(i)->hWaveOut, MAKELONG(iVolume, iVolume) );
+        waveOutSetVolume( pNetworkService->getOtherUser(i)->hWaveOut, static_cast<DWORD>(MAKELONG(iVolume, iVolume)) );
     }
 
-    waveOutSetVolume( hTestWaveOut, MAKELONG(iVolume, iVolume) );
+    waveOutSetVolume( hTestWaveOut, static_cast<DWORD>(MAKELONG(iVolume, iVolume)) );
 
 
     pNetworkService->getOtherUsersMutex()->unlock();
@@ -459,8 +459,8 @@ void AudioService::setupUserAudio(User *pUser)
                                   true);
     }
 
-    waveOutSetVolume( pUser->hWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
-                                                 pSettingsManager->getCurrentSettings()->iMasterVolume) );
+    waveOutSetVolume( pUser->hWaveOut, static_cast<DWORD>(MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                                 pSettingsManager->getCurrentSettings()->iMasterVolume)) );
 }
 
 void AudioService::deleteUserAudio(User *pUser)
@@ -1475,8 +1475,8 @@ void AudioService::testOutputAudio()
                                   true);
     }
 
-    waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
-                                             pSettingsManager->getCurrentSettings()->iMasterVolume) );
+    waveOutSetVolume( hTestWaveOut, static_cast<DWORD>(MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                             pSettingsManager->getCurrentSettings()->iMasterVolume)) );
 
 
 
@@ -1508,8 +1508,8 @@ void AudioService::testOutputAudio()
 
                 bWasStarted = false;
 
-                waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
-                                                         pSettingsManager->getCurrentSettings()->iMasterVolume) );
+                waveOutSetVolume( hTestWaveOut, static_cast<DWORD>(MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                                         pSettingsManager->getCurrentSettings()->iMasterVolume)) );
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -1541,8 +1541,8 @@ void AudioService::testOutputAudio()
 
                 mtxAudioPacketsForTest.unlock();
 
-                waveOutSetVolume( hTestWaveOut, MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
-                                                         pSettingsManager->getCurrentSettings()->iMasterVolume) );
+                waveOutSetVolume( hTestWaveOut, static_cast<DWORD>(MAKELONG(pSettingsManager->getCurrentSettings()->iMasterVolume,
+                                                         pSettingsManager->getCurrentSettings()->iMasterVolume)) );
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

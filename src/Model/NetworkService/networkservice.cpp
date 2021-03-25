@@ -509,7 +509,7 @@ bool NetworkService::processChatInfo(char* pReadBuffer, int iPacketSize, wchar_t
         char bufferForNames[MAX_NAME_LENGTH + 1];
         memset(bufferForNames, 0, MAX_NAME_LENGTH + 1);
 
-        std::memcpy(bufferForNames, pReadBuffer + iReadBytes, roomNameSize);
+        std::memcpy(bufferForNames, pReadBuffer + iReadBytes, static_cast<size_t>(roomNameSize));
         iReadBytes += roomNameSize;
 
         sRoomName = bufferForNames;
@@ -556,7 +556,7 @@ bool NetworkService::processChatInfo(char* pReadBuffer, int iPacketSize, wchar_t
 
             std::string sNewUserName = std::string(rowText);
 
-            User* pNewUser = new User( sNewUserName, 0, pMainWindow->addUserToRoomIndex(sNewUserName, i) );
+            User* pNewUser = new User( sNewUserName, 0, pMainWindow->addUserToRoomIndex(sNewUserName, static_cast<size_t>(i)) );
 
             vOtherUsers.push_back( pNewUser );
 
@@ -692,7 +692,7 @@ bool NetworkService::establishSecureConnection(char* pReadBuffer)
     std::memcpy(pOpenKeyString, &iStringSize, sizeof(iStringSize));
     std::memcpy(pOpenKeyString + sizeof(iStringSize), B.str().c_str(), B.str().size());
 
-    send(pThisUser->sockUserTCP, pOpenKeyString, sizeof(iStringSize) + B.str().size(), 0);
+    send(pThisUser->sockUserTCP, pOpenKeyString, static_cast<int>(sizeof(iStringSize) + B.str().size()), 0);
 
 
 
@@ -809,7 +809,7 @@ void NetworkService::eraseDisconnectedUser(std::string sUserName, char cDisconne
 
 
         delete pDisconnectedUser;
-        vOtherUsers.erase( vOtherUsers.begin() + iUserPosInVector );
+        vOtherUsers.erase( vOtherUsers.begin() + static_cast<long long>(iUserPosInVector) );
 
 
         pMainWindow->deleteUserFromList(pItem);
@@ -940,7 +940,7 @@ void NetworkService::connectTo(std::string address, std::string port, std::strin
 
     // Connect.
 
-    returnCode = connect(pThisUser->sockUserTCP, result->ai_addr, result->ai_addrlen);
+    returnCode = connect(pThisUser->sockUserTCP, result->ai_addr, static_cast<int>(result->ai_addrlen));
 
     freeaddrinfo(result);
 
@@ -1902,13 +1902,13 @@ void NetworkService::enterRoomWithPassword(std::string sRoomName, std::wstring s
         int iCurrentIndex = 2;
 
         std::memcpy(vBuffer + iCurrentIndex, sRoomName.c_str(), sRoomName.size());
-        iCurrentIndex += sRoomName.size();
+        iCurrentIndex += static_cast<int>(sRoomName.size());
 
         vBuffer[iCurrentIndex] = static_cast<char>(sPassword.size());
         iCurrentIndex++;
 
         std::memcpy(vBuffer + iCurrentIndex, sPassword.c_str(), sPassword.size() * 2);
-        iCurrentIndex += sPassword.size() * 2;
+        iCurrentIndex += static_cast<int>(sPassword.size()) * 2;
 
         send(pThisUser->sockUserTCP, vBuffer, iCurrentIndex, 0);
     }

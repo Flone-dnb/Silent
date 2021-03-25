@@ -340,7 +340,7 @@ void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
     {
         if (vInputDevices[i] == pSettingsFile->sInputDeviceName)
         {
-            ui->comboBox_input->setCurrentIndex(1 + i);
+            ui->comboBox_input->setCurrentIndex(static_cast<int>(1 + i));
             break;
         }
     }

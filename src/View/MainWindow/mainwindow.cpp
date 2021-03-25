@@ -436,9 +436,9 @@ void MainWindow::slotRegisterMuteMicButton(int iButton)
         bMuteMicButtonRegistered = false;
     }
 
-    if (pController->getCurrentSettingsFile()->iMuteMicrophoneButton != 0)
+    if (iButton != 0)
     {
-        RegisterHotKey((HWND)MainWindow::winId(), 100, MOD_NOREPEAT, pController->getCurrentSettingsFile()->iMuteMicrophoneButton);
+        RegisterHotKey((HWND)MainWindow::winId(), 100, MOD_NOREPEAT, static_cast<unsigned int>(iButton));
 
         bMuteMicButtonRegistered = true;
     }
@@ -1058,7 +1058,7 @@ void MainWindow::onExecCalled()
 
     if (pController->getCurrentSettingsFile()->iMuteMicrophoneButton != 0)
     {
-        RegisterHotKey((HWND)MainWindow::winId(), 100, MOD_NOREPEAT, pController->getCurrentSettingsFile()->iMuteMicrophoneButton);
+        RegisterHotKey((HWND)MainWindow::winId(), 100, MOD_NOREPEAT, static_cast<unsigned int>(pController->getCurrentSettingsFile()->iMuteMicrophoneButton));
 
         bMuteMicButtonRegistered = true;
     }
@@ -1250,7 +1250,7 @@ bool MainWindow::filterMessageText(std::wstring &sMessage)
 
     for (int i = static_cast<int>(sMessage.size() - 1); i >= 0; i--)
     {
-        if (sMessage[i] == L'\n')
+        if (sMessage[static_cast<size_t>(i)] == L'\n')
         {
             sMessage.pop_back();
         }
@@ -1281,7 +1281,7 @@ bool MainWindow::filterMessageText(std::wstring &sMessage)
         {
             if (bWasNewLine)
             {
-                sMessage.erase( sMessage.begin() + i );
+                sMessage.erase( sMessage.begin() + static_cast<long long>(i) );
                 i--;
             }
             else
