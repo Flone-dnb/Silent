@@ -132,20 +132,20 @@ void MainWindow::slotApplyShouldHearTestVoice(bool bHear)
 
 
 
-void MainWindow::typeSomeOnScreen(QString text, SilentMessage messageColor, bool bUserMessage)
+void MainWindow::typeSomeOnScreen(QString sText, SilentMessage messageColor, bool bUserMessage)
 {
     mtxPrintOutput.lock();
 
     if (bUserMessage)
     {
-        ui->plainTextEdit->appendHtml ( text );
+        ui->plainTextEdit->appendHtml (sText);
     }
     else
     {
-        text.replace("\n", "<br>");
+        sText.replace("\n", "<br>");
         QString color = QString::fromStdString(messageColor.sMessage);
 
-        ui->plainTextEdit->appendHtml ( outputHTMLmessageStart + color + "\">" + text + outputHTMLmessageEnd );
+        ui->plainTextEdit->appendHtml (outputHTMLmessageStart + color + "\">" + sText + outputHTMLmessageEnd);
     }
 
 
@@ -203,7 +203,7 @@ void MainWindow::slotTrayIconActivated()
     showNormal      ();
 }
 
-void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessage messageColor, char cUserLost)
+void MainWindow::slotShowUserDisconnectNotice(std::string sName, SilentMessage messageColor, char cUserLost)
 {
     mtxPrintOutput.lock   ();
 
@@ -213,15 +213,15 @@ void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessage me
 
     if (cUserLost == 2)
     {
-        message = "The server has kicked the user " + QString::fromStdString(name) + ".<br>";
+        message = "The server has kicked the user " + QString::fromStdString(sName) + ".<br>";
     }
     else if (cUserLost == 1)
     {
-        message = "The server has lost connection with " + QString::fromStdString(name) + ".<br>";
+        message = "The server has lost connection with " + QString::fromStdString(sName) + ".<br>";
     }
     else if (cUserLost == 0)
     {
-        message = QString::fromStdString(name) + " disconnected.<br>";
+        message = QString::fromStdString(sName) + " disconnected.<br>";
     }
 
     QString color = QString::fromStdString(messageColor.sTime);
@@ -233,11 +233,11 @@ void MainWindow::slotShowUserDisconnectNotice(std::string name, SilentMessage me
     mtxPrintOutput.unlock ();
 }
 
-void MainWindow::slotShowUserConnectNotice(std::string name, SilentMessage messageColor)
+void MainWindow::slotShowUserConnectNotice(std::string sName, SilentMessage messageColor)
 {
     mtxPrintOutput.lock   ();
 
-    QString message = QString::fromStdString(name) + " just connected to the chat.<br>";
+    QString message = QString::fromStdString(sName) + " just connected to the chat.<br>";
 
     QString color = QString::fromStdString(messageColor.sTime);
 
@@ -461,24 +461,24 @@ void MainWindow::slotHideWindow()
     setWindowState(Qt::WindowState::WindowMinimized);
 }
 
-void MainWindow::connectTo(std::string adress, std::string port, std::string userName, std::wstring sPass)
+void MainWindow::connectTo(std::string sAdress, std::string sPort, std::string sUserName, std::wstring sPass)
 {
     ui->plainTextEdit->clear();
 
-    pController->connectTo(adress, port, userName, sPass);
+    pController->connectTo(sAdress, sPort, sUserName, sPass);
 }
 
-void MainWindow::printOutput(std::string text, SilentMessage messageColor, bool bEmitSignal)
+void MainWindow::printOutput(std::string sText, SilentMessage messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
-        emit signalTypeOnScreen(QString::fromStdString(text), messageColor);
+        emit signalTypeOnScreen(QString::fromStdString(sText), messageColor);
     }
     else
     {
         mtxPrintOutput.lock   ();
 
-        QString message = QString::fromStdString(text);
+        QString message = QString::fromStdString(sText);
         message.replace("\n", "<br>");
         QString color = QString::fromStdString(messageColor.sMessage);
 
@@ -488,17 +488,17 @@ void MainWindow::printOutput(std::string text, SilentMessage messageColor, bool 
     }
 }
 
-void MainWindow::printOutputW(std::wstring text, SilentMessage messageColor, bool bEmitSignal)
+void MainWindow::printOutputW(std::wstring sText, SilentMessage messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
-        emit signalTypeOnScreen(QString::fromStdWString(text), messageColor);
+        emit signalTypeOnScreen(QString::fromStdWString(sText), messageColor);
     }
     else
     {
         mtxPrintOutput.lock   ();
 
-        QString message = QString::fromStdWString(text);
+        QString message = QString::fromStdWString(sText);
         message.replace("\n", "<br>");
         QString color = QString::fromStdString(messageColor.sMessage);
 
@@ -508,7 +508,7 @@ void MainWindow::printOutputW(std::wstring text, SilentMessage messageColor, boo
     }
 }
 
-void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, SilentMessage messageColor, bool bEmitSignal)
+void MainWindow::printUserMessage(std::string sTimeInfo, std::wstring sMessage, SilentMessage messageColor, bool bEmitSignal)
 {
     // 'timeInfo' example: "18:58. Flone: "
 
@@ -518,9 +518,9 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
     QString sTime    = "";
     size_t  iNameStartPos = 0;
 
-    for (size_t i = 0;   i < timeInfo.size();   i++)
+    for (size_t i = 0;   i < sTimeInfo.size();   i++)
     {
-        if (timeInfo[i] == ' ')
+        if (sTimeInfo[i] == ' ')
         {
             iNameStartPos = i;
 
@@ -528,7 +528,7 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
         }
         else
         {
-            sTime += timeInfo[i];
+            sTime += sTimeInfo[i];
         }
     }
 
@@ -539,12 +539,12 @@ void MainWindow::printUserMessage(std::string timeInfo, std::wstring message, Si
 
     QString sNameWithMessage = "";
 
-    for (size_t i = iNameStartPos;   i < timeInfo.size();   i++)
+    for (size_t i = iNameStartPos;   i < sTimeInfo.size();   i++)
     {
-        sNameWithMessage += timeInfo[i];
+        sNameWithMessage += sTimeInfo[i];
     }
 
-    sNameWithMessage += QString::fromStdWString(message);
+    sNameWithMessage += QString::fromStdWString(sMessage);
 
 
     // Replace any '\n' to '<br>' because we will use "appendHtml()" function.
@@ -592,9 +592,9 @@ void MainWindow::enableInteractiveElements(bool bMenu, bool bTypeAndSend)
     emit signalEnableInteractiveElements(bMenu, bTypeAndSend);
 }
 
-void MainWindow::setOnlineUsersCount(int onlineCount)
+void MainWindow::setOnlineUsersCount(int iOnlineCount)
 {
-    ui->label_connectedCount->setText( "Connected: " + QString::number(onlineCount) );
+    ui->label_connectedCount->setText( "Connected: " + QString::number(iOnlineCount) );
 }
 
 void MainWindow::setConnectDisconnectButton(bool bConnect)
@@ -609,14 +609,14 @@ void MainWindow::setPingAndTalkingToUser(SListItemUser* pListWidgetItem, int iPi
 }
 
 
-SListItemUser* MainWindow::addNewUserToList(std::string name)
+SListItemUser* MainWindow::addNewUserToList(std::string sName)
 {
     mtxList.lock();
 
     std::promise<SListItemUser*> resultPromise;
     std::future<SListItemUser*> resultFuture = resultPromise.get_future();
 
-    emit signalAddNewUserToList(QString::fromStdString(name), &resultPromise);
+    emit signalAddNewUserToList(QString::fromStdString(sName), &resultPromise);
 
     SListItemUser* pUser = resultFuture.get();
 
@@ -761,14 +761,14 @@ void MainWindow::deleteUserFromList(SListItemUser* pListWidgetItem, bool bDelete
     mtxList.unlock();
 }
 
-void MainWindow::showUserDisconnectNotice(std::string name, SilentMessage messageColor, char cUserLost)
+void MainWindow::showUserDisconnectNotice(std::string sName, SilentMessage messageColor, char cUserLost)
 {
-    emit signalShowUserDisconnectNotice(name, messageColor, cUserLost);
+    emit signalShowUserDisconnectNotice(sName, messageColor, cUserLost);
 }
 
-void MainWindow::showUserConnectNotice(std::string name, SilentMessage messageColor)
+void MainWindow::showUserConnectNotice(std::string sName, SilentMessage messageColor)
 {
-    emit signalShowUserConnectNotice(name, messageColor);
+    emit signalShowUserConnectNotice(sName, messageColor);
 }
 
 void MainWindow::showOldText(wchar_t *pText)
@@ -776,9 +776,9 @@ void MainWindow::showOldText(wchar_t *pText)
     emit signalShowOldText(pText);
 }
 
-void MainWindow::showMessageBox(bool bWarningBox, std::string message)
+void MainWindow::showMessageBox(bool bWarningBox, std::string sMessage)
 {
-    emit signalShowMessageBox(bWarningBox, message);
+    emit signalShowMessageBox(bWarningBox, sMessage);
 }
 
 void MainWindow::showPasswordInputWindow(std::string sRoomName)
@@ -1151,9 +1151,9 @@ void MainWindow::slotChangeUserVolume()
     }
 }
 
-void MainWindow::slotSetNewUserVolume(QString userName, float fVolume)
+void MainWindow::slotSetNewUserVolume(QString sUserName, float fVolume)
 {
-    pController->setNewUserVolume(userName.toStdString(), fVolume);
+    pController->setNewUserVolume(sUserName.toStdString(), fVolume);
 }
 
 void MainWindow::slotDeleteUserFromList(SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise)

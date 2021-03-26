@@ -46,8 +46,9 @@ public:
 
     // Start
 
-        void  start                            (const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass);
-        void  connectTo                        (std::string address, std::string port, std::string userName, std::wstring sPass);
+        void  start                            (const std::string& sAddress, const std::string& sPort, const std::string& sUserName,
+                                                const std::wstring& sPass);
+        void  connectTo                        (std::string sAddress, std::string sPort, std::string sUserName, std::wstring sPass);
 
 
     // Listen
@@ -77,7 +78,6 @@ public:
         void  stop                             ();
 
 
-
     // GET functions
 
         std::string    getClientVersion        () const;
@@ -92,14 +92,15 @@ public:
 
 private:
 
-    // Connect
+    // Connect.
 
-        void  setupChatConnection              (const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass);
+        void  setupChatConnection              (const std::string& sAddress, const std::string& sPort, const std::string& sUserName,
+                                                const std::wstring& sPass);
         bool  processChatInfo                  (char* pReadBuffer, int iPacketSize, wchar_t*& pWelcomeRoomMessage);
         bool  establishSecureConnection        (char* pReadBuffer);
 
 
-    // Receive
+    // Receive.
 
         void  receiveInfoAboutNewUser          ();
         void  receiveMessage                   ();
@@ -125,7 +126,7 @@ private:
         std::string formatAddressString        (const std::string& sAddress);
 
 
-    // Rooms
+    // Rooms.
 
         void  canMoveToRoom                    ();
         void  userEntersRoom                   ();
@@ -135,7 +136,7 @@ private:
         void  serverChangesRoom                ();
 
 
-    // VOIP
+    // VOIP.
 
         void setupVoiceConnection              ();
         bool sendVOIPReadyPacket               ();

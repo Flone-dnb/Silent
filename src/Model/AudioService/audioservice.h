@@ -18,9 +18,7 @@
 #include "Mmsystem.h"
 
 
-// for mmsystem
-#pragma comment(lib,"Winmm.lib")
-// for GetAsyncKeyState
+#pragma comment(lib, "Winmm.lib")
 #pragma comment(lib, "user32.lib")
 
 
@@ -28,7 +26,6 @@
 class MainWindow;
 class NetworkService;
 class SettingsManager;
-
 class User;
 
 
@@ -62,14 +59,14 @@ public:
 
 
 
-    // Start
+    // Start.
 
         void   prepareForStart               ();
         bool   start                         ();
         void   startTestWaveOut              ();
 
 
-    // Play sound
+    // Play sound.
 
         void   playConnectDisconnectSound    (bool bConnectSound);
         void   playMuteMicSound              (bool bMuteSound);
@@ -78,25 +75,25 @@ public:
         void   playLostConnectionSound       ();
 
 
-    // User add/delete
+    // User add/delete.
 
         void   setupUserAudio                (User* pUser);
         void   deleteUserAudio               (User* pUser);
 
 
-    // Audio data record/play
+    // Audio data record/play.
 
         void   setTestRecordingPause         (bool bPause);
         void   playAudioData                 (short int* pAudio, std::string sUserName, bool bLast);
         void   play                          (User* pUser);
 
 
-    // Stop
+    // Stop.
 
         void   stop                          ();
 
 
-    // SET functions
+    // SET functions.
 
         void   setInputAudioVolume           (int iVolume);
         void   setVoiceStartValue            (int iValue);
@@ -108,12 +105,11 @@ public:
         bool   getMuteMic                    ();
 
 
-    // GET functions
+    // GET functions.
 
-        float  getUserCurrentVolume          (const std::string& sUserName);
-        std::vector<std::wstring> getInputDevices();
-        int    getAudioPacketSizeInSamples   () const;
-
+        float                     getUserCurrentVolume        (const std::string& sUserName);
+        std::vector<std::wstring> getInputDevices             ();
+        int                       getAudioPacketSizeInSamples () const;
 
 
 
@@ -122,14 +118,14 @@ public:
 
 private:
 
-    // Recording
+    // Recording.
 
-        void   recordOnPush                  ();
-        void   recordOnTalk                  ();
-        void   testRecord                    ();
+        void  recordOnPush             ();
+        void  recordOnTalk             ();
+        void  testRecord               ();
 
 
-    // Used in recordOnPress()/recordOnTalk()/testRecord()
+    // Used in recordOnPress()/recordOnTalk()/testRecord().
 
         bool  addInBuffer              (LPWAVEHDR buffer, bool bTestDevice = false);
         bool  addOutBuffer             (HWAVEOUT  hWaveOut, LPWAVEHDR buffer);
@@ -143,74 +139,76 @@ private:
         void  sendAudioDataVolume      (short* pAudio);
         void  testOutputAudio          ();
 
-    // Used in play()
+
+    // Used in play().
 
         void  waitForPlayToEnd         (User* pUser, WAVEHDR* pWaveOutHdr, size_t& iLastPlayingPacketIndex);
         void  waitForPlayOnTestToEnd   (WAVEHDR* pWaveOutHdr);
         void  waitForAllBuffers        (User* pUser, bool bClearPackets, size_t* iLastPlayingPacketIndex);
 
-    // Used in start()
 
-        int  getInputDeviceID          (std::wstring sDeviceName);
+    // Used in start().
+
+        int   getInputDeviceID         (std::wstring sDeviceName);
 
     // -------------------------------------------------------------
 
 
-    MainWindow*      pMainWindow;
-    NetworkService*  pNetworkService;
-    SettingsManager* pSettingsManager;
+    MainWindow*         pMainWindow;
+    NetworkService*     pNetworkService;
+    SettingsManager*    pSettingsManager;
 
 
-    // Waveform-audio input device
-    HWAVEIN          hWaveIn;
-    HWAVEIN          hTestWaveIn; // Used to show the voice meter in the Settings window.
+    // Waveform-audio input device.
+    HWAVEIN             hWaveIn;
+    HWAVEIN             hTestWaveIn; // Used to show the voice meter in the Settings window.
 
 
-    // Audio format
-    WAVEFORMATEX     Format;
+    // Audio format.
+    WAVEFORMATEX        Format;
 
 
-    // Audio buffers
-    WAVEHDR          WaveInHdr1;
-    WAVEHDR          WaveInHdr2;
-    WAVEHDR          WaveInHdr3;
-    WAVEHDR          WaveInHdr4;
-    WAVEHDR          TestWaveInHdr1;
-    WAVEHDR          TestWaveInHdr2;
-    WAVEHDR          TestWaveInHdr3;
-    WAVEHDR          TestWaveInHdr4;
+    // Audio buffers.
+    WAVEHDR             WaveInHdr1;
+    WAVEHDR             WaveInHdr2;
+    WAVEHDR             WaveInHdr3;
+    WAVEHDR             WaveInHdr4;
+    WAVEHDR             TestWaveInHdr1;
+    WAVEHDR             TestWaveInHdr2;
+    WAVEHDR             TestWaveInHdr3;
+    WAVEHDR             TestWaveInHdr4;
 
 
-    std::promise<bool> promiseFinishTestRecord;
-    std::promise<bool> promiseFinishTestOutputAudio;
+    std::promise<bool>  promiseFinishTestRecord;
+    std::promise<bool>  promiseFinishTestOutputAudio;
 
 
-    // "In" buffers
-    short int*       pWaveIn1;
-    short int*       pWaveIn2;
-    short int*       pWaveIn3;
-    short int*       pWaveIn4;
-    short int*       pTestWaveIn1;
-    short int*       pTestWaveIn2;
-    short int*       pTestWaveIn3;
-    short int*       pTestWaveIn4;
+    // "In" buffers.
+    short int*          pWaveIn1;
+    short int*          pWaveIn2;
+    short int*          pWaveIn3;
+    short int*          pWaveIn4;
+    short int*          pTestWaveIn1;
+    short int*          pTestWaveIn2;
+    short int*          pTestWaveIn3;
+    short int*          pTestWaveIn4;
 
 
-    // Audio packets
+    // Audio packets.
     std::vector<short*> vAudioPacketsForTest;
     std::mutex          mtxAudioPacketsForTest;
 
 
-    // Waveform-audio output device
+    // Waveform-audio output device.
     HWAVEOUT            hTestWaveOut;
 
 
-    // Audio buffers
+    // Audio buffers.
     WAVEHDR             TestWaveOutHdr1;
     WAVEHDR             TestWaveOutHdr2;
 
 
-    // Record quality
+    // Record quality.
     // Do not set 'sampleCout' to more than ~700 (700 * 2 = 1400) (~MTU)
     // we '*2" because audio data in PCM16, 1 sample = 16 bits.
     // Of course, we can send 2 packets, but it's just more headache.
@@ -231,6 +229,5 @@ private:
     bool             bOutputTestVoice;
     bool             bRecordTalk;
     bool             bRecordedSome;
-
     bool             bMuteMic;
 };

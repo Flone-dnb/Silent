@@ -19,7 +19,6 @@
 #include "Model/OutputTextType.h"
 
 
-
 class connectWindow;
 class Controller;
 class QMouseEvent;
@@ -35,7 +34,6 @@ namespace Ui
 {
     class MainWindow;
 }
-
 
 // --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
@@ -53,84 +51,84 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
 
-    // Print on Chat Room QPlainTextEdit
+    // Print on Chat Room QPlainTextEdit.
 
-        void              printUserMessage           (std::string timeInfo,  std::wstring message,             SilentMessage messageColor, bool bEmitSignal = false);
-        void              printOutput                (std::string text,      SilentMessage messageColor,  bool bEmitSignal = false);
-        void              printOutputW               (std::wstring text,     SilentMessage messageColor,  bool bEmitSignal = false);
-        void              showUserDisconnectNotice   (std::string name,      SilentMessage messageColor,  char cUserLost);
-        void              showUserConnectNotice      (std::string name,      SilentMessage messageColor);
-        void              showOldText                (wchar_t* pText);
-
-
-    // Update UI elements
-
-        void              setPingAndTalkingToUser    (SListItemUser* pListWidgetItem, int iPing, bool bTalking);
-        void              deleteUserFromList         (SListItemUser* pListWidgetItem,  bool bDeleteAll = false);
-        void              enableInteractiveElements  (bool bMenu, bool bTypeAndSend);
-        void              setOnlineUsersCount        (int onlineCount);
-        void              setConnectDisconnectButton (bool bConnect);
-        SListItemUser*    addNewUserToList           (std::string name);
-        void              addRoom                    (std::string sRoomName, std::wstring sPassword = L"", size_t iMaxUsers = 0, bool bFirstRoom = false);
-        size_t            getRoomCount               ();
-        SListItemUser*    addUserToRoomIndex         (std::string sName, size_t iRoomIndex);
-        void              moveUserToRoom             (SListItemUser* pUser, std::string sRoomName);
-        void              moveRoom                   (std::string sRoomName, bool bMoveUp);
-        void              deleteRoom                 (std::string sRoomName);
-        void              createRoom                 (std::string sName, std::u16string sPassword, size_t iMaxUsers);
-        void              changeRoomSettings         (std::string sOldName, std::string sNewName, size_t iMaxUsers);
+        void              printUserMessage               (std::string sTimeInfo, std::wstring sMessage, SilentMessage messageColor, bool bEmitSignal = false);
+        void              printOutput                    (std::string sText, SilentMessage messageColor, bool bEmitSignal = false);
+        void              printOutputW                   (std::wstring sText, SilentMessage messageColor, bool bEmitSignal = false);
+        void              showUserDisconnectNotice       (std::string sName, SilentMessage messageColor, char cUserLost);
+        void              showUserConnectNotice          (std::string sName, SilentMessage messageColor);
+        void              showOldText                    (wchar_t* pText);
 
 
-    // Input message QPlainTextEdit
+    // Update UI elements.
 
-        void              clearTextEdit              ();
+        void              setPingAndTalkingToUser        (SListItemUser* pListWidgetItem, int iPing, bool bTalking);
+        void              deleteUserFromList             (SListItemUser* pListWidgetItem, bool bDeleteAll = false);
+        void              enableInteractiveElements      (bool bMenu, bool bTypeAndSend);
+        void              setOnlineUsersCount            (int iOnlineCount);
+        void              setConnectDisconnectButton     (bool bConnect);
+        SListItemUser*    addNewUserToList               (std::string sName);
+        void              addRoom                        (std::string sRoomName, std::wstring sPassword = L"", size_t iMaxUsers = 0, bool bFirstRoom = false);
+        size_t            getRoomCount                   ();
+        SListItemUser*    addUserToRoomIndex             (std::string sName, size_t iRoomIndex);
+        void              moveUserToRoom                 (SListItemUser* pUser, std::string sRoomName);
+        void              moveRoom                       (std::string sRoomName, bool bMoveUp);
+        void              deleteRoom                     (std::string sRoomName);
+        void              createRoom                     (std::string sName, std::u16string sPassword, size_t iMaxUsers);
+        void              changeRoomSettings             (std::string sOldName, std::string sNewName, size_t iMaxUsers);
 
 
-    // Other
+    // Input message QPlainTextEdit.
 
-        void              showVoiceVolumeValueInSettings(int iVolume);
-        void              showMessageBox             (bool bWarningBox, std::string message);
-        void              showPasswordInputWindow    (std::string sRoomName);
-        void              showServerMessage          (std::string sMessage);
-        void              applyTheme                 ();
+        void              clearTextEdit                  ();
+
+
+    // Other.
+
+        void              showVoiceVolumeValueInSettings (int iVolume);
+        void              showMessageBox                 (bool bWarningBox, std::string sMessage);
+        void              showPasswordInputWindow        (std::string sRoomName);
+        void              showServerMessage              (std::string sMessage);
+        void              applyTheme                     ();
 
     ~MainWindow();
 
 
 signals:
 
-    // Print on Chat Room QPlainTextEdit
+    // Print on Chat Room QPlainTextEdit.
 
-        void signalTypeOnScreen                      (QString text,     SilentMessage messageColor, bool bUserMessage = false);
-        void signalShowUserDisconnectNotice          (std::string name, SilentMessage messageColor, char cUserLost);
-        void signalShowUserConnectNotice             (std::string name, SilentMessage messageColor);
-        void signalShowOldText                       (wchar_t* pText);
-        void signalClearTextEdit                     ();
-        void signalClearTextChatOutput               ();
-
-
-    // Update UI elements
-
-        void signalPingAndTalkingToUser              (std::string sUserName,            QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
-        void signalEnableInteractiveElements         (bool bMenu,                       bool bTypeAndSend);
-        void signalSetConnectDisconnectButton        (bool bConnect);
-        void signalCreateRoom                        (QString sName, QString sPassword, size_t iMaxUsers, std::promise<bool>* resultPromise);
-        void signalDeleteUserFromList                (SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise);
-        void signalMoveUserToRoom                    (SListItemUser *pUser, QString sRoomName, std::promise<bool>* promiseResult);
-        void signalAddRoom                           (QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom, std::promise<int>* promiseRoomCount);
+        void signalTypeOnScreen                    (QString sText, SilentMessage messageColor, bool bUserMessage = false);
+        void signalShowUserDisconnectNotice        (std::string sName, SilentMessage messageColor, char cUserLost);
+        void signalShowUserConnectNotice           (std::string sName, SilentMessage messageColor);
+        void signalShowOldText                     (wchar_t* pText);
+        void signalClearTextEdit                   ();
+        void signalClearTextChatOutput             ();
 
 
-    // Other
+    // Update UI elements.
 
-        void signalShowVoiceVolumeValueInSettings    (int iVolume);
-        void signalShowMessageBox                    (bool bWarningBox, std::string message);
-        void signalShowPasswordInputWindow           (std::string sRoomName);
-        void signalShowServerMessage                 (QString sMessage);
-        void signalDeleteRoom                        (QString sRoomName, std::promise<int>* promiseRoomCount);
-        void signalMoveRoom                          (QString sRoomName, bool bMoveUp, std::promise<bool>* promiseResult);
-        void signalAddUserToRoomIndex                (QString sName, size_t iRoomIndex, std::promise<SListItemUser*>* promiseResult);
-        void signalAddNewUserToList                  (QString sName, std::promise<SListItemUser*>* promiseResult);
-        void signalApplyTheme                        ();
+        void signalPingAndTalkingToUser            (std::string sUserName, QListWidgetItem* pListWidgetItem, int iPing, bool bTalking);
+        void signalEnableInteractiveElements       (bool bMenu, bool bTypeAndSend);
+        void signalSetConnectDisconnectButton      (bool bConnect);
+        void signalCreateRoom                      (QString sName, QString sPassword, size_t iMaxUsers, std::promise<bool>* resultPromise);
+        void signalDeleteUserFromList              (SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise);
+        void signalMoveUserToRoom                  (SListItemUser *pUser, QString sRoomName, std::promise<bool>* promiseResult);
+        void signalAddRoom                         (QString sRoomName, QString sPassword, size_t iMaxUsers, bool bFirstRoom, std::promise<int>* promiseRoomCount);
+
+
+    // Other.
+
+        void signalShowVoiceVolumeValueInSettings  (int iVolume);
+        void signalShowMessageBox                  (bool bWarningBox, std::string sMessage);
+        void signalShowPasswordInputWindow         (std::string sRoomName);
+        void signalShowServerMessage               (QString sMessage);
+        void signalDeleteRoom                      (QString sRoomName, std::promise<int>* promiseRoomCount);
+        void signalMoveRoom                        (QString sRoomName, bool bMoveUp, std::promise<bool>* promiseResult);
+        void signalAddUserToRoomIndex              (QString sName, size_t iRoomIndex, std::promise<SListItemUser*>* promiseResult);
+        void signalAddNewUserToList                (QString sName, std::promise<SListItemUser*>* promiseResult);
+        void signalApplyTheme                      ();
 
 
 protected:
@@ -145,20 +143,20 @@ protected:
 
 public slots:
 
-    void  onExecCalled                      ();
+    void onExecCalled    ();
 
 
 private slots:
 
     // Called from ConnectWindow
 
-        void connectTo                          (std::string adress, std::string port, std::string userName, std::wstring sPass);
+        void connectTo                          (std::string sAdress, std::string sPort, std::string sUserName, std::wstring sPass);
 
 
     // Context menu in QListWidget
 
         void  on_listWidget_users_customContextMenuRequested (const QPoint &pos);
-        void  slotSetNewUserVolume                           (QString userName, float fVolume);
+        void  slotSetNewUserVolume                           (QString sUserName, float fVolume);
         void  slotChangeUserVolume                           ();
         void  slotEnterRoom                                  ();
         void  on_listWidget_users_itemDoubleClicked          (QListWidgetItem *item);
@@ -167,16 +165,16 @@ private slots:
     // Update UI elements
 
         void  slotDeleteUserFromList            (SListItemUser* pListWidgetItem, bool bDeleteAll, std::promise<bool>* resultPromise);
-        void  slotEnableInteractiveElements     (bool bMenu,                       bool bTypeAndSend);
+        void  slotEnableInteractiveElements     (bool bMenu, bool bTypeAndSend);
         void  slotSetConnectDisconnectButton    (bool bConnect);
         void  slotCreateRoom                    (QString sName, QString sPassword, size_t iMaxUsers, std::promise<bool>* resultPromise);
 
 
     // Print on Chat Room QPlainTextEdit
 
-        void  typeSomeOnScreen                  (QString text,     SilentMessage messageColor, bool bUserMessage = false);
-        void  slotShowUserDisconnectNotice      (std::string name, SilentMessage messageColor, char cUserLost);
-        void  slotShowUserConnectNotice         (std::string name, SilentMessage messageColor);
+        void  typeSomeOnScreen                  (QString sText, SilentMessage messageColor, bool bUserMessage = false);
+        void  slotShowUserDisconnectNotice      (std::string sName, SilentMessage messageColor, char cUserLost);
+        void  slotShowUserConnectNotice         (std::string sName, SilentMessage messageColor);
         void  slotShowOldText                   (wchar_t* pText);
         void  slotClearTextEdit                 ();
         void  slotClearTextChatOutput           ();
@@ -223,8 +221,8 @@ private slots:
 
     // UI
 
-        void  customqplaintextedit_return_pressed();
-        void  on_listWidget_users_itemClicked(QListWidgetItem *item);
+        void  customqplaintextedit_return_pressed ();
+        void  on_listWidget_users_itemClicked     (QListWidgetItem *item);
 
 
 

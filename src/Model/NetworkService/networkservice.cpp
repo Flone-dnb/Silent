@@ -894,7 +894,7 @@ void NetworkService::start(const std::string& sAddress, const std::string& sPort
     }
 }
 
-void NetworkService::connectTo(std::string address, std::string port, std::string userName,  std::wstring sPass)
+void NetworkService::connectTo(std::string sAddress, std::string sPort, std::string sUserName, std::wstring sPass)
 {
     int returnCode = 0;
 
@@ -912,7 +912,7 @@ void NetworkService::connectTo(std::string address, std::string port, std::strin
 
     // Get the IPv4 address of the server (if 'address' contains a domain name).
 
-    INT dResult = getaddrinfo(address.c_str(), port.c_str(), &hints, &result);
+    INT dResult = getaddrinfo(sAddress.c_str(), sPort.c_str(), &hints, &result);
     if ( dResult != 0 )
     {
         pMainWindow->printOutput("NetworkService::connectTo::getaddrinfo() failed. Error code: "
@@ -977,7 +977,7 @@ void NetworkService::connectTo(std::string address, std::string port, std::strin
     }
     else
     {
-        setupChatConnection(address, port, userName, sPass);
+        setupChatConnection(sAddress, sPort, sUserName, sPass);
     }
 }
 
@@ -1779,7 +1779,7 @@ void NetworkService::receiveServerMessage()
 
 void NetworkService::sendMessage(const std::wstring& sMessage)
 {
-    if (sMessage.length() * 2 > MAX_MESSAGE_LENGTH)
+    if (sMessage.length() * sizeof(wchar_t) > MAX_MESSAGE_LENGTH)
     {
         pMainWindow->showMessageBox(true, "Your message is too big!");
 
@@ -1790,14 +1790,14 @@ void NetworkService::sendMessage(const std::wstring& sMessage)
 
     // Encrypt message.
 
-    char* pRawMessage = new char[sMessage.length() * 2 + 1];
-    memset(pRawMessage, 0, sMessage.length() * 2 + 1);
+    char* pRawMessage = new char[sMessage.length() * sizeof(wchar_t) + 1];
+    memset(pRawMessage, 0, sMessage.length() * sizeof(wchar_t) + 1);
 
-    std::memcpy(pRawMessage, sMessage.c_str(), sMessage.length() * 2);
+    std::memcpy(pRawMessage, sMessage.c_str(), sMessage.length() * sizeof(wchar_t));
 
     unsigned int iEncryptedMessageSize = 0;
     unsigned char* pEncryptedMessageBytes = pAES->EncryptECB(reinterpret_cast<unsigned char*>(pRawMessage),
-                                                             static_cast<unsigned int>(sMessage.length() * 2 + 1),
+                                                             static_cast<unsigned int>(sMessage.length() * sizeof(wchar_t) + 1),
                                                              reinterpret_cast<unsigned char*>(vSecretAESKey),
                                                              iEncryptedMessageSize);
 
@@ -1907,8 +1907,8 @@ void NetworkService::enterRoomWithPassword(const std::string& sRoomName, const s
         vBuffer[iCurrentIndex] = static_cast<char>(sPassword.size());
         iCurrentIndex++;
 
-        std::memcpy(vBuffer + iCurrentIndex, sPassword.c_str(), sPassword.size() * 2);
-        iCurrentIndex += static_cast<int>(sPassword.size()) * 2;
+        std::memcpy(vBuffer + iCurrentIndex, sPassword.c_str(), sPassword.size() * sizeof(wchar_t));
+        iCurrentIndex += static_cast<int>(sPassword.size() * sizeof(wchar_t));
 
         send(pThisUser->sockUserTCP, vBuffer, iCurrentIndex, 0);
     }
