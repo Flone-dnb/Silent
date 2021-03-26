@@ -53,9 +53,9 @@ public:
 
     // Print on Chat Room QPlainTextEdit.
 
-        void              printUserMessage               (std::string sTimeInfo, std::wstring sMessage, SilentMessage messageColor, bool bEmitSignal = false);
-        void              printOutput                    (std::string sText, SilentMessage messageColor, bool bEmitSignal = false);
-        void              printOutputW                   (std::wstring sText, SilentMessage messageColor, bool bEmitSignal = false);
+        void              printUserMessage               (const std::string& sTimeInfo, const std::wstring& sMessage, SilentMessage messageColor, bool bEmitSignal = false);
+        void              printOutput                    (const std::string& sText, SilentMessage messageColor, bool bEmitSignal = false);
+        void              printOutputW                   (const std::wstring& sText, SilentMessage messageColor, bool bEmitSignal = false);
         void              showUserDisconnectNotice       (std::string sName, SilentMessage messageColor, char cUserLost);
         void              showUserConnectNotice          (std::string sName, SilentMessage messageColor);
         void              showOldText                    (wchar_t* pText);
@@ -68,15 +68,15 @@ public:
         void              enableInteractiveElements      (bool bMenu, bool bTypeAndSend);
         void              setOnlineUsersCount            (int iOnlineCount);
         void              setConnectDisconnectButton     (bool bConnect);
-        SListItemUser*    addNewUserToList               (std::string sName);
+        SListItemUser*    addNewUserToList               (const std::string& sName);
         void              addRoom                        (std::string sRoomName, std::wstring sPassword = L"", size_t iMaxUsers = 0, bool bFirstRoom = false);
         size_t            getRoomCount                   ();
-        SListItemUser*    addUserToRoomIndex             (std::string sName, size_t iRoomIndex);
+        SListItemUser*    addUserToRoomIndex             (const std::string& sName, size_t iRoomIndex);
         void              moveUserToRoom                 (SListItemUser* pUser, std::string sRoomName);
-        void              moveRoom                       (std::string sRoomName, bool bMoveUp);
-        void              deleteRoom                     (std::string sRoomName);
-        void              createRoom                     (std::string sName, std::u16string sPassword, size_t iMaxUsers);
-        void              changeRoomSettings             (std::string sOldName, std::string sNewName, size_t iMaxUsers);
+        void              moveRoom                       (const std::string& sRoomName, bool bMoveUp);
+        void              deleteRoom                     (const std::string& sRoomName);
+        void              createRoom                     (const std::string& sName, const std::u16string& sPassword, size_t iMaxUsers);
+        void              changeRoomSettings             (const std::string& sOldName, const std::string& sNewName, size_t iMaxUsers);
 
 
     // Input message QPlainTextEdit.

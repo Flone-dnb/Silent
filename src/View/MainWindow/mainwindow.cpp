@@ -468,7 +468,7 @@ void MainWindow::connectTo(std::string sAdress, std::string sPort, std::string s
     pController->connectTo(sAdress, sPort, sUserName, sPass);
 }
 
-void MainWindow::printOutput(std::string sText, SilentMessage messageColor, bool bEmitSignal)
+void MainWindow::printOutput(const std::string& sText, SilentMessage messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
@@ -488,7 +488,7 @@ void MainWindow::printOutput(std::string sText, SilentMessage messageColor, bool
     }
 }
 
-void MainWindow::printOutputW(std::wstring sText, SilentMessage messageColor, bool bEmitSignal)
+void MainWindow::printOutputW(const std::wstring& sText, SilentMessage messageColor, bool bEmitSignal)
 {
     if (bEmitSignal)
     {
@@ -508,7 +508,7 @@ void MainWindow::printOutputW(std::wstring sText, SilentMessage messageColor, bo
     }
 }
 
-void MainWindow::printUserMessage(std::string sTimeInfo, std::wstring sMessage, SilentMessage messageColor, bool bEmitSignal)
+void MainWindow::printUserMessage(const std::string& sTimeInfo, const std::wstring& sMessage, SilentMessage messageColor, bool bEmitSignal)
 {
     // 'timeInfo' example: "18:58. Flone: "
 
@@ -609,7 +609,7 @@ void MainWindow::setPingAndTalkingToUser(SListItemUser* pListWidgetItem, int iPi
 }
 
 
-SListItemUser* MainWindow::addNewUserToList(std::string sName)
+SListItemUser* MainWindow::addNewUserToList(const std::string& sName)
 {
     mtxList.lock();
 
@@ -644,7 +644,7 @@ size_t MainWindow::getRoomCount()
     return ui->listWidget_users->getRoomCount();
 }
 
-SListItemUser* MainWindow::addUserToRoomIndex(std::string sName, size_t iRoomIndex)
+SListItemUser* MainWindow::addUserToRoomIndex(const std::string& sName, size_t iRoomIndex)
 {
     mtxList.lock();
 
@@ -677,7 +677,7 @@ void MainWindow::moveUserToRoom(SListItemUser *pUser, std::string sRoomName)
     mtxList.unlock();
 }
 
-void MainWindow::moveRoom(std::string sRoomName, bool bMoveUp)
+void MainWindow::moveRoom(const std::string& sRoomName, bool bMoveUp)
 {
     mtxList.lock();
 
@@ -691,7 +691,7 @@ void MainWindow::moveRoom(std::string sRoomName, bool bMoveUp)
     mtxList.unlock();
 }
 
-void MainWindow::deleteRoom(std::string sRoomName)
+void MainWindow::deleteRoom(const std::string& sRoomName)
 {
     mtxList.lock();
 
@@ -705,7 +705,7 @@ void MainWindow::deleteRoom(std::string sRoomName)
     mtxList.unlock();
 }
 
-void MainWindow::createRoom(std::string sName, std::u16string sPassword, size_t iMaxUsers)
+void MainWindow::createRoom(const std::string& sName, const std::u16string& sPassword, size_t iMaxUsers)
 {
     mtxList.lock();
 
@@ -719,7 +719,7 @@ void MainWindow::createRoom(std::string sName, std::u16string sPassword, size_t 
     mtxList.unlock();
 }
 
-void MainWindow::changeRoomSettings(std::string sOldName, std::string sNewName, size_t iMaxUsers)
+void MainWindow::changeRoomSettings(const std::string& sOldName, const std::string& sNewName, size_t iMaxUsers)
 {
     mtxList.lock();
 

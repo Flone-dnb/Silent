@@ -1626,8 +1626,7 @@ void NetworkService::receiveMessage()
 
     // Show data on screen & play audio sound.
 
-    pMainWindow->printUserMessage    (std::string(timeText),
-                                     std::wstring(reinterpret_cast<wchar_t*>(pDecryptedMessageBytes)), SilentMessage(true), true);
+    pMainWindow->printUserMessage (std::string(timeText), std::wstring(reinterpret_cast<wchar_t*>(pDecryptedMessageBytes)), SilentMessage(true), true);
 
     pAudioService->playNewMessageSound ();
 
