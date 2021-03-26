@@ -836,7 +836,7 @@ void MainWindow::customqplaintextedit_return_pressed()
 
         if (sMessage != L"")
         {
-            pController->sendMessage( sMessage );
+            pController->sendMessage(sMessage);
         }
         else
         {

@@ -96,7 +96,6 @@ float AudioService::getUserCurrentVolume(const std::string &sUserName)
     }
 
 
-
     pNetworkService->getOtherUsersMutex()->unlock();
 
 
@@ -155,7 +154,7 @@ void AudioService::setNewMasterVolume(unsigned short int iVolume)
     pNetworkService->getOtherUsersMutex()->unlock();
 }
 
-void AudioService::setNewUserVolume(std::string sUserName, float fVolume)
+void AudioService::setNewUserVolume(const std::string& sUserName, float fVolume)
 {
     User* pUser = nullptr;
 

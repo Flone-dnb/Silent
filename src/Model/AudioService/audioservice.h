@@ -87,7 +87,7 @@ public:
     // Audio data record/play
 
         void   setTestRecordingPause         (bool bPause);
-        void   playAudioData                 (short int* pAudio,  std::string sUserName,  bool bLast);
+        void   playAudioData                 (short int* pAudio, std::string sUserName, bool bLast);
         void   play                          (User* pUser);
 
 
@@ -101,7 +101,7 @@ public:
         void   setInputAudioVolume           (int iVolume);
         void   setVoiceStartValue            (int iValue);
         void   setShouldHearTestVoice        (bool bHear);
-        void   setNewUserVolume              (std::string sUserName,  float fVolume);
+        void   setNewUserVolume              (const std::string& sUserName, float fVolume);
         void   setNewMasterVolume            (unsigned short int iVolume);
         void   setNetworkService             (NetworkService* pNetworkService);
         void   setMuteMic                    (bool bMute);

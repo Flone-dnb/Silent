@@ -107,17 +107,17 @@ std::vector<std::wstring> Controller::getInputDevices()
     }
 }
 
-float Controller::getUserCurrentVolume(std::string sUserName)
+float Controller::getUserCurrentVolume(const std::string& sUserName)
 {
     return pAudioService->getUserCurrentVolume(sUserName);
 }
 
-void Controller::connectTo(std::string sAddress, std::string sPort, std::string sUserName,  std::wstring sPass)
+void Controller::connectTo(const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass)
 {
     pNetworkService->start(sAddress, sPort, sUserName, sPass);
 }
 
-void Controller::setNewUserVolume(std::string sUserName, float fVolume)
+void Controller::setNewUserVolume(const std::string& sUserName, float fVolume)
 {
     pAudioService->setNewUserVolume(sUserName, fVolume);
 }
@@ -152,17 +152,17 @@ SettingsManager *Controller::getSettingsManager()
     }
 }
 
-void Controller::sendMessage(std::wstring sMessage)
+void Controller::sendMessage(const std::wstring& sMessage)
 {
     pNetworkService->sendMessage(sMessage);
 }
 
-void Controller::enterRoom(std::string sRoomName)
+void Controller::enterRoom(const std::string& sRoomName)
 {
     pNetworkService->enterRoom(sRoomName);
 }
 
-void Controller::enterRoomWithPassword(std::string sRoomName, std::wstring sPassword)
+void Controller::enterRoomWithPassword(const std::string& sRoomName, const std::wstring& sPassword)
 {
     pNetworkService->enterRoomWithPassword(sRoomName, sPassword);
 }

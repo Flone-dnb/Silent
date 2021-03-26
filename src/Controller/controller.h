@@ -35,7 +35,7 @@ public:
 
     // Start/stop
 
-        void           connectTo                  (std::string sAddress,    std::string sPort,  std::string sUserName,  std::wstring sPass = L"");
+        void           connectTo                  (const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass);
         void           disconnect                 ();
         void           stop                       ();
         void           unpauseTestRecording       ();
@@ -44,9 +44,9 @@ public:
 
     // Chat functions
 
-        void           sendMessage                (std::wstring sMessage);
-        void           enterRoom                  (std::string sRoomName);
-        void           enterRoomWithPassword      (std::string sRoomName, std::wstring sPassword);
+        void           sendMessage                (const std::wstring& sMessage);
+        void           enterRoom                  (const std::string& sRoomName);
+        void           enterRoomWithPassword      (const std::string& sRoomName, const std::wstring& sPassword);
 
 
     // Settings
@@ -55,7 +55,7 @@ public:
         void           applyAudioInputVolume      (int iVolume);
         void           applyVoiceStartValue       (int iValue);
         void           applyShouldHearTestVoice   (bool bHear);
-        void           setNewUserVolume           (std::string sUserName,  float fVolume);
+        void           setNewUserVolume           (const std::string& sUserName,  float fVolume);
 
 
     // Other
@@ -67,14 +67,14 @@ public:
 
     // GET functions
 
-        SettingsManager* getSettingsManager       ();
-        float          getUserCurrentVolume       (std::string sUserName);
-        std::string    getClientVersion           ();
-        std::string    getUserName                ();
-        SettingsFile*  getCurrentSettingsFile     ();
-        bool           isSettingsCreatedFirstTime ();
-        bool           isSettingsFileInOldFormat  ();
-        SListItemRoom* getCurrentUserRoom         ();
+        SettingsManager* getSettingsManager         ();
+        float            getUserCurrentVolume       (const std::string& sUserName);
+        std::string      getClientVersion           ();
+        std::string      getUserName                ();
+        SettingsFile*    getCurrentSettingsFile     ();
+        bool             isSettingsCreatedFirstTime ();
+        bool             isSettingsFileInOldFormat  ();
+        SListItemRoom*   getCurrentUserRoom         ();
         std::vector<std::wstring> getInputDevices ();
 
 

@@ -174,7 +174,7 @@ std::mutex *NetworkService::getOtherUsersMutex()
     return &mtxOtherUsers;
 }
 
-void NetworkService::setupChatConnection(std::string address, std::string port, std::string userName, wstring sPass)
+void NetworkService::setupChatConnection(const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass)
 {
     // Disable Nagle algorithm for connected socket.
 
@@ -227,11 +227,11 @@ void NetworkService::setupChatConnection(std::string address, std::string port, 
 
     // User name.
 
-    byteVariable = static_cast <char> (userName.size());
+    byteVariable = static_cast <char> (sUserName.size());
     vUserInfoBuffer[iBufferWritePos] = byteVariable;
     iBufferWritePos += sizeof(byteVariable);
 
-    std::memcpy(vUserInfoBuffer + iBufferWritePos, userName.c_str(), static_cast <size_t> (byteVariable));
+    std::memcpy(vUserInfoBuffer + iBufferWritePos, sUserName.c_str(), static_cast <size_t> (byteVariable));
     iBufferWritePos += byteVariable;
 
 
@@ -374,8 +374,8 @@ void NetworkService::setupChatConnection(std::string address, std::string port, 
 
         // Save this user.
 
-        pThisUser->sUserName = userName;
-        pThisUser->pListWidgetItem = pMainWindow->addUserToRoomIndex(userName, 0);
+        pThisUser->sUserName = sUserName;
+        pThisUser->pListWidgetItem = pMainWindow->addUserToRoomIndex(sUserName, 0);
 
         pAudioService->setupUserAudio( pThisUser );
 
@@ -409,9 +409,9 @@ void NetworkService::setupChatConnection(std::string address, std::string port, 
         SettingsFile* pUpdatedSettings = pSettingsManager->getCurrentSettings();
         if (pUpdatedSettings)
         {
-            pUpdatedSettings->sUsername      = userName;
-            pUpdatedSettings->sConnectString = address;
-            pUpdatedSettings->iPort          = static_cast<unsigned short>(stoi(port));
+            pUpdatedSettings->sUsername      = sUserName;
+            pUpdatedSettings->sConnectString = sAddress;
+            pUpdatedSettings->iPort          = static_cast<unsigned short>(stoi(sPort));
             pUpdatedSettings->sPassword      = sPass;
 
             pSettingsManager->saveCurrentSettings();
@@ -840,7 +840,7 @@ void NetworkService::clearWinsockAndThisUser()
     }
 }
 
-void NetworkService::start(std::string address, std::string port, std::string userName, std::wstring sPass)
+void NetworkService::start(const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass)
 {
     if (bTextListen)
     {
@@ -886,9 +886,9 @@ void NetworkService::start(std::string address, std::string port, std::string us
         }
         else
         {
-            std::string sFormattedAddress = formatAddressString(address);
+            std::string sFormattedAddress = formatAddressString(sAddress);
 
-            std::thread connectThread(&NetworkService::connectTo, this, sFormattedAddress, port, userName, sPass);
+            std::thread connectThread(&NetworkService::connectTo, this, sFormattedAddress, sPort, sUserName, sPass);
             connectThread.detach();
         }
     }
@@ -1777,9 +1777,9 @@ void NetworkService::receiveServerMessage()
     pAudioService->playServerMessageSound();
 }
 
-void NetworkService::sendMessage(std::wstring message)
+void NetworkService::sendMessage(const std::wstring& sMessage)
 {
-    if (message.length() * 2 > MAX_MESSAGE_LENGTH)
+    if (sMessage.length() * 2 > MAX_MESSAGE_LENGTH)
     {
         pMainWindow->showMessageBox(true, "Your message is too big!");
 
@@ -1790,14 +1790,14 @@ void NetworkService::sendMessage(std::wstring message)
 
     // Encrypt message.
 
-    char* pRawMessage = new char[message.length() * 2 + 1];
-    memset(pRawMessage, 0, message.length() * 2 + 1);
+    char* pRawMessage = new char[sMessage.length() * 2 + 1];
+    memset(pRawMessage, 0, sMessage.length() * 2 + 1);
 
-    std::memcpy(pRawMessage, message.c_str(), message.length() * 2);
+    std::memcpy(pRawMessage, sMessage.c_str(), sMessage.length() * 2);
 
     unsigned int iEncryptedMessageSize = 0;
     unsigned char* pEncryptedMessageBytes = pAES->EncryptECB(reinterpret_cast<unsigned char*>(pRawMessage),
-                                                             static_cast<unsigned int>(message.length() * 2 + 1),
+                                                             static_cast<unsigned int>(sMessage.length() * 2 + 1),
                                                              reinterpret_cast<unsigned char*>(vSecretAESKey),
                                                              iEncryptedMessageSize);
 
@@ -1872,7 +1872,7 @@ void NetworkService::sendMessage(std::wstring message)
     delete[] pRawMessage;
 }
 
-void NetworkService::enterRoom(std::string sName)
+void NetworkService::enterRoom(const std::string& sRoomName)
 {
     if (bTextListen)
     {
@@ -1880,15 +1880,15 @@ void NetworkService::enterRoom(std::string sName)
         memset(vBuffer, 0, MAX_NAME_LENGTH + 3);
 
         vBuffer[0] = RC_ENTER_ROOM;
-        vBuffer[1] = static_cast<char>(sName.size());
+        vBuffer[1] = static_cast<char>(sRoomName.size());
 
-        std::memcpy(vBuffer + 2, sName.c_str(), sName.size());
+        std::memcpy(vBuffer + 2, sRoomName.c_str(), sRoomName.size());
 
-        send(pThisUser->sockUserTCP, vBuffer, static_cast<int>(sName.size()) + 2, 0);
+        send(pThisUser->sockUserTCP, vBuffer, static_cast<int>(sRoomName.size()) + 2, 0);
     }
 }
 
-void NetworkService::enterRoomWithPassword(std::string sRoomName, std::wstring sPassword)
+void NetworkService::enterRoomWithPassword(const std::string& sRoomName, const std::wstring& sPassword)
 {
     if (bTextListen)
     {

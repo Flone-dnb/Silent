@@ -46,8 +46,8 @@ public:
 
     // Start
 
-        void  start                            (std::string address, std::string port, std::string userName, std::wstring sPass = L"");
-        void  connectTo                        (std::string address, std::string port, std::string userName, std::wstring sPass = L"");
+        void  start                            (const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass);
+        void  connectTo                        (std::string address, std::string port, std::string userName, std::wstring sPass);
 
 
     // Listen
@@ -59,13 +59,13 @@ public:
     // Send
 
         void  sendVoiceMessage                 (char* pVoiceMessage, int iMessageSize, bool bLast);
-        void  sendMessage                      (std::wstring message);
+        void  sendMessage                      (const std::wstring& sMessage);
 
 
     // Rooms
 
-        void  enterRoom                        (std::string sName);
-        void  enterRoomWithPassword            (std::string sRoomName, std::wstring sPassword);
+        void  enterRoom                        (const std::string& sRoomName);
+        void  enterRoomWithPassword            (const std::string& sRoomName, const std::wstring& sPassword);
 
 
     // Stop / Delete / Disconnect
@@ -94,7 +94,7 @@ private:
 
     // Connect
 
-        void  setupChatConnection              (std::string address, std::string port, std::string userName, std::wstring sPass = L"");
+        void  setupChatConnection              (const std::string& sAddress, const std::string& sPort, const std::string& sUserName, const std::wstring& sPass);
         bool  processChatInfo                  (char* pReadBuffer, int iPacketSize, wchar_t*& pWelcomeRoomMessage);
         bool  establishSecureConnection        (char* pReadBuffer);
 
