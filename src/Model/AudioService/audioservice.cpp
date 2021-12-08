@@ -1544,8 +1544,12 @@ void AudioService::testOutputAudio()
                                                          pSettingsManager->getCurrentSettings()->iMasterVolume)) );
             }
 
+            if (bTestInputReady == false) break;
+
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+
+        if (bTestInputReady == false) break;
 
         bWasStarted = true;
 
