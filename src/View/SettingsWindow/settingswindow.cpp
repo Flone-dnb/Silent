@@ -358,6 +358,7 @@ void SettingsWindow::updateUIToSettings(std::vector<QString> vInputDevices)
     }
 
     ui->horizontalSlider_start_voice_rec->setValue(pSettingsFile->iVoiceStartRecValueInDBFS);
+    ui->voiceVolumeMeter->setStartValueInDBFS(pSettingsFile->iVoiceStartRecValueInDBFS);
 
     ui->checkBox_hear_voice->setChecked(pSettingsFile->bHearVoiceInSettings);
 
